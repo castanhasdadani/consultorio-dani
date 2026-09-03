@@ -21,29 +21,29 @@
        1. VARIÁVEIS E PALETA DE CORES (ROSA SOFISTICADO & OFF-WHITE)
        ------------------------------------------------------------- */
     :root {
-      --bg-main: #FAF8F8;          /* Off-white levemente quente */
-      --bg-surface: #FFFFFF;       /* Branco puro para áreas elevadas */
-      --bg-subtle: #F5EFEB;        /* Rosa neutro/blush muito suave */
+      --bg-main: #FAF8F8;          
+      --bg-surface: #FFFFFF;       
+      --bg-subtle: #F5EFEB;        
       
-      --rose-light: #FBF0F3;      /* Destaque suave */
-      --rose-medium: #F4D3DC;     /* Bordas e interações delicadas */
-      --rose-primary: #D988A1;    /* Rosa sofisticado principal */
-      --rose-hover: #C5728B;      /* Hover do rosa principal */
+      --rose-light: #FBF0F3;      
+      --rose-medium: #F4D3DC;     
+      --rose-primary: #D988A1;    
+      --rose-hover: #C5728B;      
       
-      --text-main: #2D2B2C;       /* Cinza muito escuro para texto principal */
-      --text-muted: #7A7577;      /* Cinza médio suave */
-      --text-light: #A39E9F;      /* Cinza claro para rótulos */
+      --text-main: #2D2B2C;       
+      --text-muted: #7A7577;      
+      --text-light: #A39E9F;      
 
-      --border-subtle: #EDE8E8;   /* Linhas extremamente suaves */
-      --status-success: #70A98B;  /* Verde discreto */
-      --status-warning: #E09F67;  /* Laranja discreto */
+      --border-subtle: #EDE8E8;   
+      --status-success: #70A98B;  
+      --status-warning: #E09F67;  
 
       --radius-sm: 8px;
       --radius-md: 14px;
       --radius-lg: 20px;
 
       --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-      --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.02);
+      --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.05);
     }
 
     * {
@@ -435,7 +435,7 @@
     }
 
     /* -------------------------------------------------------------
-       6. EDITOR DE EVOLUÇÃO (ESCRITA CONFORTÁVEL)
+       6. EDITOR DE EVOLUÇÃO
        ------------------------------------------------------------- */
     .editor-container {
       background: var(--bg-surface);
@@ -475,33 +475,36 @@
       margin-bottom: 8px;
     }
 
-    .editor-field textarea {
+    .editor-field textarea, .form-control {
       width: 100%;
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-sm);
-      padding: 14px;
+      padding: 12px 14px;
       font-size: 14px;
       line-height: 1.6;
       color: var(--text-main);
       background: var(--bg-main);
-      resize: vertical;
       outline: none;
       transition: var(--transition);
+    }
+
+    .editor-field textarea {
+      resize: vertical;
       min-height: 90px;
     }
 
-    .editor-field textarea:focus {
+    .editor-field textarea:focus, .form-control:focus {
       border-color: var(--rose-medium);
       background: var(--bg-surface);
     }
 
     /* -------------------------------------------------------------
-       7. MODAL MINIMALISTA
+       7. MODAL DE CADASTRO DE PACIENTE
        ------------------------------------------------------------- */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.15);
+      background: rgba(0,0,0,0.2);
       backdrop-filter: blur(2px);
       display: none;
       align-items: center;
@@ -518,7 +521,7 @@
       padding: 28px;
       border-radius: var(--radius-md);
       width: 100%;
-      max-width: 440px;
+      max-width: 480px;
       border: 1px solid var(--border-subtle);
       box-shadow: var(--shadow-subtle);
     }
@@ -526,7 +529,7 @@
     .modal h3 {
       font-size: 18px;
       font-weight: 600;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
     .modal p {
@@ -535,14 +538,27 @@
       margin-bottom: 20px;
     }
 
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
     .modal-actions {
       display: flex;
       justify-content: flex-end;
       gap: 10px;
+      margin-top: 24px;
     }
 
     /* -------------------------------------------------------------
-       8. MODELO DE IMPRESSÃO DE PDF (OCULTO NA TELA)
+       8. IMPRESSÃO PDF
        ------------------------------------------------------------- */
     #pdf-template {
       display: none;
@@ -609,23 +625,23 @@
         <p>Psicologia Clínica</p>
       </div>
       <ul class="nav-list">
-        <li><a class="nav-item active" onclick="switchTab('home')"><i data-lucide="home"></i> Início</a></li>
-        <li><a class="nav-item" onclick="switchTab('pacientes')"><i data-lucide="users"></i> Pacientes</a></li>
-        <li><a class="nav-item" onclick="switchTab('agenda')"><i data-lucide="calendar"></i> Agenda</a></li>
-        <li><a class="nav-item" onclick="switchTab('evolucao')"><i data-lucide="file-text"></i> Evoluções</a></li>
-        <li><a class="nav-item" onclick="switchTab('financeiro')"><i data-lucide="credit-card"></i> Financeiro</a></li>
-        <li><a class="nav-item" onclick="switchTab('documentos')"><i data-lucide="folder"></i> Documentos</a></li>
+        <li><a class="nav-item active" onclick="switchTab('home', this)"><i data-lucide="home"></i> Início</a></li>
+        <li><a class="nav-item" onclick="switchTab('pacientes', this)"><i data-lucide="users"></i> Pacientes</a></li>
+        <li><a class="nav-item" onclick="switchTab('agenda', this)"><i data-lucide="calendar"></i> Agenda</a></li>
+        <li><a class="nav-item" onclick="switchTab('evolucao', this)"><i data-lucide="file-text"></i> Evoluções</a></li>
+        <li><a class="nav-item" onclick="switchTab('financeiro', this)"><i data-lucide="credit-card"></i> Financeiro</a></li>
+        <li><a class="nav-item" onclick="switchTab('documentos', this)"><i data-lucide="folder"></i> Documentos</a></li>
       </ul>
     </div>
     <div>
-      <a class="nav-item"><i data-lucide="settings"></i> Configurações</a>
+      <a class="nav-item" onclick="switchTab('configuracoes', this)"><i data-lucide="settings"></i> Configurações</a>
     </div>
   </aside>
 
   <!-- CONTEÚDO PRINCIPAL -->
   <main class="content">
 
-    <!-- 1. HOME / DASHBOARD ELEGANTE -->
+    <!-- 1. HOME / DASHBOARD -->
     <section id="sec-home" class="page-section active">
       <div class="header-title">
         <h2>Olá, Daniele</h2>
@@ -654,7 +670,7 @@
       <div style="margin-bottom: 24px;">
         <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 12px; color: var(--text-muted);">HOJE</h3>
         <div class="agenda-list">
-          <div class="agenda-row">
+          <div class="agenda-row" onclick="openProntuario('Mariana Silva')" style="cursor: pointer;">
             <div class="agenda-time">14:00</div>
             <div class="agenda-info">
               <div class="patient">Mariana Silva</div>
@@ -662,7 +678,7 @@
             </div>
             <span class="tag tag-pending">Próximo</span>
           </div>
-          <div class="agenda-row">
+          <div class="agenda-row" onclick="openProntuario('Carlos Eduardo')" style="cursor: pointer;">
             <div class="agenda-time">15:00</div>
             <div class="agenda-info">
               <div class="patient">Carlos Eduardo</div>
@@ -676,7 +692,7 @@
       <div>
         <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 12px; color: var(--text-muted);">PRECISA DA SUA ATENÇÃO</h3>
         <div class="attention-list">
-          <div class="agenda-row" onclick="switchTab('evolucao')" style="cursor: pointer;">
+          <div class="agenda-row" onclick="switchTabDirect('evolucao')" style="cursor: pointer;">
             <i data-lucide="alert-circle" style="color: var(--status-warning); margin-right: 12px;"></i>
             <div class="agenda-info">
               <div class="patient">Evolução pendente</div>
@@ -688,34 +704,41 @@
       </div>
     </section>
 
-    <!-- 2. BIBLIOTECA DE PACIENTES -->
+    <!-- 2. PACIENTES -->
     <section id="sec-pacientes" class="page-section">
       <div class="header-title" style="display: flex; justify-content: space-between; align-items: flex-start;">
         <div>
           <h2>Pacientes</h2>
           <p>Seus acompanhamentos em um só lugar.</p>
         </div>
-        <button class="btn btn-primary"><i data-lucide="plus"></i> Novo paciente</button>
+        <button class="btn btn-primary" onclick="openModal()"><i data-lucide="plus"></i> Novo paciente</button>
       </div>
 
       <div class="filter-bar">
         <div class="search-box">
           <i data-lucide="search" style="width: 16px; color: var(--text-light);"></i>
-          <input type="text" placeholder="Buscar paciente...">
+          <input type="text" id="patient-search" placeholder="Buscar paciente..." onkeyup="filterPatients()">
         </div>
         <div class="filter-pills">
-          <button class="pill active">Todos</button>
-          <button class="pill">Ativos</button>
-          <button class="pill">Inativos</button>
-          <button class="pill">Adultos</button>
-          <button class="pill">Infantis</button>
+          <button class="pill active" onclick="setFilter('todos', this)">Todos</button>
+          <button class="pill" onclick="setFilter('ativo', this)">Ativos</button>
+          <button class="pill" onclick="setFilter('inativo', this)">Inativos</button>
         </div>
       </div>
 
-      <div class="agenda-list">
-        <div class="agenda-row" onclick="openProntuario('Mariana Silva')" style="cursor: pointer;">
+      <div class="agenda-list" id="patient-list">
+        <div class="agenda-row patient-card" data-status="ativo" onclick="openProntuario('Mariana Silva')" style="cursor: pointer;">
           <div class="agenda-info">
             <div class="patient">Mariana Silva</div>
+            <div class="type">Última sessão: 02/09/2026 • Próxima: 09/09/2026</div>
+          </div>
+          <span class="tag tag-active" style="margin-right: 12px;">Ativo</span>
+          <span style="font-size: 12px; color: var(--rose-primary); font-weight: 500;">Abrir prontuário →</span>
+        </div>
+
+        <div class="agenda-row patient-card" data-status="ativo" onclick="openProntuario('Carlos Eduardo')" style="cursor: pointer;">
+          <div class="agenda-info">
+            <div class="patient">Carlos Eduardo</div>
             <div class="type">Última sessão: 02/09/2026 • Próxima: 09/09/2026</div>
           </div>
           <span class="tag tag-active" style="margin-right: 12px;">Ativo</span>
@@ -724,7 +747,7 @@
       </div>
     </section>
 
-    <!-- 3. PRONTUÁRIO INDIVIDUAL DO PACIENTE -->
+    <!-- 3. PRONTUÁRIO -->
     <section id="sec-prontuario" class="page-section">
       <div class="header-title" style="display: flex; justify-content: space-between; align-items: flex-start;">
         <div>
@@ -732,17 +755,17 @@
           <p><span class="tag tag-active">• Ativo</span></p>
         </div>
         <div style="display: flex; gap: 8px;">
-          <button class="btn btn-secondary" onclick="switchTab('evolucao')"><i data-lucide="plus"></i> Nova evolução</button>
+          <button class="btn btn-secondary" onclick="switchTabDirect('evolucao')"><i data-lucide="plus"></i> Nova evolução</button>
           <button class="btn btn-primary" onclick="generatePDF()"><i data-lucide="download"></i> Gerar PDF Integral</button>
         </div>
       </div>
 
       <div class="patient-nav">
-        <span class="patient-nav-item active">Visão geral</span>
-        <span class="patient-nav-item">Sessões</span>
-        <span class="patient-nav-item">Evoluções</span>
-        <span class="patient-nav-item">Financeiro</span>
-        <span class="patient-nav-item">Documentos</span>
+        <span class="patient-nav-item active" onclick="setSubTab(this)">Visão geral</span>
+        <span class="patient-nav-item" onclick="setSubTab(this)">Sessões</span>
+        <span class="patient-nav-item" onclick="setSubTab(this)">Evoluções</span>
+        <span class="patient-nav-item" onclick="setSubTab(this)">Financeiro</span>
+        <span class="patient-nav-item" onclick="setSubTab(this)">Documentos</span>
       </div>
 
       <div class="summary-strip">
@@ -773,11 +796,11 @@
       </div>
     </section>
 
-    <!-- 4. EDITOR DE EVOLUÇÃO (EXPERIÊNCIA CONFORTÁVEL) -->
+    <!-- 4. EDITOR DE EVOLUÇÃO -->
     <section id="sec-evolucao" class="page-section">
       <div class="header-title">
         <h2>Evolução</h2>
-        <p>Mariana Silva • Sessão de 02/09/2026</p>
+        <p><span id="evo-patient-title">Mariana Silva</span> • Sessão de 02/09/2026</p>
       </div>
 
       <div class="editor-container">
@@ -827,25 +850,125 @@
           <span class="label">Pendente</span>
         </div>
       </div>
+
+      <div class="agenda-list">
+        <div class="agenda-row">
+          <div class="agenda-info">
+            <div class="patient">Mariana Silva</div>
+            <div class="type">Sessão de 02/09/2026 — Pix</div>
+          </div>
+          <span class="tag tag-active">Pago R$ 200</span>
+        </div>
+      </div>
     </section>
 
-    <!-- 6. AGENDA E DOCUMENTOS (SEÇÕES DE SUPORTE) -->
+    <!-- 6. AGENDA -->
     <section id="sec-agenda" class="page-section">
-      <div class="header-title"><h2>Agenda</h2><p>Visão limpa do calendário.</p></div>
+      <div class="header-title">
+        <h2>Agenda</h2>
+        <p>Visão organizada das sessões agendadas.</p>
+      </div>
+      <div class="agenda-list">
+        <div class="agenda-row">
+          <div class="agenda-time">09:00</div>
+          <div class="agenda-info">
+            <div class="patient">Carlos Eduardo</div>
+            <div class="type">Psicoterapia Individual</div>
+          </div>
+          <button class="btn btn-outline" onclick="openProntuario('Carlos Eduardo')">Prontuário</button>
+        </div>
+        <div class="agenda-row">
+          <div class="agenda-time">14:00</div>
+          <div class="agenda-info">
+            <div class="patient">Mariana Silva</div>
+            <div class="type">Psicoterapia Individual</div>
+          </div>
+          <button class="btn btn-outline" onclick="openProntuario('Mariana Silva')">Prontuário</button>
+        </div>
+      </div>
     </section>
 
+    <!-- 7. DOCUMENTOS -->
     <section id="sec-documentos" class="page-section">
-      <div class="header-title"><h2>Documentos</h2><p>Biblioteca de PDFs e recibos emitidos.</p></div>
+      <div class="header-title">
+        <h2>Documentos</h2>
+        <p>Modelos de atestados, recibos e declarações.</p>
+      </div>
+      <div class="agenda-list">
+        <div class="agenda-row">
+          <div class="agenda-info">
+            <div class="patient">Declaração de Comparecimento</div>
+            <div class="type">Modelo padrão configurado com seu CRP</div>
+          </div>
+          <button class="btn btn-secondary">Usar Modelo</button>
+        </div>
+        <div class="agenda-row">
+          <div class="agenda-info">
+            <div class="patient">Recibo de Honorários</div>
+            <div class="type">Para fins de reembolso ou imposto de renda</div>
+          </div>
+          <button class="btn btn-secondary">Emitir Recibo</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. CONFIGURAÇÕES -->
+    <section id="sec-configuracoes" class="page-section">
+      <div class="header-title">
+        <h2>Configurações</h2>
+        <p>Dados profissionais e preferências do sistema.</p>
+      </div>
+      <div class="editor-container">
+        <div class="form-group">
+          <label>Nome Profissional</label>
+          <input type="text" class="form-control" value="Daniele Sousa Santos">
+        </div>
+        <div class="form-group">
+          <label>Registro Profissional (CRP)</label>
+          <input type="text" class="form-control" value="CRP: 22/07398">
+        </div>
+        <button class="btn btn-primary" onclick="alert('Configurações salvas!')">Salvar alterações</button>
+      </div>
     </section>
 
   </main>
 
-  <!-- ESTRUTURA OCULTA DE PDF INTEGRAL -->
+  <!-- MODAL DE NOVO PACIENTE -->
+  <div class="modal-overlay" id="modal-paciente">
+    <div class="modal">
+      <h3>Novo Paciente</h3>
+      <p>Cadastre os dados básicos do paciente.</p>
+
+      <div class="form-group">
+        <label>Nome Completo</label>
+        <input type="text" id="new-patient-name" class="form-control" placeholder="Ex: Ana Maria Lima">
+      </div>
+      <div class="form-group">
+        <label>Telefone / WhatsApp</label>
+        <input type="text" class="form-control" placeholder="(98) 98888-8888">
+      </div>
+      <div class="form-group">
+        <label>Modalidade</label>
+        <select class="form-control">
+          <option>Psicoterapia Individual (Adulto)</option>
+          <option>Psicoterapia Infantil</option>
+          <option>Terapia de Casal</option>
+        </select>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="addPatient()">Salvar Paciente</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ESTRUTURA OCULTA PARA IMPRESSÃO PDF -->
   <div id="pdf-template">
     <div class="pdf-header">
       <h1>Prontuário Psicológico Integral</h1>
       <p><strong>Psicóloga Responsável:</strong> Daniele Sousa Santos — CRP: 22/07398</p>
-      <p><strong>Paciente:</strong> Mariana Silva</p>
+      <p><strong>Paciente:</strong> <span id="pdf-out-patient">Mariana Silva</span></p>
     </div>
 
     <div class="pdf-session-block">
@@ -872,41 +995,119 @@
     </div>
   </div>
 
-  <!-- JAVASCRIPT DE INTERATIVIDADE -->
+  <!-- JAVASCRIPT DE INTERATIVIDADE CORRIGIDO -->
   <script>
-    // Inicializar ícones da biblioteca Lucide
-    lucide.createIcons();
+    // Inicialização dos ícones Lucide
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+    });
 
-    // Controle de Transição de Abas
-    function switchTab(tabId) {
+    // Alternar Abas Principais
+    function switchTab(tabId, element) {
       document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
-      document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+      document.querySelectorAll('.sidebar .nav-item').forEach(item => item.classList.remove('active'));
 
       const target = document.getElementById('sec-' + tabId);
       if(target) target.classList.add('active');
 
-      // Atualiza link visual ativo
-      event.currentTarget?.classList?.add('active');
+      if(element) {
+        element.classList.add('active');
+      }
     }
 
-    // Abrir prontuário específico
+    function switchTabDirect(tabId) {
+      const navItem = Array.from(document.querySelectorAll('.sidebar .nav-item'))
+                           .find(el => el.getAttribute('onclick')?.includes(`'${tabId}'`));
+      switchTab(tabId, navItem);
+    }
+
+    // Abrir Prontuário de um Paciente
     function openProntuario(patientName) {
       document.getElementById('patient-name-heading').innerText = patientName;
-      switchTab('prontuario');
+      document.getElementById('evo-patient-title').innerText = patientName;
+      document.getElementById('pdf-out-patient').innerText = patientName;
+      switchTabDirect('prontuario');
     }
 
-    // Lógica de Salvamento e Rascunho Automático
+    // Sub-abas do Prontuário
+    function setSubTab(element) {
+      document.querySelectorAll('.patient-nav-item').forEach(item => item.classList.remove('active'));
+      element.classList.add('active');
+    }
+
+    // Modal de Cadastro
+    function openModal() {
+      document.getElementById('modal-paciente').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('modal-paciente').classList.remove('active');
+    }
+
+    function addPatient() {
+      const nameInput = document.getElementById('new-patient-name');
+      const name = nameInput.value.trim();
+
+      if(!name) {
+        alert('Por favor, informe o nome do paciente.');
+        return;
+      }
+
+      const list = document.getElementById('patient-list');
+      const newCard = document.createElement('div');
+      newCard.className = 'agenda-row patient-card';
+      newCard.setAttribute('data-status', 'ativo');
+      newCard.style.cursor = 'pointer';
+      newCard.onclick = () => openProntuario(name);
+      newCard.innerHTML = `
+        <div class="agenda-info">
+          <div class="patient">${name}</div>
+          <div class="type">Cadastrado recentemente</div>
+        </div>
+        <span class="tag tag-active" style="margin-right: 12px;">Ativo</span>
+        <span style="font-size: 12px; color: var(--rose-primary); font-weight: 500;">Abrir prontuário →</span>
+      `;
+
+      list.prepend(newCard);
+      nameInput.value = '';
+      closeModal();
+      alert('Paciente cadastrado com sucesso!');
+    }
+
+    // Filtros e Busca de Pacientes
+    function filterPatients() {
+      const search = document.getElementById('patient-search').value.toLowerCase();
+      document.querySelectorAll('.patient-card').forEach(card => {
+        const name = card.querySelector('.patient').innerText.toLowerCase();
+        card.style.display = name.includes(search) ? 'flex' : 'none';
+      });
+    }
+
+    function setFilter(status, pillElement) {
+      document.querySelectorAll('.filter-pills .pill').forEach(p => p.classList.remove('active'));
+      pillElement.classList.add('active');
+
+      document.querySelectorAll('.patient-card').forEach(card => {
+        if (status === 'todos' || card.getAttribute('data-status') === status) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    // Lógica de Salvamento e Auto-Save
     let saveTimeout;
     function triggerAutoSave() {
       const statusEl = document.getElementById('save-status');
-      statusEl.innerHTML = `<i data-lucide="refresh-cw" style="width:14px; animation: spin 1s infinite linear;"></i> Salvando rascunho...`;
+      statusEl.innerHTML = `<i data-lucide="refresh-cw" style="width:14px;"></i> Salvando rascunho...`;
       lucide.createIcons();
 
       clearTimeout(saveTimeout);
       saveTimeout = setTimeout(() => {
         statusEl.innerHTML = `<i data-lucide="check-circle" style="width: 14px; color: var(--status-success);"></i> Rascunho salvo automaticamente`;
         lucide.createIcons();
-      }, 1000);
+      }, 800);
     }
 
     function saveEvolucao() {
@@ -915,9 +1116,8 @@
       lucide.createIcons();
     }
 
-    // Geração de PDF Completo, Profissional e sem limite de páginas
+    // Gerar PDF Completo
     function generatePDF() {
-      // Preencher o template
       document.getElementById('pdf-out-queixa').innerText = document.getElementById('txt-queixa').value;
       document.getElementById('pdf-out-demanda').innerText = document.getElementById('txt-demanda').value;
       document.getElementById('pdf-out-descricao').innerText = document.getElementById('txt-descricao').value;
@@ -928,7 +1128,7 @@
 
       const opt = {
         margin:       15,
-        filename:     'Prontuario_Mariana_Silva.pdf',
+        filename:     `Prontuario_${document.getElementById('patient-name-heading').innerText.replace(/\s+/g, '_')}.pdf`,
         image:        { type: 'jpeg', quality: 0.98 },
         html2canvas:  { scale: 2 },
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
