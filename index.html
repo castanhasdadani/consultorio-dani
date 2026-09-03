@@ -3,1155 +3,1522 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema de Gestão de Prontuário Psicológico</title>
-  <!-- Tailwind CSS CDN -->
+  <title>PsiGestão - Sistema Integrado de Prontuário Psicológico</title>
+  
+  <!-- Tailwind CSS via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- FontAwesome for Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Dexie.js (Wrapper IndexedDB / Banco de Dados Local Completo) -->
+  <script src="https://unpkg.com/dexie@3.2.4/dist/dexie.js"></script>
+  <!-- jsPDF & AutoTable para Geração de PDFs Semanais -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            pink: {
-              50: '#fdf2f8',
-              100: '#fce7f3',
-              200: '#fbcfe8',
-              300: '#f9a8d4',
-              400: '#f472b6',
-              500: '#ec4899',
-              600: '#db2777',
-              700: '#be185d',
-              800: '#9d174d',
-              900: '#831843',
+            rose: {
+              50: '#fff1f2',
+              100: '#ffe4e6',
+              200: '#fecdd3',
+              300: '#fda4af',
+              400: '#fb7185',
+              500: '#f43f5e',
+              600: '#e11d48',
+              700: '#be123c',
+              800: '#9f1239',
+              900: '#881337',
             }
           }
         }
       }
     }
   </script>
+  <style>
+    .bg-gradient-rose {
+      background: linear-gradient(135deg, #be123c 0%, #e11d48 50%, #fb7185 100%);
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #fff1f2;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #fda4af;
+      border-radius: 4px;
+    }
+  </style>
 </head>
-<body class="bg-pink-50 min-h-screen text-slate-800 flex flex-col">
+<body class="bg-rose-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased selection:bg-rose-200">
 
-  <!-- TOP NAVIGATION BAR -->
-  <header class="bg-pink-600 text-white shadow-lg sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-      <div class="flex items-center space-x-3">
-        <i class="fa-solid fa-[#ffffff] fa-brain text-2xl"></i>
-        <h1 class="text-xl font-bold tracking-wide">PsiGestão <span class="text-pink-200 text-xs font-normal">| Prontuário Psicológico</span></h1>
+  <!-- NAVBAR SUPERIOR -->
+  <header class="bg-gradient-rose text-white shadow-md sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="navigateTo('dashboard')">
+        <div class="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
+          <i data-lucide="heart-pulse" class="w-6 h-6 text-white"></i>
+        </div>
+        <span class="font-bold text-xl tracking-tight text-white">PsiGestão</span>
       </div>
-      <nav class="hidden md:flex space-x-4 font-medium">
-        <button onclick="navigateTo('dashboard')" class="hover:bg-pink-700 px-3 py-1.5 rounded-lg transition"><i class="fa-solid fa-chart-pie mr-1"></i> Dashboard</button>
-        <button onclick="navigateTo('pacientes')" class="hover:bg-pink-700 px-3 py-1.5 rounded-lg transition"><i class="fa-solid fa-users mr-1"></i> Pacientes</button>
-        <button onclick="navigateTo('sessoes')" class="hover:bg-pink-700 px-3 py-1.5 rounded-lg transition"><i class="fa-solid fa-calendar-check mr-1"></i> Sessões</button>
+      
+      <nav class="hidden md:flex space-x-1">
+        <button onclick="navigateTo('dashboard')" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-white/10 transition flex items-center gap-2">
+          <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard
+        </button>
+        <button onclick="navigateTo('pacientes')" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-white/10 transition flex items-center gap-2">
+          <i data-lucide="users" class="w-4 h-4"></i> Pacientes
+        </button>
+        <button onclick="navigateTo('sessoes')" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-white/10 transition flex items-center gap-2">
+          <i data-lucide="calendar" class="w-4 h-4"></i> Sessões
+        </button>
+        <button onclick="navigateTo('financeiro')" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-white/10 transition flex items-center gap-2">
+          <i data-lucide="dollar-sign" class="w-4 h-4"></i> Financeiro
+        </button>
       </nav>
+
+      <!-- Botão Menu Mobile -->
+      <button onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-md hover:bg-white/10">
+        <i data-lucide="menu" class="w-6 h-6"></i>
+      </button>
+    </div>
+
+    <!-- Dropdown Mobile -->
+    <div id="mobileMenu" class="hidden md:hidden bg-rose-800 border-t border-rose-700 px-4 pt-2 pb-3 space-y-1">
+      <button onclick="navigateTo('dashboard'); toggleMobileMenu()" class="w-full text-left px-3 py-2 rounded-md text-base font-medium text-white hover:bg-rose-700 flex items-center gap-2">
+        <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard
+      </button>
+      <button onclick="navigateTo('pacientes'); toggleMobileMenu()" class="w-full text-left px-3 py-2 rounded-md text-base font-medium text-white hover:bg-rose-700 flex items-center gap-2">
+        <i data-lucide="users" class="w-5 h-5"></i> Pacientes
+      </button>
+      <button onclick="navigateTo('sessoes'); toggleMobileMenu()" class="w-full text-left px-3 py-2 rounded-md text-base font-medium text-white hover:bg-rose-700 flex items-center gap-2">
+        <i data-lucide="calendar" class="w-5 h-5"></i> Sessões
+      </button>
+      <button onclick="navigateTo('financeiro'); toggleMobileMenu()" class="w-full text-left px-3 py-2 rounded-md text-base font-medium text-white hover:bg-rose-700 flex items-center gap-2">
+        <i data-lucide="dollar-sign" class="w-5 h-5"></i> Financeiro
+      </button>
     </div>
   </header>
 
-  <!-- NAVIGATION VOLTAR / GLOBAL BAR -->
-  <div class="bg-pink-100 border-b border-pink-200 py-2 px-4 shadow-inner">
-    <div class="max-w-7xl mx-auto flex justify-between items-center">
-      <button id="btn-voltar" onclick="goBack()" class="hidden bg-white text-pink-700 border border-pink-300 hover:bg-pink-50 px-3 py-1 rounded-md text-sm font-semibold transition flex items-center gap-1 shadow-sm">
-        <i class="fa-solid fa-arrow-left"></i> Voltar
+  <!-- BARRA SUB-HEADER COM BOTÃO VOLTAR GLOBAL -->
+  <div class="bg-rose-100 border-b border-rose-200 px-4 sm:px-8 py-2 flex items-center justify-between">
+    <div id="backButtonContainer">
+      <button onclick="goBack()" class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-rose-700 bg-white border border-rose-300 rounded-lg shadow-sm hover:bg-rose-50 transition">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar
       </button>
-      <span id="breadcrumb" class="text-xs font-semibold text-pink-700 uppercase tracking-wider">Dashboard</span>
+    </div>
+    <div id="breadcrumbText" class="text-xs font-semibold text-rose-800 uppercase tracking-wider">
+      PsiGestão / Dashboard
     </div>
   </div>
 
-  <!-- MAIN CONTENT CONTAINER AREA -->
-  <main class="max-w-7xl mx-auto p-4 flex-grow w-full">
-
-    <!-- 1. DASHBOARD VIEW -->
-    <section id="view-dashboard" class="view-screen">
-      <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold text-pink-800">Painel Principal</h2>
-        <div class="flex gap-2">
-          <button onclick="openModalPaciente()" class="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition shadow-md">
-            <i class="fa-solid fa-user-plus mr-1"></i> Novo Paciente
-          </button>
-          <button onclick="openModalSessao()" class="bg-pink-800 hover:bg-pink-900 text-white px-4 py-2 rounded-lg text-sm font-semibold transition shadow-md">
-            <i class="fa-solid fa-calendar-plus mr-1"></i> Nova Sessão
-          </button>
-        </div>
-      </div>
-
-      <!-- CARDS INFORMATIVOS -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div class="bg-white p-4 rounded-xl border-l-4 border-pink-500 shadow-sm">
-          <p class="text-xs font-bold text-slate-400 uppercase">Pacientes</p>
-          <p class="text-2xl font-black text-slate-700" id="dash-tot-pacientes">0</p>
-          <p class="text-xs text-slate-500"><span id="dash-act-pacientes">0</span> Ativos | <span id="dash-ina-pacientes">0</span> Inativos</p>
-        </div>
-        <div class="bg-white p-4 rounded-xl border-l-4 border-pink-500 shadow-sm">
-          <p class="text-xs font-bold text-slate-400 uppercase">Sessões Realizadas</p>
-          <p class="text-2xl font-black text-slate-700" id="dash-sess-realizadas">0</p>
-          <p class="text-xs text-slate-500"><span id="dash-sess-agendadas">0</span> Agendadas</p>
-        </div>
-        <div class="bg-white p-4 rounded-xl border-l-4 border-pink-500 shadow-sm">
-          <p class="text-xs font-bold text-slate-400 uppercase">Faltas / Canceladas</p>
-          <p class="text-2xl font-black text-slate-700"><span id="dash-faltas">0</span> / <span id="dash-cancelamentos">0</span></p>
-          <p class="text-xs text-slate-500">Total não efetuadas</p>
-        </div>
-        <div class="bg-white p-4 rounded-xl border-l-4 border-pink-500 shadow-sm">
-          <p class="text-xs font-bold text-slate-400 uppercase">Valores (Recebido / Pendente)</p>
-          <p class="text-xl font-black text-emerald-600" id="dash-recebido">R$ 0,00</p>
-          <p class="text-xs font-semibold text-rose-500" id="dash-pendente">Pend: R$ 0,00</p>
-        </div>
-      </div>
-
-      <!-- ATALHOS RAPIDOS -->
-      <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-100 mb-6">
-        <h3 class="font-bold text-pink-800 mb-3">Acesso Rápido</h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <button onclick="navigateTo('pacientes')" class="p-4 bg-pink-50 hover:bg-pink-100 border border-pink-200 rounded-lg text-left font-semibold text-pink-700 flex items-center justify-between">
-            <span><i class="fa-solid fa-address-book mr-2"></i> Consultar Pacientes</span>
-            <i class="fa-solid fa-chevron-right text-xs"></i>
-          </button>
-          <button onclick="navigateTo('sessoes')" class="p-4 bg-pink-50 hover:bg-pink-100 border border-pink-200 rounded-lg text-left font-semibold text-pink-700 flex items-center justify-between">
-            <span><i class="fa-solid fa-list-check mr-2"></i> Visualizar Sessões</span>
-            <i class="fa-solid fa-chevron-right text-xs"></i>
-          </button>
-          <button onclick="openModalPaciente()" class="p-4 bg-pink-50 hover:bg-pink-100 border border-pink-200 rounded-lg text-left font-semibold text-pink-700 flex items-center justify-between">
-            <span><i class="fa-solid fa-user-plus mr-2"></i> Cadastrar Novo Paciente</span>
-            <i class="fa-solid fa-chevron-right text-xs"></i>
-          </button>
-        </div>
-      </div>
-    </section>
-
-    <!-- 2. LISTA DE PACIENTES VIEW -->
-    <section id="view-pacientes" class="view-screen hidden">
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-        <div>
-          <h2 class="text-2xl font-bold text-pink-800">Lista de Pacientes</h2>
-          <p class="text-sm text-slate-500">Gerencie cadastros, status e prontuários.</p>
-        </div>
-        <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
-          <select id="filtro-status-paciente" onchange="renderPacientesList()" class="bg-white border border-pink-300 text-sm rounded-lg p-2 focus:ring-pink-500">
-            <option value="Ativo">Apenas Ativos</option>
-            <option value="Inativo">Apenas Inativos</option>
-            <option value="Todos">Todos</option>
-          </select>
-          <button onclick="openModalPaciente()" class="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition shadow">
-            <i class="fa-solid fa-plus mr-1"></i> Cadastrar Paciente
-          </button>
-        </div>
-      </div>
-
-      <!-- LISTA/TABELA DE PACIENTES -->
-      <div class="bg-white rounded-xl shadow-sm border border-pink-100 overflow-x-auto">
-        <table class="w-full text-left text-sm">
-          <thead class="bg-pink-100 text-pink-800 uppercase font-semibold text-xs border-b border-pink-200">
-            <tr>
-              <th class="p-4">Nome</th>
-              <th class="p-4">Tipo</th>
-              <th class="p-4">Contato</th>
-              <th class="p-4">Status</th>
-              <th class="p-4 text-right">Ações</th>
-            </tr>
-          </thead>
-          <tbody id="lista-pacientes-body" class="divide-y divide-slate-100">
-            <!-- Renderizado via JS -->
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- 3. DETALHE DO PRONTUÁRIO VIEW -->
-    <section id="view-prontuario" class="view-screen hidden">
-      <!-- HEADER DO PACIENTE -->
-      <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-200 mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <div class="flex items-center gap-3">
-            <h2 class="text-2xl font-black text-pink-800" id="pront-nome">Nome do Paciente</h2>
-            <span id="pront-status-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">Ativo</span>
-            <span id="pront-tipo-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-pink-100 text-pink-800">Adulto</span>
-          </div>
-          <p class="text-sm text-slate-500 mt-1" id="pront-detalhes-pessoais">Telefone: -- | Email: --</p>
-          <div id="pront-responsavel-box" class="text-xs text-pink-700 bg-pink-50 p-2 rounded mt-2 border border-pink-200 hidden">
-            <!-- Dados de responsável infantil -->
-          </div>
-        </div>
-        <div class="flex flex-wrap gap-2">
-          <button onclick="editarPacienteAtual()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-sm font-semibold transition border border-slate-300">
-            <i class="fa-solid fa-pen mr-1"></i> Editar Dados
-          </button>
-          <button id="btn-toggle-inativar" onclick="toggleStatusPacienteAtual()" class="bg-rose-100 hover:bg-rose-200 text-rose-700 px-3 py-1.5 rounded-lg text-sm font-semibold transition border border-rose-300">
-            <i class="fa-solid fa-user-slash mr-1"></i> Inativar Paciente
-          </button>
-        </div>
-      </div>
-
-      <!-- BOTÃO DE DESTAQUE: GERAR RESUMO DO PRONTUÁRIO AUTOMÁTICO -->
-      <div class="mb-6">
-        <button onclick="gerarResumoAutomaticoProntuario()" class="w-full bg-gradient-to-r from-pink-500 to-pink-700 hover:from-pink-600 hover:to-pink-800 text-white font-bold p-4 rounded-xl shadow-md transition flex items-center justify-center gap-2 text-lg">
-          <i class="fa-solid fa-wand-magic-sparkles"></i> ✨ GERAR RESUMO DO PRONTUÁRIO
-        </button>
-      </div>
-
-      <!-- AREA DE EXIBIÇÃO DO RESUMO DO PRONTUÁRIO -->
-      <div id="box-resumo-prontuario" class="hidden bg-white p-6 rounded-xl border-2 border-pink-400 shadow-md mb-6 relative">
-        <div class="flex justify-between items-center mb-4 border-b border-pink-100 pb-2">
-          <h3 class="font-bold text-pink-800 text-lg flex items-center gap-2"><i class="fa-solid fa-file-invoice"></i> Resumo Consolidado do Prontuário</h3>
-          <button onclick="copiarResumoProntuario()" class="bg-pink-100 hover:bg-pink-200 text-pink-700 px-3 py-1 rounded text-xs font-bold transition">
-            <i class="fa-solid fa-copy mr-1"></i> Copiar Conteúdo
-          </button>
-        </div>
-        <textarea id="text-resumo-prontuario" class="w-full h-48 bg-pink-50 border border-pink-200 rounded-lg p-3 text-sm font-mono focus:outline-none" readonly></textarea>
-      </div>
-
-      <!-- CONTROLES MENSAL E HISTÓRICO -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <!-- BUSCA HISTÓRICO MENSAL -->
-        <div class="bg-white p-5 rounded-xl shadow-sm border border-pink-100 col-span-1">
-          <h3 class="font-bold text-pink-800 mb-3"><i class="fa-solid fa-calendar-days mr-1"></i> Selecionar Mês/Ano</h3>
-          <div class="flex gap-2 mb-3">
-            <input type="month" id="filtro-mes-ano-prontuario" class="border border-pink-300 rounded-lg p-2 text-sm w-full focus:ring-pink-500">
-            <button onclick="filtrarSessoesProntuarioMes()" class="bg-pink-600 hover:bg-pink-700 text-white px-3 py-2 rounded-lg text-sm font-semibold">Buscar</button>
-          </div>
-          <div class="flex flex-col gap-2">
-            <button onclick="gerarResumoMensalAutomatico()" class="bg-pink-100 hover:bg-pink-200 text-pink-800 border border-pink-300 font-bold p-2 rounded-lg text-sm transition">
-              📊 Resumo Mensal
-            </button>
-            <button onclick="carregarHistoricoCompletoProntuario()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 font-semibold p-2 rounded-lg text-sm transition">
-              Ver Histórico Completo
-            </button>
-          </div>
-        </div>
-
-        <!-- QUADRO RESUMO MENSAL RESULTADO -->
-        <div id="box-resumo-mensal-resultado" class="bg-white p-5 rounded-xl shadow-sm border border-pink-100 col-span-2 hidden">
-          <h3 class="font-bold text-pink-800 mb-2 border-b border-pink-100 pb-2">Resumo Mensal Calculado</h3>
-          <div class="grid grid-cols-3 gap-2 text-xs">
-            <div class="p-2 bg-pink-50 rounded"><span class="font-bold block">Total Sessões:</span> <span id="rm-tot-sess">0</span></div>
-            <div class="p-2 bg-pink-50 rounded"><span class="font-bold block">Realizadas:</span> <span id="rm-realizadas">0</span></div>
-            <div class="p-2 bg-pink-50 rounded"><span class="font-bold block">Faltas / Cancel:</span> <span id="rm-faltas-canc">0</span></div>
-            <div class="p-2 bg-pink-50 rounded"><span class="font-bold block">Total Recebido:</span> <span id="rm-recebido" class="text-emerald-700 font-bold">R$ 0,00</span></div>
-            <div class="p-2 bg-pink-50 rounded"><span class="font-bold block">Total Pendente:</span> <span id="rm-pendente" class="text-rose-600 font-bold">R$ 0,00</span></div>
-            <div class="p-2 bg-pink-50 rounded"><span class="font-bold block">Evoluções:</span> <span id="rm-evolucoes">0</span></div>
-            <div class="p-2 bg-pink-50 rounded"><span class="font-bold block">Com Recibo:</span> <span id="rm-com-recibo">0</span></div>
-            <div class="p-2 bg-pink-50 rounded"><span class="font-bold block">Sem Recibo:</span> <span id="rm-sem-recibo">0</span></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- SEÇÃO HISTÓRICO DE SESSÕES E EVOLUÇÕES -->
-      <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-100">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="font-bold text-pink-800 text-lg">Histórico de Sessões e Evoluções</h3>
-          <button onclick="openModalSessao(pacienteAtualId)" class="bg-pink-600 hover:bg-pink-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">
-            <i class="fa-solid fa-plus mr-1"></i> Nova Sessão neste Prontuário
-          </button>
-        </div>
-
-        <div id="container-sessoes-prontuario" class="space-y-4">
-          <!-- Renderizado via JS -->
-        </div>
-      </div>
-    </section>
-
-    <!-- 4. SESSÕES GENERAL VIEW -->
-    <section id="view-sessoes" class="view-screen hidden">
-      <div class="flex justify-between items-center mb-6">
-        <div>
-          <h2 class="text-2xl font-bold text-pink-800">Todas as Sessões</h2>
-          <p class="text-sm text-slate-500">Listagem de agendamentos e registros de atendimento.</p>
-        </div>
-        <button onclick="openModalSessao()" class="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition shadow">
-          <i class="fa-solid fa-plus mr-1"></i> Nova Sessão
-        </button>
-      </div>
-
-      <div class="bg-white rounded-xl shadow-sm border border-pink-100 overflow-x-auto">
-        <table class="w-full text-left text-sm">
-          <thead class="bg-pink-100 text-pink-800 uppercase font-semibold text-xs border-b border-pink-200">
-            <tr>
-              <th class="p-4">Data / Hora</th>
-              <th class="p-4">Paciente</th>
-              <th class="p-4">Modalidade</th>
-              <th class="p-4">Status</th>
-              <th class="p-4">Valor / Pagto</th>
-              <th class="p-4">Recibo</th>
-              <th class="p-4 text-right">Ações</th>
-            </tr>
-          </thead>
-          <tbody id="lista-sessoes-geral-body" class="divide-y divide-slate-100">
-            <!-- Renderizado via JS -->
-          </tbody>
-        </table>
-      </div>
-    </section>
-
+  <!-- CONTEÚDO PRINCIPAL (RENDERIZADO DINAMICAMENTE) -->
+  <main id="app" class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+    <!-- View ativa será injetada via JavaScript -->
   </main>
 
   <!-- MODAIS DO SISTEMA -->
+  <div id="modalContainer"></div>
 
-  <!-- MODAL CADASTRO / EDIÇÃO PACIENTE -->
-  <div id="modal-paciente" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-lg rounded-2xl shadow-xl overflow-hidden">
-      <div class="bg-pink-600 p-4 text-white flex justify-between items-center">
-        <h3 class="font-bold text-lg" id="modal-paciente-titulo">Cadastrar Paciente</h3>
-        <button onclick="closeModal('modal-paciente')" class="text-white hover:text-pink-200"><i class="fa-solid fa-xmark text-xl"></i></button>
-      </div>
-      <form id="form-paciente" onsubmit="salvarPaciente(event)" class="p-6 space-y-4">
-        <input type="hidden" id="paciente-id">
-        <div>
-          <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Nome Completo *</label>
-          <input type="text" id="paciente-nome" required class="w-full border border-pink-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-pink-500 outline-none">
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Telefone / Whats</label>
-            <input type="text" id="paciente-telefone" class="w-full border border-pink-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-pink-500 outline-none">
-          </div>
-          <div>
-            <label class="block text-xs font-bold uppercase text-slate-600 mb-1">E-mail</label>
-            <input type="email" id="paciente-email" class="w-full border border-pink-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-pink-500 outline-none">
-          </div>
-        </div>
-        <div>
-          <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Tipo de Atendimento *</label>
-          <select id="paciente-tipo" onchange="toggleAtendimentoInfantil()" required class="w-full border border-pink-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-pink-500 outline-none">
-            <option value="Adulto">Adulto</option>
-            <option value="Infantil">Infantil</option>
-          </select>
-        </div>
-
-        <!-- CAMPOS CONDICIONAIS INFANTIL -->
-        <div id="box-infantil" class="hidden p-4 bg-pink-50 border border-pink-200 rounded-lg space-y-3">
-          <p class="text-xs font-bold text-pink-800 uppercase">Dados do Responsável</p>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Nome do Responsável *</label>
-            <input type="text" id="paciente-resp-nome" class="w-full border border-pink-300 rounded-lg p-2 text-sm">
-          </div>
-          <div class="grid grid-cols-3 gap-2">
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">Parentesco</label>
-              <input type="text" id="paciente-resp-parentesco" placeholder="Ex: Mãe" class="w-full border border-pink-300 rounded-lg p-2 text-sm">
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">Telefone</label>
-              <input type="text" id="paciente-resp-telefone" class="w-full border border-pink-300 rounded-lg p-2 text-sm">
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">E-mail</label>
-              <input type="email" id="paciente-resp-email" class="w-full border border-pink-300 rounded-lg p-2 text-sm">
-            </div>
-          </div>
-        </div>
-
-        <div class="flex justify-end gap-2 pt-4 border-t border-slate-100">
-          <button type="button" onclick="closeModal('modal-paciente')" class="px-4 py-2 border rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancelar</button>
-          <button type="submit" class="px-4 py-2 bg-pink-600 hover:bg-pink-700 text-white rounded-lg text-sm font-semibold shadow">Salvar Paciente</button>
-        </div>
-      </form>
+  <!-- RODAPÉ -->
+  <footer class="bg-white border-t border-rose-100 py-4 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 text-center text-xs text-rose-500 font-medium">
+      PsiGestão © 2026 — Sistema Privado de Gestão de Prontuários Psicológicos. Dados Persistidos com Segurança Local.
     </div>
-  </div>
+  </footer>
 
-  <!-- MODAL REGISTRAR / EDITAR SESSÃO -->
-  <div id="modal-sessao" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden">
-      <div class="bg-pink-600 p-4 text-white flex justify-between items-center">
-        <h3 class="font-bold text-lg" id="modal-sessao-titulo">Registrar Sessão</h3>
-        <button onclick="closeModal('modal-sessao')" class="text-white hover:text-pink-200"><i class="fa-solid fa-xmark text-xl"></i></button>
-      </div>
-      <form id="form-sessao" onsubmit="salvarSessao(event)" class="p-6 space-y-3">
-        <input type="hidden" id="sessao-id">
-        <div>
-          <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Paciente *</label>
-          <select id="sessao-paciente-id" required class="w-full border border-pink-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-pink-500 outline-none">
-            <!-- Renderizado via JS -->
-          </select>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Data *</label>
-            <input type="date" id="sessao-data" required class="w-full border border-pink-300 rounded-lg p-2 text-sm">
-          </div>
-          <div>
-            <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Horário *</label>
-            <input type="time" id="sessao-horario" required class="w-full border border-pink-300 rounded-lg p-2 text-sm">
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Modalidade *</label>
-            <select id="sessao-modalidade" required class="w-full border border-pink-300 rounded-lg p-2 text-sm">
-              <option value="Presencial">Presencial</option>
-              <option value="Online">Online</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Status *</label>
-            <select id="sessao-status" required class="w-full border border-pink-300 rounded-lg p-2 text-sm">
-              <option value="Agendada">Agendada</option>
-              <option value="Realizada">Realizada</option>
-              <option value="Falta">Falta</option>
-              <option value="Cancelada">Cancelada</option>
-            </select>
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Valor (R$)</label>
-            <input type="number" step="0.01" id="sessao-valor" placeholder="150.00" class="w-full border border-pink-300 rounded-lg p-2 text-sm">
-          </div>
-          <div>
-            <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Pagamento *</label>
-            <select id="sessao-pagamento" required class="w-full border border-pink-300 rounded-lg p-2 text-sm">
-              <option value="Pendente">Pendente</option>
-              <option value="Pago">Pago</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="flex justify-end gap-2 pt-4 border-t border-slate-100">
-          <button type="button" onclick="closeModal('modal-sessao')" class="px-4 py-2 border rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancelar</button>
-          <button type="submit" class="px-4 py-2 bg-pink-600 hover:bg-pink-700 text-white rounded-lg text-sm font-semibold shadow">Salvar Sessão</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL REGISTRAR / EDITAR EVOLUÇÃO -->
-  <div id="modal-evolucao" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-2xl rounded-2xl shadow-xl overflow-hidden">
-      <div class="bg-pink-600 p-4 text-white flex justify-between items-center">
-        <h3 class="font-bold text-lg" id="modal-evolucao-titulo">Evolução do Atendimento</h3>
-        <button onclick="closeModal('modal-evolucao')" class="text-white hover:text-pink-200"><i class="fa-solid fa-xmark text-xl"></i></button>
-      </div>
-      <form id="form-evolucao" onsubmit="salvarEvolucao(event)" class="p-6 space-y-3">
-        <input type="hidden" id="evolucao-id">
-        <input type="hidden" id="evolucao-sessao-id">
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Queixa Principal</label>
-            <input type="text" id="evolucao-queixa" class="w-full border border-pink-300 rounded-lg p-2 text-sm">
-          </div>
-          <div>
-            <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Demanda Trabalhada</label>
-            <input type="text" id="evolucao-demanda" class="w-full border border-pink-300 rounded-lg p-2 text-sm">
-          </div>
-        </div>
-        <div>
-          <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Descrição da Sessão</label>
-          <textarea id="evolucao-descricao" rows="2" class="w-full border border-pink-300 rounded-lg p-2 text-sm"></textarea>
-        </div>
-        <div>
-          <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Análise Técnica / Técnica Aplicada</label>
-          <textarea id="evolucao-analise" rows="2" class="w-full border border-pink-300 rounded-lg p-2 text-sm"></textarea>
-        </div>
-        <div>
-          <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Evolução do Quadro e Encaminhamentos *</label>
-          <textarea id="evolucao-texto" required rows="3" class="w-full border border-pink-300 rounded-lg p-2 text-sm"></textarea>
-        </div>
-
-        <div class="flex justify-end gap-2 pt-4 border-t border-slate-100">
-          <button type="button" onclick="closeModal('modal-evolucao')" class="px-4 py-2 border rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancelar</button>
-          <button type="submit" class="px-4 py-2 bg-pink-600 hover:bg-pink-700 text-white rounded-lg text-sm font-semibold shadow">Salvar Alterações</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL RECIBO -->
-  <div id="modal-recibo" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-lg rounded-2xl shadow-xl overflow-hidden">
-      <div class="bg-pink-600 p-4 text-white flex justify-between items-center">
-        <h3 class="font-bold text-lg">Gerenciamento de Recibo</h3>
-        <button onclick="closeModal('modal-recibo')" class="text-white hover:text-pink-200"><i class="fa-solid fa-xmark text-xl"></i></button>
-      </div>
-      <div class="p-6 space-y-4">
-        <input type="hidden" id="recibo-sessao-id">
-        <div id="box-upload-recibo">
-          <label class="block text-xs font-bold uppercase text-slate-600 mb-2">Anexar Recibo (PDF, JPG, PNG)</label>
-          <input type="file" id="file-recibo-input" accept=".pdf,image/jpeg,image/png,image/jpg" class="w-full border border-pink-300 rounded-lg p-2 text-sm bg-pink-50">
-          <button onclick="salvarAnexoRecibo()" class="mt-3 w-full bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 rounded-lg text-sm transition">
-            Anexar Recibo
-          </button>
-        </div>
-
-        <div id="box-view-recibo" class="hidden space-y-3">
-          <div class="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-lg text-sm flex items-center justify-between">
-            <span><i class="fa-solid fa-paperclip mr-2"></i> Recibo Anexado</span>
-            <span id="recibo-tipo-label" class="text-xs font-bold uppercase"></span>
-          </div>
-
-          <div class="flex gap-2">
-            <button onclick="visualizarReciboAnexo()" class="flex-1 bg-pink-100 hover:bg-pink-200 text-pink-800 font-semibold py-2 rounded-lg text-xs">
-              <i class="fa-solid fa-eye mr-1"></i> Visualizar / Baixar
-            </button>
-            <button onclick="removerReciboAnexo()" class="bg-rose-100 hover:bg-rose-200 text-rose-700 font-semibold px-3 py-2 rounded-lg text-xs">
-              <i class="fa-solid fa-trash mr-1"></i> Remover
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- SCRIPT JS LOGIC -->
+  <!-- LÓGICA DO SISTEMA -->
   <script>
-    // --- PERSISTÊNCIA BANCO DE DADOS LOCAL (STORAGE REAL) ---
-    const DB_KEY_PACIENTES = 'psigestao_pacientes_db';
-    const DB_KEY_SESSOES = 'psigestao_sessoes_db';
-    const DB_KEY_EVOLUCOES = 'psigestao_evolucoes_db';
+    // ==========================================
+    // 1. BANCO DE DADOS LOCAL (Dexie.js / IndexedDB)
+    // ==========================================
+    const db = new Dexie('PsiGestaoDB');
+    db.version(1).stores({
+      pacientes: '++id, nome, status, tipoAtendimento, dataCadastro',
+      sessoes: '++id, pacienteId, data, status, valor, statusPagamento, dataPagamento',
+      evolucoes: '++id, pacienteId, sessaoId, data',
+      recibos: '++id, pacienteId, sessaoId, dataCriacao',
+      pdfsSemanais: '++id, pacienteId, dataCriacao, semana'
+    });
 
-    function getDB(key) {
-      return JSON.parse(localStorage.getItem(key) || '[]');
-    }
+    // ==========================================
+    // 2. ESTADO GLOBAL DA APLICAÇÃO & NAVEGAÇÃO
+    // ==========================================
+    const state = {
+      currentView: 'dashboard',
+      viewParam: null,
+      historyStack: []
+    };
 
-    function setDB(key, data) {
-      localStorage.setItem(key, JSON.stringify(data));
-    }
-
-    // NAVEGAÇÃO E NAVEGAÇÃO HISTÓRICO ("VOLTAR")
-    let historyStack = ['dashboard'];
-    let pacienteAtualId = null;
-
-    function navigateTo(viewId, pushHistory = true) {
-      if (pushHistory && historyStack[historyStack.length - 1] !== viewId) {
-        historyStack.push(viewId);
+    function navigateTo(view, param = null, addToHistory = true) {
+      if (addToHistory && state.currentView) {
+        state.historyStack.push({ view: state.currentView, param: state.viewParam });
       }
-
-      document.querySelectorAll('.view-screen').forEach(el => el.classList.add('hidden'));
-      const targetView = document.getElementById(`view-${viewId}`);
-      if (targetView) targetView.classList.remove('hidden');
-
-      // Atualizar Botão Voltar
-      const btnVoltar = document.getElementById('btn-voltar');
-      if (historyStack.length > 1) {
-        btnVoltar.classList.remove('hidden');
-      } else {
-        btnVoltar.classList.add('hidden');
-      }
-
-      // Breadcrumb
-      document.getElementById('breadcrumb').innerText = viewId.replace('-', ' ');
-
-      // Refresh data
-      if (viewId === 'dashboard') renderDashboard();
-      if (viewId === 'pacientes') renderPacientesList();
-      if (viewId === 'sessoes') renderSessoesGeralList();
+      state.currentView = view;
+      state.viewParam = param;
+      render();
     }
 
     function goBack() {
-      if (historyStack.length > 1) {
-        historyStack.pop();
-        const prevView = historyStack[historyStack.length - 1];
-        navigateTo(prevView, false);
+      if (state.historyStack.length > 0) {
+        const previous = state.historyStack.pop();
+        state.currentView = previous.view;
+        state.viewParam = previous.param;
+        render();
+      } else {
+        state.currentView = 'dashboard';
+        state.viewParam = null;
+        render();
       }
     }
 
-    // MODAL HANDLERS
-    function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
-    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-
-    // --- CADASTRO E GERENCIAMENTO DE PACIENTES ---
-    function toggleAtendimentoInfantil() {
-      const tipo = document.getElementById('paciente-tipo').value;
-      const box = document.getElementById('box-infantil');
-      if (tipo === 'Infantil') box.classList.remove('hidden');
-      else box.classList.add('hidden');
+    function toggleMobileMenu() {
+      const menu = document.getElementById('mobileMenu');
+      menu.classList.toggle('hidden');
     }
 
-    function openModalPaciente(id = null) {
-      document.getElementById('form-paciente').reset();
-      document.getElementById('paciente-id').value = '';
-      document.getElementById('modal-paciente-titulo').innerText = id ? 'Editar Paciente' : 'Cadastrar Paciente';
+    // ==========================================
+    // 3. MOTORES DE CÁLCULO E ALERTAS DE PENDÊNCIAS
+    // ==========================================
+    async function getAlerts() {
+      const pacientes = await db.pacientes.toArray();
+      const sessoes = await db.sessoes.toArray();
+      const evolucoes = await db.evolucoes.toArray();
+      const recibos = await db.recibos.toArray();
+      const pdfs = await db.pdfsSemanais.toArray();
 
-      if (id) {
-        const pacientes = getDB(DB_KEY_PACIENTES);
-        const p = pacientes.find(x => x.id === id);
-        if (p) {
-          document.getElementById('paciente-id').value = p.id;
-          document.getElementById('paciente-nome').value = p.nome;
-          document.getElementById('paciente-telefone').value = p.telefone || '';
-          document.getElementById('paciente-email').value = p.email || '';
-          document.getElementById('paciente-tipo').value = p.tipo;
-          
-          if (p.tipo === 'Infantil' && p.responsavel) {
-            document.getElementById('paciente-resp-nome').value = p.responsavel.nome || '';
-            document.getElementById('paciente-resp-parentesco').value = p.responsavel.parentesco || '';
-            document.getElementById('paciente-resp-telefone').value = p.responsavel.telefone || '';
-            document.getElementById('paciente-resp-email').value = p.responsavel.email || '';
+      const alerts = [];
+
+      // 1. Sessões Realizadas Sem Evolução
+      for (const s of sessoes) {
+        if (s.status === 'Realizada') {
+          const temEvolucao = evolucoes.some(e => e.sessaoId === s.id);
+          if (!temEvolucao) {
+            const pac = pacientes.find(p => p.id === s.pacienteId);
+            alerts.push({
+              tipo: 'evolucao',
+              pacienteId: s.pacienteId,
+              sessaoId: s.id,
+              texto: `Evolução pendente: ${pac ? pac.nome : 'Paciente'} (Sessão de ${formatDate(s.data)})`,
+              link: () => navigateTo('prontuario', s.pacienteId)
+            });
           }
-          toggleAtendimentoInfantil();
         }
       }
-      openModal('modal-paciente');
-    }
 
-    function salvarPaciente(e) {
-      e.preventDefault();
-      const id = document.getElementById('paciente-id').value;
-      const nome = document.getElementById('paciente-nome').value;
-      const telefone = document.getElementById('paciente-telefone').value;
-      const email = document.getElementById('paciente-email').value;
-      const tipo = document.getElementById('paciente-tipo').value;
-
-      let responsavel = null;
-      if (tipo === 'Infantil') {
-        responsavel = {
-          nome: document.getElementById('paciente-resp-nome').value,
-          parentesco: document.getElementById('paciente-resp-parentesco').value,
-          telefone: document.getElementById('paciente-resp-telefone').value,
-          email: document.getElementById('paciente-resp-email').value
-        };
-      }
-
-      let pacientes = getDB(DB_KEY_PACIENTES);
-
-      if (id) {
-        // Editar mantendo dados históricos intactos
-        const idx = pacientes.findIndex(x => x.id === id);
-        if (idx !== -1) {
-          pacientes[idx] = { ...pacientes[idx], nome, telefone, email, tipo, responsavel };
+      // 2. Pagamento Recebido Sem Recibo
+      for (const s of sessoes) {
+        if (s.statusPagamento === 'Pago') {
+          const temRecibo = recibos.some(r => r.sessaoId === s.id);
+          if (!temRecibo) {
+            const pac = pacientes.find(p => p.id === s.pacienteId);
+            alerts.push({
+              tipo: 'recibo',
+              pacienteId: s.pacienteId,
+              sessaoId: s.id,
+              texto: `Recibo não anexado: ${pac ? pac.nome : 'Paciente'} (Sessão de ${formatDate(s.data)})`,
+              link: () => navigateTo('prontuario', s.pacienteId)
+            });
+          }
         }
-      } else {
-        // Criar Novo
-        const newPaciente = {
-          id: 'pac_' + Date.now(),
-          nome, telefone, email, tipo, responsavel,
-          status: 'Ativo',
-          dataCriacao: new Date().toISOString()
-        };
-        pacientes.push(newPaciente);
       }
 
-      setDB(DB_KEY_PACIENTES, pacientes);
-      closeModal('modal-paciente');
+      // 3. Verificação de PDF Semanal Pendente
+      const seteDiasAtras = new Date();
+      seteDiasAtras.setDate(seteDiasAtras.getDate() - 7);
 
-      if (pacienteAtualId && pacienteAtualId === id) {
-        carregarProntuario(id);
-      } else {
-        renderPacientesList();
-      }
-    }
-
-    function renderPacientesList() {
-      const pacientes = getDB(DB_KEY_PACIENTES);
-      const filtro = document.getElementById('filtro-status-paciente').value;
-      const body = document.getElementById('lista-pacientes-body');
-      body.innerHTML = '';
-
-      const filtrados = pacientes.filter(p => {
-        if (filtro === 'Todos') return true;
-        return p.status === filtro;
-      });
-
-      if (filtrados.length === 0) {
-        body.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">Nenhum paciente encontrado.</td></tr>`;
-        return;
+      for (const p of pacientes.filter(pac => pac.status === 'Ativo')) {
+        const sessoesRecentes = sessoes.filter(s => s.pacienteId === p.id && s.status === 'Realizada' && new Date(s.data) >= seteDiasAtras);
+        if (sessoesRecentes.length > 0) {
+          const pdfRecente = pdfs.some(pdf => pdf.pacienteId === p.id && new Date(pdf.dataCriacao) >= seteDiasAtras);
+          if (!pdfRecente) {
+            alerts.push({
+              tipo: 'pdf',
+              pacienteId: p.id,
+              texto: `Prontuário semanal pendente: ${p.nome}`,
+              link: () => navigateTo('prontuario', p.id)
+            });
+          }
+        }
       }
 
-      filtrados.forEach(p => {
-        const tr = document.createElement('tr');
-        tr.className = 'hover:bg-pink-50/50 transition';
-        tr.innerHTML = `
-          <td class="p-4 font-bold text-slate-700">${p.nome}</td>
-          <td class="p-4"><span class="px-2 py-1 bg-pink-100 text-pink-800 text-xs rounded-full font-semibold">${p.tipo}</span></td>
-          <td class="p-4 text-xs text-slate-600">${p.telefone || '--'}<br>${p.email || ''}</td>
-          <td class="p-4">
-            <span class="px-2 py-1 text-xs rounded-full font-bold ${p.status === 'Ativo' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'}">
-              ${p.status}
-            </span>
-          </td>
-          <td class="p-4 text-right space-x-1">
-            <button onclick="carregarProntuario('${p.id}')" class="bg-pink-600 text-white px-3 py-1 rounded text-xs font-semibold hover:bg-pink-700 shadow">Prontuário</button>
-            <button onclick="openModalPaciente('${p.id}')" class="bg-slate-200 text-slate-700 px-2 py-1 rounded text-xs font-semibold hover:bg-slate-300"><i class="fa-solid fa-pen"></i></button>
-          </td>
-        `;
-        body.appendChild(tr);
-      });
-    }
-
-    // --- PRONTUÁRIO & INATIVAÇÃO ---
-    function carregarProntuario(pacienteId) {
-      pacienteAtualId = pacienteId;
-      const pacientes = getDB(DB_KEY_PACIENTES);
-      const p = pacientes.find(x => x.id === pacienteId);
-      if (!p) return;
-
-      document.getElementById('pront-nome').innerText = p.nome;
-      document.getElementById('pront-status-badge').innerText = p.status;
-      document.getElementById('pront-status-badge').className = `px-2.5 py-0.5 rounded-full text-xs font-bold ${p.status === 'Ativo' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'}`;
-      document.getElementById('pront-tipo-badge').innerText = p.tipo;
-      document.getElementById('pront-detalhes-pessoais').innerText = `Tel: ${p.telefone || 'N/A'} | Email: ${p.email || 'N/A'}`;
-
-      const respBox = document.getElementById('pront-responsavel-box');
-      if (p.tipo === 'Infantil' && p.responsavel) {
-        respBox.classList.remove('hidden');
-        respBox.innerHTML = `<strong>Responsável:</strong> ${p.responsavel.nome} (${p.responsavel.parentesco || 'Responsável'}) - Tel: ${p.responsavel.telefone || 'N/A'} - Email: ${p.responsavel.email || 'N/A'}`;
-      } else {
-        respBox.classList.add('hidden');
+      // 4. Dados Obrigatórios Faltando no Cadastro
+      for (const p of pacientes) {
+        if (!p.nome || !p.tipoAtendimento || (p.tipoAtendimento === 'Infantil' && !p.nomeResponsavel)) {
+          alerts.push({
+            tipo: 'cadastro',
+            pacienteId: p.id,
+            texto: `Informação obrigatória faltando no cadastro de ${p.nome || 'Paciente sem nome'}`,
+            link: () => openModalPaciente(p.id)
+          });
+        }
       }
 
-      const btnInativar = document.getElementById('btn-toggle-inativar');
-      if (p.status === 'Ativo') {
-        btnInativar.innerHTML = `<i class="fa-solid fa-user-slash mr-1"></i> Inativar Paciente`;
-        btnInativar.className = `bg-rose-100 hover:bg-rose-200 text-rose-700 px-3 py-1.5 rounded-lg text-sm font-semibold transition border border-rose-300`;
-      } else {
-        btnInativar.innerHTML = `<i class="fa-solid fa-user-check mr-1"></i> Reativar Paciente`;
-        btnInativar.className = `bg-emerald-100 hover:bg-emerald-200 text-emerald-700 px-3 py-1.5 rounded-lg text-sm font-semibold transition border border-emerald-300`;
+      return alerts;
+    }
+
+    // ==========================================
+    // 4. RENDERING PRINCIPAL
+    // ==========================================
+    async function render() {
+      const app = document.getElementById('app');
+      document.getElementById('breadcrumbText').innerText = `PsiGestão / ${state.currentView.toUpperCase()}`;
+      
+      // Controle do botão voltar
+      const backBtn = document.getElementById('backButtonContainer');
+      backBtn.style.display = state.historyStack.length > 0 ? 'block' : 'inline-block';
+
+      if (state.currentView === 'dashboard') {
+        app.innerHTML = await renderDashboard();
+      } else if (state.currentView === 'pacientes') {
+        app.innerHTML = await renderPacientes();
+      } else if (state.currentView === 'prontuario') {
+        app.innerHTML = await renderProntuario(state.viewParam);
+      } else if (state.currentView === 'sessoes') {
+        app.innerHTML = await renderSessoes();
+      } else if (state.currentView === 'financeiro') {
+        app.innerHTML = await renderFinanceiro();
       }
 
-      document.getElementById('box-resumo-prontuario').classList.add('hidden');
-      document.getElementById('box-resumo-mensal-resultado').classList.add('hidden');
-
-      carregarHistoricoCompletoProntuario();
-      navigateTo('prontuario');
+      lucide.createIcons();
     }
 
-    function toggleStatusPacienteAtual() {
-      if (!pacienteAtualId) return;
-      let pacientes = getDB(DB_KEY_PACIENTES);
-      const idx = pacientes.findIndex(x => x.id === pacienteAtualId);
-      if (idx !== -1) {
-        pacientes[idx].status = pacientes[idx].status === 'Ativo' ? 'Inativo' : 'Ativo';
-        setDB(DB_KEY_PACIENTES, pacientes);
-        carregarProntuario(pacienteAtualId);
-      }
-    }
+    // ==========================================
+    // 5. VIEW: DASHBOARD
+    // ==========================================
+    async function renderDashboard() {
+      const pacientes = await db.pacientes.toArray();
+      const sessoes = await db.sessoes.toArray();
+      const alerts = await getAlerts();
 
-    function editarPacienteAtual() {
-      if (pacienteAtualId) openModalPaciente(pacienteAtualId);
-    }
+      const totalPacientes = pacientes.length;
+      const ativos = pacientes.filter(p => p.status === 'Ativo').length;
+      const inativos = pacientes.filter(p => p.status === 'Inativo').length;
 
-    // HISTÓRICO DE SESSÕES NO PRONTUÁRIO
-    function carregarHistoricoCompletoProntuario() {
-      if (!pacienteAtualId) return;
-      const sessoes = getDB(DB_KEY_SESSOES).filter(s => s.pacienteId === pacienteAtualId);
-      sessoes.sort((a,b) => new Date(b.data + 'T' + b.horario) - new Date(a.data + 'T' + a.horario));
-      renderSessoesNoProntuario(sessoes);
-    }
-
-    function filtrarSessoesProntuarioMes() {
-      const mesAno = document.getElementById('filtro-mes-ano-prontuario').value;
-      if (!mesAno || !pacienteAtualId) return;
-      const sessoes = getDB(DB_KEY_SESSOES).filter(s => s.pacienteId === pacienteAtualId && s.data.startsWith(mesAno));
-      sessoes.sort((a,b) => new Date(b.data + 'T' + b.horario) - new Date(a.data + 'T' + a.horario));
-      renderSessoesNoProntuario(sessoes);
-    }
-
-    function renderSessoesNoProntuario(sessoes) {
-      const container = document.getElementById('container-sessoes-prontuario');
-      const evolucoes = getDB(DB_KEY_EVOLUCOES);
-      container.innerHTML = '';
-
-      if (sessoes.length === 0) {
-        container.innerHTML = `<p class="text-sm text-slate-400 py-4 text-center">Nenhuma sessão registrada para este período.</p>`;
-        return;
-      }
-
-      sessoes.forEach(s => {
-        const evol = evolucoes.find(e => e.sessaoId === s.id);
-        const card = document.createElement('div');
-        card.className = "border border-pink-200 rounded-xl p-4 bg-pink-50/30 space-y-3";
-
-        let statusBg = "bg-blue-100 text-blue-800";
-        if (s.status === 'Realizada') statusBg = "bg-emerald-100 text-emerald-800";
-        if (s.status === 'Falta') statusBg = "bg-rose-100 text-rose-800";
-        if (s.status === 'Cancelada') statusBg = "bg-slate-200 text-slate-700";
-
-        card.innerHTML = `
-          <div class="flex flex-wrap justify-between items-center border-b border-pink-100 pb-2 gap-2">
-            <div class="flex items-center gap-2">
-              <span class="font-bold text-pink-900">${formataData(s.data)} às ${s.horario}</span>
-              <span class="text-xs px-2 py-0.5 rounded-full font-bold ${statusBg}">${s.status}</span>
-              <span class="text-xs px-2 py-0.5 rounded bg-white border text-slate-600">${s.modalidade}</span>
-            </div>
-            <div class="flex items-center gap-2 text-xs">
-              <span class="font-semibold text-slate-700">Valor: R$ ${parseFloat(s.valor || 0).toFixed(2)}</span>
-              <span class="px-2 py-0.5 rounded font-bold ${s.pagamento === 'Pago' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'}">${s.pagamento}</span>
-            </div>
-          </div>
-
-          <!-- BOTÕES DE AÇÕES SESSÃO -->
-          <div class="flex flex-wrap gap-2 text-xs">
-            <button onclick="openModalSessao('${s.id}')" class="text-slate-600 hover:text-pink-600 font-semibold"><i class="fa-solid fa-pen"></i> Editar Sessão</button>
-            <span>|</span>
-            <button onclick="openModalEvolucao('${s.id}')" class="text-pink-700 hover:text-pink-900 font-bold"><i class="fa-solid fa-file-medical"></i> ${evol ? 'Editar Evolução' : '+ Registrar Evolução'}</button>
-            <span>|</span>
-            <button onclick="openModalRecibo('${s.id}')" class="text-slate-600 hover:text-pink-600 font-semibold"><i class="fa-solid fa-paperclip"></i> Recibo (${s.recibo ? 'Anexado' : 'Sem Recibo'})</button>
-          </div>
-
-          <!-- BLOCADORES DE EVOLUÇÃO -->
-          ${evol ? `
-            <div class="bg-white p-3 rounded-lg border border-pink-100 text-xs space-y-1">
-              <p class="font-bold text-pink-800">Evolução Registrada:</p>
-              ${evol.queixa ? `<p><strong>Queixa:</strong> ${evol.queixa}</p>` : ''}
-              ${evol.demanda ? `<p><strong>Demanda:</strong> ${evol.demanda}</p>` : ''}
-              ${evol.descricao ? `<p><strong>Descrição:</strong> ${evol.descricao}</p>` : ''}
-              ${evol.analise ? `<p><strong>Análise:</strong> ${evol.analise}</p>` : ''}
-              <p><strong>Evolução:</strong> ${evol.texto}</p>
-            </div>
-          ` : '<p class="text-xs text-slate-400 italic">Sem evolução técnica registrada para esta sessão.</p>'}
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    // --- BOTÃO DE DESTAQUE: GERAR RESUMO AUTOMÁTICO DO PRONTUÁRIO ---
-    function gerarResumoAutomaticoProntuario() {
-      if (!pacienteAtualId) return;
-      const paciente = getDB(DB_KEY_PACIENTES).find(p => p.id === pacienteAtualId);
-      const sessoes = getDB(DB_KEY_SESSOES).filter(s => s.pacienteId === pacienteAtualId);
-      const evolucoes = getDB(DB_KEY_EVOLUCOES);
-
-      const totSessoes = sessoes.length;
+      const agendadas = sessoes.filter(s => s.status === 'Agendada').length;
       const realizadas = sessoes.filter(s => s.status === 'Realizada').length;
       const faltas = sessoes.filter(s => s.status === 'Falta').length;
       const canceladas = sessoes.filter(s => s.status === 'Cancelada').length;
-      const pagas = sessoes.filter(s => s.pagamento === 'Pago').length;
 
-      // Unir demandas e evoluções
-      const demandas = [];
-      const resumoEvolucoes = [];
+      // Cálculo estritamente baseado nos pagamentos RECEBIDOS
+      const hoje = new Date();
+      const mesAtual = hoje.getMonth();
+      const anoAtual = hoje.getFullYear();
+
+      let valorRecebidoMes = 0;
+      let valorPendenteTotal = 0;
 
       sessoes.forEach(s => {
-        const e = evolucoes.find(ev => ev.sessaoId === s.id);
-        if (e) {
-          if (e.demanda && !demandas.includes(e.demanda)) demandas.push(e.demanda);
-          if (e.texto) resumoEvolucoes.push(`[${formataData(s.data)}]: ${e.texto}`);
+        if (s.statusPagamento === 'Pago' && s.dataPagamento) {
+          const dt = new Date(s.dataPagamento);
+          if (dt.getMonth() === mesAtual && dt.getFullYear() === anoAtual) {
+            valorRecebidoMes += Number(s.valor || 0);
+          }
+        } else if (s.statusPagamento === 'Pendente') {
+          valorPendenteTotal += Number(s.valor || 0);
         }
       });
 
-      let texto = `RESUMO DO PRONTUÁRIO PSICOLÓGICO\n`;
-      texto += `===========================================\n`;
-      texto += `PACIENTE: ${paciente.nome} (${paciente.tipo})\n`;
-      texto += `STATUS ATUAL: ${paciente.status}\n`;
-      texto += `TOTAL DE SESSÕES REGISTRADAS: ${totSessoes}\n`;
-      texto += `SESSÕES REALIZADAS: ${realizadas} | FALTAS: ${faltas} | CANCELAMENTOS: ${canceladas}\n`;
-      texto += `SITUACAO FINANCEIRA: ${pagas}/${totSessoes} sessões pagas\n`;
-      texto += `-------------------------------------------\n`;
-      texto += `PRINCIPAIS DEMANDAS TRABALHADAS:\n`;
-      texto += demandas.length > 0 ? demandas.map(d => `- ${d}`).join('\n') + '\n' : `- Nenhuma demanda específica cadastrada\n`;
-      texto += `-------------------------------------------\n`;
-      texto += `HISTÓRICO DE EVOLUÇÕES:\n`;
-      texto += resumoEvolucoes.length > 0 ? resumoEvolucoes.join('\n') : `Nenhuma evolução técnica registrada até o momento.`;
+      return `
+        <!-- Cabeçalho Rápido -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-rose-100">
+          <div>
+            <h1 class="text-2xl font-bold text-rose-900">Painel Geral de Controle</h1>
+            <p class="text-sm text-rose-600">Resumo operacional, financeiro e alertas em tempo real.</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="openModalPaciente()" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-sm transition flex items-center gap-2">
+              <i data-lucide="user-plus" class="w-4 h-4"></i> Novo Paciente
+            </button>
+            <button onclick="openModalSessao()" class="bg-rose-100 hover:bg-rose-200 text-rose-800 px-4 py-2 rounded-xl text-sm font-semibold transition flex items-center gap-2">
+              <i data-lucide="calendar-plus" class="w-4 h-4"></i> Agendar Sessão
+            </button>
+          </div>
+        </div>
 
-      document.getElementById('text-resumo-prontuario').value = texto;
-      document.getElementById('box-resumo-prontuario').classList.remove('hidden');
+        <!-- AREA DE ALERTAS VERMELHOS E PENDÊNCIAS -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-rose-100">
+          <div class="flex items-center gap-2 mb-4">
+            <span class="relative flex h-3 w-3">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
+            </span>
+            <h2 class="text-lg font-bold text-slate-800">Alertas e Pendências Importantes</h2>
+            <span class="ml-auto bg-red-100 text-red-700 text-xs font-bold px-2.5 py-1 rounded-full">${alerts.length}</span>
+          </div>
+
+          ${alerts.length === 0 ? `
+            <div class="p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl text-sm flex items-center gap-2">
+              <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600"></i>
+              Nenhuma pendência detectada! Todos os prontuários e recibos estão em dia.
+            </div>
+          ` : `
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              ${alerts.map(a => `
+                <div onclick="executeAlertAction('${a.tipo}', ${a.pacienteId})" class="p-3.5 bg-red-50 hover:bg-red-100 border border-red-200 rounded-xl cursor-pointer transition flex items-start gap-3 group">
+                  <span class="text-red-600 font-bold text-lg mt-0.5">🔴</span>
+                  <div class="flex-1 text-xs">
+                    <p class="font-bold text-red-900 group-hover:underline">${a.texto}</p>
+                    <p class="text-red-600 mt-1">Clique para resolver imediatamente →</p>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          `}
+        </div>
+
+        <!-- CARDS DE ESTATÍSTICAS -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Card Pacientes -->
+          <div class="bg-white p-5 rounded-2xl shadow-sm border border-rose-100 flex items-center justify-between">
+            <div>
+              <p class="text-xs font-semibold text-rose-500 uppercase tracking-wider">Pacientes</p>
+              <h3 class="text-2xl font-black text-rose-950 mt-1">${totalPacientes}</h3>
+              <p class="text-xs text-slate-500 mt-1"><span class="text-emerald-600 font-bold">${ativos} ativos</span> • <span class="text-slate-400 font-bold">${inativos} inativos</span></p>
+            </div>
+            <div class="p-3 bg-rose-50 rounded-xl text-rose-600">
+              <i data-lucide="users" class="w-6 h-6"></i>
+            </div>
+          </div>
+
+          <!-- Card Sessões -->
+          <div class="bg-white p-5 rounded-2xl shadow-sm border border-rose-100 flex items-center justify-between">
+            <div>
+              <p class="text-xs font-semibold text-rose-500 uppercase tracking-wider">Sessões Realizadas</p>
+              <h3 class="text-2xl font-black text-rose-950 mt-1">${realizadas}</h3>
+              <p class="text-xs text-slate-500 mt-1">${agendadas} agendadas • ${faltas} faltas</p>
+            </div>
+            <div class="p-3 bg-rose-50 rounded-xl text-rose-600">
+              <i data-lucide="check-circle" class="w-6 h-6"></i>
+            </div>
+          </div>
+
+          <!-- Card Financeiro Recebido -->
+          <div class="bg-white p-5 rounded-2xl shadow-sm border border-rose-100 flex items-center justify-between">
+            <div>
+              <p class="text-xs font-semibold text-emerald-600 uppercase tracking-wider">Recebido no Mês</p>
+              <h3 class="text-2xl font-black text-emerald-700 mt-1">R$ ${valorRecebidoMes.toFixed(2)}</h3>
+              <p class="text-xs text-slate-500 mt-1">Pagamentos liquidados em ${getMesAnoAtual()}</p>
+            </div>
+            <div class="p-3 bg-emerald-50 rounded-xl text-emerald-600">
+              <i data-lucide="dollar-sign" class="w-6 h-6"></i>
+            </div>
+          </div>
+
+          <!-- Card Financeiro Pendente -->
+          <div class="bg-white p-5 rounded-2xl shadow-sm border border-rose-100 flex items-center justify-between">
+            <div>
+              <p class="text-xs font-semibold text-amber-600 uppercase tracking-wider">Valores Pendentes</p>
+              <h3 class="text-2xl font-black text-amber-700 mt-1">R$ ${valorPendenteTotal.toFixed(2)}</h3>
+              <p class="text-xs text-slate-500 mt-1">Total a receber de pacientes</p>
+            </div>
+            <div class="p-3 bg-amber-50 rounded-xl text-amber-600">
+              <i data-lucide="clock" class="w-6 h-6"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- ACESSO RÁPIDO AOS PACIENTES -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-rose-100 space-y-4">
+          <div class="flex items-center justify-between">
+            <h2 class="text-lg font-bold text-rose-950">Pacientes Recentes</h2>
+            <button onclick="navigateTo('pacientes')" class="text-xs font-semibold text-rose-600 hover:text-rose-800">Ver Todos →</button>
+          </div>
+          <div class="divide-y divide-rose-50">
+            ${pacientes.slice(0, 5).map(p => `
+              <div class="py-3 flex items-center justify-between">
+                <div>
+                  <p class="font-bold text-sm text-slate-800">${p.nome}</p>
+                  <p class="text-xs text-slate-500">${p.tipoAtendimento} • Telefone: ${p.telefone || 'Não informado'}</p>
+                </div>
+                <button onclick="navigateTo('prontuario', ${p.id})" class="px-3 py-1.5 bg-rose-50 text-rose-700 text-xs font-semibold rounded-lg hover:bg-rose-100 transition">
+                  Abrir Prontuário
+                </button>
+              </div>
+            `).join('')}
+            ${pacientes.length === 0 ? '<p class="text-xs text-slate-400 py-2">Nenhum paciente cadastrado ainda.</p>' : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    function executeAlertAction(tipo, pacienteId) {
+      navigateTo('prontuario', pacienteId);
+    }
+
+    // ==========================================
+    // 6. VIEW: PACIENTES & FILTROS
+    // ==========================================
+    let filtroStatusPaciente = 'Ativo';
+
+    async function renderPacientes() {
+      const todosPacientes = await db.pacientes.toArray();
+      const pacientesFiltrados = todosPacientes.filter(p => p.status === filtroStatusPaciente);
+
+      return `
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-rose-100">
+          <div>
+            <h1 class="text-2xl font-bold text-rose-950">Gestão de Pacientes</h1>
+            <p class="text-sm text-rose-600">Listagem, cadastro e controle de status dos prontuários.</p>
+          </div>
+          <button onclick="openModalPaciente()" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-sm transition flex items-center gap-2">
+            <i data-lucide="user-plus" class="w-4 h-4"></i> Cadastrar Paciente
+          </button>
+        </div>
+
+        <!-- FILTROS -->
+        <div class="flex border-b border-rose-200 space-x-4">
+          <button onclick="setFiltroPaciente('Ativo')" class="pb-3 text-sm font-bold border-b-2 transition ${filtroStatusPaciente === 'Ativo' ? 'border-rose-600 text-rose-700' : 'border-transparent text-slate-400 hover:text-slate-600'}">
+            Pacientes Ativos (${todosPacientes.filter(p => p.status === 'Ativo').length})
+          </button>
+          <button onclick="setFiltroPaciente('Inativo')" class="pb-3 text-sm font-bold border-b-2 transition ${filtroStatusPaciente === 'Inativo' ? 'border-rose-600 text-rose-700' : 'border-transparent text-slate-400 hover:text-slate-600'}">
+            Pacientes Inativos (${todosPacientes.filter(p => p.status === 'Inativo').length})
+          </button>
+        </div>
+
+        <!-- LISTAGEM -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          ${pacientesFiltrados.map(p => `
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-rose-100 flex flex-col justify-between hover:border-rose-300 transition">
+              <div>
+                <div class="flex items-start justify-between">
+                  <span class="px-2.5 py-1 text-xs font-bold rounded-full ${p.tipoAtendimento === 'Infantil' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800'}">
+                    Atendimento ${p.tipoAtendimento}
+                  </span>
+                  <span class="text-xs font-medium px-2 py-0.5 rounded ${p.status === 'Ativo' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}">
+                    ${p.status}
+                  </span>
+                </div>
+                <h3 class="text-lg font-bold text-slate-900 mt-3">${p.nome}</h3>
+                <p class="text-xs text-slate-500 mt-1">Tel: ${p.telefone || 'Não preenchido'}</p>
+                <p class="text-xs text-slate-500">E-mail: ${p.email || 'Não preenchido'}</p>
+
+                ${p.tipoAtendimento === 'Infantil' ? `
+                  <div class="mt-3 p-2 bg-amber-50 rounded-lg text-xs text-amber-900 border border-amber-200">
+                    <p class="font-bold">Responsável: ${p.nomeResponsavel || 'Não informado'}</p>
+                    <p>Parentesco: ${p.parentesco || 'N/A'}</p>
+                    <p>Tel Resp: ${p.telefoneResponsavel || 'N/A'}</p>
+                  </div>
+                ` : ''}
+              </div>
+
+              <div class="mt-5 pt-3 border-t border-rose-50 flex items-center justify-between gap-2">
+                <button onclick="navigateTo('prontuario', ${p.id})" class="flex-1 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold py-2 rounded-lg transition text-center">
+                  Abrir Prontuário
+                </button>
+                <button onclick="openModalPaciente(${p.id})" class="p-2 text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-lg transition" title="Editar Dados">
+                  <i data-lucide="edit-3" class="w-4 h-4"></i>
+                </button>
+                ${p.status === 'Ativo' ? `
+                  <button onclick="alterarStatusPaciente(${p.id}, 'Inativo')" class="p-2 text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-lg transition" title="Inativar Paciente">
+                    <i data-lucide="user-x" class="w-4 h-4"></i>
+                  </button>
+                ` : `
+                  <button onclick="alterarStatusPaciente(${p.id}, 'Ativo')" class="p-2 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition" title="Reativar Paciente">
+                    <i data-lucide="user-check" class="w-4 h-4"></i>
+                  </button>
+                `}
+              </div>
+            </div>
+          `).join('')}
+          ${pacientesFiltrados.length === 0 ? `
+            <div class="col-span-full bg-white p-8 text-center text-slate-400 rounded-2xl border border-rose-100">
+              Nenhum paciente ${filtroStatusPaciente.toLowerCase()} encontrado.
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }
+
+    function setFiltroPaciente(status) {
+      filtroStatusPaciente = status;
+      render();
+    }
+
+    async function alterarStatusPaciente(id, novoStatus) {
+      await db.pacientes.update(id, { status: novoStatus });
+      render();
+    }
+
+    // ==========================================
+    // 7. VIEW: PRONTUÁRIO INDIVIDUAL COMPLETO
+    // ==========================================
+    let mesFiltroHistorico = new Date().getMonth();
+    let anoFiltroHistorico = new Date().getFullYear();
+
+    async function renderProntuario(pacienteId) {
+      const paciente = await db.pacientes.get(pacienteId);
+      if (!paciente) return '<div class="p-8 text-red-600 font-bold">Paciente não encontrado.</div>';
+
+      const sessoes = await db.sessoes.where('pacienteId').equals(pacienteId).toArray();
+      const evolucoes = await db.evolucoes.where('pacienteId').equals(pacienteId).toArray();
+      const recibos = await db.recibos.where('pacienteId').equals(pacienteId).toArray();
+      const pdfs = await db.pdfsSemanais.where('pacienteId').equals(pacienteId).toArray();
+
+      // Ordenar do mais recente para o antigo
+      sessoes.sort((a,b) => new Date(b.data) - new Date(a.data));
+      pdfs.sort((a,b) => new Date(b.dataCriacao) - new Date(a.dataCriacao));
+
+      // Filtro Histórico Mensal
+      const sessoesFiltradasMes = sessoes.filter(s => {
+        const d = new Date(s.data);
+        return d.getMonth() === Number(mesFiltroHistorico) && d.getFullYear() === Number(anoFiltroHistorico);
+      });
+
+      return `
+        <!-- DADOS CADASTRAIS DO PACIENTE -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-rose-100 space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-rose-100 pb-4">
+            <div>
+              <div class="flex items-center gap-3">
+                <h1 class="text-2xl font-bold text-rose-950">${paciente.nome}</h1>
+                <span class="px-3 py-0.5 text-xs font-bold rounded-full ${paciente.status === 'Ativo' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-800'}">
+                  ${paciente.status}
+                </span>
+              </div>
+              <p class="text-xs text-rose-600 mt-1">Prontuário Individual • Cadastrado em ${formatDate(paciente.dataCadastro || new Date())}</p>
+            </div>
+            
+            <div class="flex flex-wrap gap-2">
+              <button onclick="gerarResumoAutomaticoProntuario(${paciente.id})" class="bg-gradient-rose text-white px-4 py-2 rounded-xl text-xs font-bold shadow-sm hover:opacity-90 transition flex items-center gap-1.5">
+                ✨ GERAR RESUMO DO PRONTUÁRIO
+              </button>
+              <button onclick="gerarPdfSemanalAutomatico(${paciente.id})" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+                ✨ GERAR PDF SEMANAL
+              </button>
+              <button onclick="openModalAnexarPdfSemanal(${paciente.id})" class="bg-rose-100 hover:bg-rose-200 text-rose-800 px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+                📄 ADICIONAR PDF
+              </button>
+              <button onclick="openModalPaciente(${paciente.id})" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl text-xs font-bold transition">
+                Editar
+              </button>
+            </div>
+          </div>
+
+          <!-- DETALHES -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+            <div>
+              <span class="text-slate-400 block font-semibold">TIPO DE ATENDIMENTO</span>
+              <span class="font-bold text-slate-800 text-sm">${paciente.tipoAtendimento}</span>
+            </div>
+            <div>
+              <span class="text-slate-400 block font-semibold">CONTATOS</span>
+              <span class="font-bold text-slate-800">${paciente.telefone || 'N/A'}</span>
+              <span class="block text-slate-500">${paciente.email || ''}</span>
+            </div>
+            ${paciente.tipoAtendimento === 'Infantil' ? `
+              <div class="col-span-2 bg-amber-50 p-2.5 rounded-xl border border-amber-200">
+                <span class="text-amber-800 font-bold block">DADOS DO RESPONSÁVEL</span>
+                <span class="text-amber-950 font-semibold">${paciente.nomeResponsavel || 'Não informado'} (${paciente.parentesco || 'N/A'})</span>
+                <span class="block text-amber-900">Tel: ${paciente.telefoneResponsavel || 'N/A'} | Email: ${paciente.emailResponsavel || 'N/A'}</span>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+
+        <!-- PAINEL DE RESUMO GERADO AUTOMATICAMENTE (INJETADO DINAMICAMENTE) -->
+        <div id="painelResumoAutomatico"></div>
+
+        <!-- ÁREA 1: HISTÓRICO DE PDFS SEMANAIS -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-rose-100 space-y-4">
+          <div class="flex items-center justify-between">
+            <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <i data-lucide="folder-archive" class="w-5 h-5 text-rose-600"></i>
+              📁 PDFs DO PRONTUÁRIO
+            </h2>
+            <span class="text-xs font-bold bg-rose-100 text-rose-800 px-2.5 py-1 rounded-full">${pdfs.length} Arquivos</span>
+          </div>
+
+          ${pdfs.length === 0 ? `
+            <p class="text-xs text-slate-400 py-2">Nenhum PDF semanal arquivado para este paciente.</p>
+          ` : `
+            <div class="divide-y divide-rose-50">
+              ${pdfs.map(pdf => `
+                <div class="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <p class="font-bold text-sm text-slate-800">${pdf.nomeArquivo}</p>
+                    <p class="text-xs text-slate-500">Semana: ${pdf.semana} • Criado em: ${formatDate(pdf.dataCriacao)} • Período: ${pdf.periodo}</p>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <button onclick="visualizarPdf('${pdf.conteudoBase64}')" class="px-3 py-1.5 bg-rose-50 text-rose-700 text-xs font-bold rounded-lg hover:bg-rose-100 transition">
+                      Visualizar
+                    </button>
+                    <button onclick="baixarPdf('${pdf.conteudoBase64}', '${pdf.nomeArquivo}')" class="px-3 py-1.5 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg hover:bg-slate-200 transition">
+                      Baixar
+                    </button>
+                    <button onclick="removerPdfSemanal(${pdf.id})" class="px-2 py-1.5 bg-red-50 text-red-600 text-xs font-bold rounded-lg hover:bg-red-100 transition">
+                      Remover
+                    </button>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          `}
+        </div>
+
+        <!-- ÁREA 2: SESSÕES & EVOLUÇÕES COM FILTRO MENSAL -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-rose-100 space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-rose-100 pb-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">Histórico de Sessões e Evoluções</h2>
+              <p class="text-xs text-slate-500">Selecione o mês e ano para consultar os registros.</p>
+            </div>
+            
+            <div class="flex items-center gap-2">
+              <select id="selectMesHistorico" onchange="atualizarFiltroHistoricoProntuario(${paciente.id})" class="bg-rose-50 border border-rose-200 text-xs rounded-xl p-2 font-bold text-rose-900">
+                ${getMesesOptions(mesFiltroHistorico)}
+              </select>
+              <select id="selectAnoHistorico" onchange="atualizarFiltroHistoricoProntuario(${paciente.id})" class="bg-rose-50 border border-rose-200 text-xs rounded-xl p-2 font-bold text-rose-900">
+                <option value="2026" ${anoFiltroHistorico == 2026 ? 'selected' : ''}>2026</option>
+                <option value="2025" ${anoFiltroHistorico == 2025 ? 'selected' : ''}>2025</option>
+              </select>
+              <button onclick="openModalSessao(null, ${paciente.id})" class="bg-rose-600 hover:bg-rose-700 text-white px-3 py-2 rounded-xl text-xs font-bold transition">
+                + Sessão
+              </button>
+            </div>
+          </div>
+
+          <!-- BOTÃO E RESUMO MENSAL AUTOMÁTICO DO PRONTUÁRIO -->
+          <div class="bg-rose-50/50 p-4 rounded-xl border border-rose-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <span class="text-xs font-bold text-rose-900">Resumo Consolidado do Mês Selecionado</span>
+              <p class="text-xs text-rose-600">Total de sessões, evoluções e financeiro do mês.</p>
+            </div>
+            <button onclick="gerarResumoMensalProntuario(${paciente.id})" class="bg-rose-700 text-white text-xs font-bold px-3 py-2 rounded-lg hover:bg-rose-800 transition">
+              📊 GERAR RESUMO MENSAL
+            </button>
+          </div>
+
+          <div id="painelResumoMensalProntuario"></div>
+
+          <!-- LISTA DE SESSÕES DO MÊS -->
+          <div class="space-y-4">
+            ${sessoesFiltradasMes.map(s => {
+              const evolucao = evolucoes.find(e => e.sessaoId === s.id);
+              const recibo = recibos.find(r => r.sessaoId === s.id);
+              
+              return `
+                <div class="border border-rose-100 rounded-2xl p-4 bg-white shadow-xs space-y-3">
+                  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-rose-50 pb-2">
+                    <div class="flex items-center gap-2">
+                      <span class="font-black text-sm text-rose-950">${formatDate(s.data)} - ${s.horario || '00:00'}</span>
+                      <span class="px-2 py-0.5 text-xs font-bold rounded ${getStatusSessaoBadge(s.status)}">${s.status}</span>
+                      <span class="text-xs text-slate-500 font-medium">(${s.modalidade})</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs">
+                      <span class="font-bold text-slate-700">R$ ${Number(s.valor || 0).toFixed(2)}</span>
+                      <span class="px-2 py-0.5 font-bold rounded ${s.statusPagamento === 'Pago' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+                        ${s.statusPagamento === 'Pago' ? 'Pago' : 'Pendente'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- ALERTAS DA SESSÃO -->
+                  <div class="flex flex-wrap gap-2 text-xs">
+                    ${s.status === 'Realizada' && !evolucao ? `
+                      <span class="bg-red-100 text-red-800 font-bold px-2.5 py-1 rounded-md">🔴 EVOLUÇÃO PENDENTE</span>
+                    ` : ''}
+                    ${s.statusPagamento === 'Pago' && !recibo ? `
+                      <span class="bg-red-100 text-red-800 font-bold px-2.5 py-1 rounded-md">🔴 RECIBO PENDENTE</span>
+                    ` : ''}
+                    ${recibo ? `
+                      <span class="bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-md">🟢 Recibo Anexado</span>
+                    ` : ''}
+                  </div>
+
+                  <!-- DETALHES DA EVOLUÇÃO -->
+                  <div class="bg-rose-50/40 p-3 rounded-xl border border-rose-100 text-xs space-y-1">
+                    <div class="flex justify-between items-center mb-1">
+                      <span class="font-bold text-rose-900">Evolução Clínica</span>
+                      ${evolucao ? `
+                        <button onclick="openModalEvolucao(${s.id}, ${evolucao.id})" class="text-rose-700 font-bold hover:underline">Editar Evolução</button>
+                      ` : `
+                        <button onclick="openModalEvolucao(${s.id})" class="text-red-600 font-bold hover:underline">+ Registrar Evolução</button>
+                      `}
+                    </div>
+                    ${evolucao ? `
+                      <p class="text-slate-700 font-medium"><strong>Queixa:</strong> ${evolucao.queixa || 'N/A'}</p>
+                      <p class="text-slate-700"><strong>Descrição:</strong> ${evolucao.descricao || 'N/A'}</p>
+                      <p class="text-slate-700"><strong>Análise/Evolução:</strong> ${evolucao.analise || 'N/A'}</p>
+                    ` : `
+                      <p class="text-slate-400 italic">Nenhuma evolução registrada para esta sessão.</p>
+                    `}
+                  </div>
+
+                  <!-- AÇÕES DE ANEXAÇÃO E EDICAO -->
+                  <div class="flex flex-wrap items-center justify-between gap-2 pt-1 text-xs">
+                    <div class="flex items-center gap-2">
+                      ${recibo ? `
+                        <button onclick="visualizarPdf('${recibo.conteudoBase64}')" class="text-rose-700 font-bold hover:underline">Ver Recibo</button>
+                        <button onclick="removerRecibo(${recibo.id})" class="text-red-600 hover:underline">Remover</button>
+                      ` : `
+                        <button onclick="openModalAnexarRecibo(${s.id})" class="bg-rose-100 hover:bg-rose-200 text-rose-800 px-2.5 py-1 rounded-md font-bold">
+                          Anexar Recibo
+                        </button>
+                      `}
+                    </div>
+                    <button onclick="openModalSessao(${s.id})" class="text-slate-500 hover:text-slate-800 font-medium">Editar Sessão</button>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+
+            ${sessoesFiltradasMes.length === 0 ? `
+              <p class="text-xs text-slate-400 py-4 text-center">Nenhuma sessão registrada no mês selecionado.</p>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    function atualizarFiltroHistoricoProntuario(pacienteId) {
+      mesFiltroHistorico = document.getElementById('selectMesHistorico').value;
+      anoFiltroHistorico = document.getElementById('selectAnoHistorico').value;
+      render();
+    }
+
+    // ==========================================
+    // 8. GERADOR AUTOMÁTICO DE RESUMO DO PRONTUÁRIO
+    // ==========================================
+    async function gerarResumoAutomaticoProntuario(pacienteId) {
+      const paciente = await db.pacientes.get(pacienteId);
+      const sessoes = await db.sessoes.where('pacienteId').equals(pacienteId).toArray();
+      const evolucoes = await db.evolucoes.where('pacienteId').equals(pacienteId).toArray();
+
+      const totalSessoes = sessoes.length;
+      const realizadas = sessoes.filter(s => s.status === 'Realizada').length;
+      const faltas = sessoes.filter(s => s.status === 'Falta').length;
+      const canceladas = sessoes.filter(s => s.status === 'Cancelada').length;
+
+      // Compilado das evoluções reais
+      const demandas = evolucoes.map(e => e.demanda).filter(Boolean).join(', ') || 'Não registradas especificamente';
+      const queixas = evolucoes.map(e => e.queixa).filter(Boolean).join('; ') || 'Sem resumo de queixas';
+
+      const divResumo = document.getElementById('painelResumoAutomatico');
+      divResumo.innerHTML = `
+        <div class="bg-rose-900 text-white p-6 rounded-2xl shadow-lg space-y-4 my-4 animate-fade-in">
+          <div class="flex items-center justify-between border-b border-rose-800 pb-3">
+            <h3 class="font-bold text-lg flex items-center gap-2">
+              <i data-lucide="sparkles" class="w-5 h-5 text-rose-300"></i> Resumo Sintético do Prontuário
+            </h3>
+            <button onclick="copiarResumoProntuario()" class="bg-white/10 hover:bg-white/20 text-xs px-3 py-1.5 rounded-lg font-bold transition">
+              Copiar Texto
+            </button>
+          </div>
+          <div id="textoResumoProntuario" class="text-xs space-y-2 leading-relaxed text-rose-100">
+            <p><strong>Paciente:</strong> ${paciente.nome} (${paciente.tipoAtendimento})</p>
+            <p><strong>Total de Atendimentos:</strong> ${totalSessoes} sessões registradas (${realizadas} realizadas, ${faltas} faltas, ${canceladas} canceladas).</p>
+            <p><strong>Demandas Mapeadas:</strong> ${demandas}</p>
+            <p><strong>Síntese das Evoluções Clínicas:</strong> ${queixas}</p>
+            <p><strong>Situação Atual:</strong> Acompanhamento ${paciente.status === 'Ativo' ? 'em andamento' : 'inativado/encerrado'}.</p>
+          </div>
+        </div>
+      `;
+      lucide.createIcons();
     }
 
     function copiarResumoProntuario() {
-      const area = document.getElementById('text-resumo-prontuario');
-      area.select();
-      document.execCommand('copy');
-      alert('Resumo do prontuário copiado para a área de transferência!');
+      const el = document.getElementById('textoResumoProntuario');
+      navigator.clipboard.writeText(el.innerText);
+      alert('Resumo copiado para a área de transferência!');
     }
 
-    // RESUMO MENSAL AUTOMÁTICO
-    function gerarResumoMensalAutomatico() {
-      const mesAno = document.getElementById('filtro-mes-ano-prontuario').value;
-      if (!mesAno || !pacienteAtualId) {
-        alert('Por favor, selecione Mês e Ano primeiro.');
-        return;
-      }
+    async function gerarResumoMensalProntuario(pacienteId) {
+      const sessoes = await db.sessoes.where('pacienteId').equals(pacienteId).toArray();
+      const sessoesFiltradas = sessoes.filter(s => {
+        const d = new Date(s.data);
+        return d.getMonth() === Number(mesFiltroHistorico) && d.getFullYear() === Number(anoFiltroHistorico);
+      });
 
-      const sessoes = getDB(DB_KEY_SESSOES).filter(s => s.pacienteId === pacienteAtualId && s.data.startsWith(mesAno));
-      const evolucoes = getDB(DB_KEY_EVOLUCOES);
+      const total = sessoesFiltradas.length;
+      const realizadas = sessoesFiltradas.filter(s => s.status === 'Realizada').length;
+      const faltas = sessoesFiltradas.filter(s => s.status === 'Falta').length;
 
-      let tot = sessoes.length;
-      let realizadas = 0, faltasCanc = 0, comRecibo = 0, semRecibo = 0, evolsCount = 0;
-      let rec = 0, pend = 0;
+      let recebido = 0;
+      let pendente = 0;
+      sessoesFiltradas.forEach(s => {
+        if (s.statusPagamento === 'Pago') recebido += Number(s.valor || 0);
+        else pendente += Number(s.valor || 0);
+      });
 
+      const container = document.getElementById('painelResumoMensalProntuario');
+      container.innerHTML = `
+        <div class="bg-rose-100/70 p-4 rounded-xl border border-rose-200 text-xs text-rose-950 grid grid-cols-2 sm:grid-cols-4 gap-3 my-2">
+          <div><span class="block text-slate-500 font-semibold">SESSÕES MÊS</span> <strong class="text-sm">${total} (${realizadas} rel.)</strong></div>
+          <div><span class="block text-slate-500 font-semibold">FALTAS</span> <strong class="text-sm text-amber-800">${faltas}</strong></div>
+          <div><span class="block text-slate-500 font-semibold">RECEBIDO</span> <strong class="text-sm text-emerald-800">R$ ${recebido.toFixed(2)}</strong></div>
+          <div><span class="block text-slate-500 font-semibold">PENDENTE</span> <strong class="text-sm text-red-800">R$ ${pendente.toFixed(2)}</strong></div>
+        </div>
+      `;
+    }
+
+    // ==========================================
+    // 9. VIEW: SESSÕES E AGENDAMENTOS
+    // ==========================================
+    async function renderSessoes() {
+      const sessoes = await db.sessoes.toArray();
+      const pacientes = await db.pacientes.toArray();
+
+      sessoes.sort((a,b) => new Date(b.data) - new Date(a.data));
+
+      return `
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-rose-100">
+          <div>
+            <h1 class="text-2xl font-bold text-rose-950">Gestão Geral de Sessões</h1>
+            <p class="text-sm text-rose-600">Agendamentos, acompanhamento de presença e status.</p>
+          </div>
+          <button onclick="openModalSessao()" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-sm transition flex items-center gap-2">
+            <i data-lucide="calendar-plus" class="w-4 h-4"></i> Agendar Nova Sessão
+          </button>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-rose-100 overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-rose-50 text-rose-900 uppercase font-bold border-b border-rose-100">
+                <tr>
+                  <th class="p-4">Data / Hora</th>
+                  <th class="p-4">Paciente</th>
+                  <th class="p-4">Modalidade</th>
+                  <th class="p-4">Status</th>
+                  <th class="p-4">Valor</th>
+                  <th class="p-4">Pagamento</th>
+                  <th class="p-4 text-right">Ações</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-rose-50">
+                ${sessoes.map(s => {
+                  const pac = pacientes.find(p => p.id === s.pacienteId);
+                  return `
+                    <tr class="hover:bg-rose-50/50 transition">
+                      <td class="p-4 font-bold text-slate-800">${formatDate(s.data)} - ${s.horario || '00:00'}</td>
+                      <td class="p-4 font-semibold text-rose-950">${pac ? pac.nome : 'Paciente Removido'}</td>
+                      <td class="p-4 text-slate-600">${s.modalidade}</td>
+                      <td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-bold ${getStatusSessaoBadge(s.status)}">${s.status}</span></td>
+                      <td class="p-4 font-bold text-slate-800">R$ ${Number(s.valor || 0).toFixed(2)}</td>
+                      <td class="p-4"><span class="px-2 py-0.5 rounded text-xs font-bold ${s.statusPagamento === 'Pago' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${s.statusPagamento}</span></td>
+                      <td class="p-4 text-right">
+                        <button onclick="openModalSessao(${s.id})" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold rounded-lg transition">
+                          Editar
+                        </button>
+                      </td>
+                    </tr>
+                  `;
+                }).join('')}
+                ${sessoes.length === 0 ? '<tr><td colspan="7" class="p-8 text-center text-slate-400">Nenhuma sessão cadastrada.</td></tr>' : ''}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    // ==========================================
+    // 10. VIEW: FINANCEIRO INTEGRADO E AUTOMÁTICO
+    // ==========================================
+    let mesFiltroFinanceiro = new Date().getMonth();
+    let anoFiltroFinanceiro = new Date().getFullYear();
+
+    async function renderFinanceiro() {
+      const sessoes = await db.sessoes.toArray();
+      const pacientes = await db.pacientes.toArray();
+
+      let totalRecebidoMes = 0;
+      let qtdPagosMes = 0;
+      let totalPendenteGeral = 0;
+      let qtdPendentesGeral = 0;
+
+      // Regra Financeira Estrita: Recebido calcula pela DATA DO PAGAMENTO
       sessoes.forEach(s => {
-        if (s.status === 'Realizada') realizadas++;
-        if (s.status === 'Falta' || s.status === 'Cancelada') faltasCanc++;
-
-        const val = parseFloat(s.valor || 0);
-        if (s.pagamento === 'Pago') rec += val;
-        else pend += val;
-
-        if (s.recibo) comRecibo++;
-        else semRecibo++;
-
-        if (evolucoes.some(e => e.sessaoId === s.id)) evolsCount++;
+        if (s.statusPagamento === 'Pago' && s.dataPagamento) {
+          const dt = new Date(s.dataPagamento);
+          if (dt.getMonth() === Number(mesFiltroFinanceiro) && dt.getFullYear() === Number(anoFiltroFinanceiro)) {
+            totalRecebidoMes += Number(s.valor || 0);
+            qtdPagosMes++;
+          }
+        } else if (s.statusPagamento === 'Pendente') {
+          totalPendenteGeral += Number(s.valor || 0);
+          qtdPendentesGeral++;
+        }
       });
 
-      document.getElementById('rm-tot-sess').innerText = tot;
-      document.getElementById('rm-realizadas').innerText = realizadas;
-      document.getElementById('rm-faltas-canc').innerText = faltasCanc;
-      document.getElementById('rm-recebido').innerText = `R$ ${rec.toFixed(2)}`;
-      document.getElementById('rm-pendente').innerText = `R$ ${pend.toFixed(2)}`;
-      document.getElementById('rm-evolucoes').innerText = evolsCount;
-      document.getElementById('rm-com-recibo').innerText = comRecibo;
-      document.getElementById('rm-sem-recibo').innerText = semRecibo;
+      // Histórico filtrado para a tabela
+      const sessoesFiltradas = sessoes.filter(s => {
+        if (s.statusPagamento === 'Pago' && s.dataPagamento) {
+          const dt = new Date(s.dataPagamento);
+          return dt.getMonth() === Number(mesFiltroFinanceiro) && dt.getFullYear() === Number(anoFiltroFinanceiro);
+        }
+        return false;
+      });
 
-      document.getElementById('box-resumo-mensal-resultado').classList.remove('hidden');
+      return `
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-rose-100">
+          <div>
+            <h1 class="text-2xl font-bold text-rose-950">Módulo Financeiro</h1>
+            <p class="text-sm text-rose-600">Calculado estritamente pelos pagamentos efetivamente liquidados.</p>
+          </div>
+          
+          <div class="flex items-center gap-2">
+            <select id="selectMesFin" onchange="atualizarFiltroFinanceiro()" class="bg-rose-50 border border-rose-200 text-xs rounded-xl p-2.5 font-bold text-rose-900">
+              ${getMesesOptions(mesFiltroFinanceiro)}
+            </select>
+            <select id="selectAnoFin" onchange="atualizarFiltroFinanceiro()" class="bg-rose-50 border border-rose-200 text-xs rounded-xl p-2.5 font-bold text-rose-900">
+              <option value="2026" ${anoFiltroFinanceiro == 2026 ? 'selected' : ''}>2026</option>
+              <option value="2025" ${anoFiltroFinanceiro == 2025 ? 'selected' : ''}>2025</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- CARDS FINANCEIROS -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div class="bg-emerald-600 text-white p-6 rounded-2xl shadow-sm">
+            <p class="text-xs font-bold uppercase tracking-wider text-emerald-100">💰 Recebido no Mês Selecionado</p>
+            <h2 class="text-3xl font-black mt-2">R$ ${totalRecebidoMes.toFixed(2)}</h2>
+            <p class="text-xs text-emerald-100 mt-1">${qtdPagosMes} pagamentos liquidados neste mês</p>
+          </div>
+
+          <div class="bg-amber-500 text-white p-6 rounded-2xl shadow-sm">
+            <p class="text-xs font-bold uppercase tracking-wider text-amber-100">⏳ Valores Pendentes (Geral)</p>
+            <h2 class="text-3xl font-black mt-2">R$ ${totalPendenteGeral.toFixed(2)}</h2>
+            <p class="text-xs text-amber-100 mt-1">${qtdPendentesGeral} pagamentos em aberto</p>
+          </div>
+
+          <div class="bg-white p-6 rounded-2xl shadow-sm border border-rose-100 flex flex-col justify-between">
+            <span class="text-xs font-bold text-rose-500 uppercase">Regra Financeira</span>
+            <p class="text-xs text-slate-600 mt-2">Os ganhos são registrados automaticamente no mês correspondente à <strong>Data do Pagamento</strong> real e não à data da sessão.</p>
+          </div>
+        </div>
+
+        <!-- HISTÓRICO DE RECEBIMENTOS -->
+        <div class="bg-white rounded-2xl shadow-sm border border-rose-100 p-6 space-y-4">
+          <h2 class="text-lg font-bold text-rose-950">Demonstrativo de Recebimentos Liquidados do Mês</h2>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-rose-50 text-rose-900 font-bold uppercase border-b border-rose-100">
+                <tr>
+                  <th class="p-3">Paciente</th>
+                  <th class="p-3">Data Atendimento</th>
+                  <th class="p-3">Data Liquidação</th>
+                  <th class="p-3">Valor</th>
+                  <th class="p-3">Status</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-rose-50">
+                ${sessoesFiltradas.map(s => {
+                  const pac = pacientes.find(p => p.id === s.pacienteId);
+                  return `
+                    <tr>
+                      <td class="p-3 font-bold text-slate-800">${pac ? pac.nome : 'Paciente N/A'}</td>
+                      <td class="p-3 text-slate-600">${formatDate(s.data)}</td>
+                      <td class="p-3 font-bold text-emerald-700">${formatDate(s.dataPagamento)}</td>
+                      <td class="p-3 font-bold text-slate-900">R$ ${Number(s.valor || 0).toFixed(2)}</td>
+                      <td class="p-3"><span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded">Pago</span></td>
+                    </tr>
+                  `;
+                }).join('')}
+                ${sessoesFiltradas.length === 0 ? '<tr><td colspan="5" class="p-6 text-center text-slate-400">Nenhum pagamento liquidado registrado neste mês.</td></tr>' : ''}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
     }
 
-    // --- GESTÃO DE SESSÕES ---
-    function openModalSessao(sessaoOrPacienteId = null) {
-      document.getElementById('form-sessao').reset();
-      document.getElementById('sessao-id').value = '';
+    function atualizarFiltroFinanceiro() {
+      mesFiltroFinanceiro = document.getElementById('selectMesFin').value;
+      anoFiltroFinanceiro = document.getElementById('selectAnoFin').value;
+      render();
+    }
 
-      // Popular dropdown de pacientes
-      const pacientes = getDB(DB_KEY_PACIENTES);
-      const select = document.getElementById('sessao-paciente-id');
-      select.innerHTML = '';
-      pacientes.forEach(p => {
-        select.innerHTML += `<option value="${p.id}">${p.nome} (${p.status})</option>`;
+    // ==========================================
+    // 11. MOTOR PDF AUTOMÁTICO (jsPDF)
+    // ==========================================
+    async function gerarPdfSemanalAutomatico(pacienteId) {
+      const paciente = await db.pacientes.get(pacienteId);
+      const sessoes = await db.sessoes.where('pacienteId').equals(pacienteId).toArray();
+      const evolucoes = await db.evolucoes.where('pacienteId').equals(pacienteId).toArray();
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      // Configuração visual do PDF (Tons de Rosa/Vinho)
+      doc.setFillColor(190, 18, 60); // Rose 700
+      doc.rect(0, 0, 210, 25, 'F');
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(16);
+      doc.setFont("helvetica", "bold");
+      doc.text("PRONTUÁRIO PSICOLÓGICO SEMANAL", 14, 16);
+
+      doc.setTextColor(50, 50, 50);
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "bold");
+      doc.text(`Paciente: ${paciente.nome}`, 14, 35);
+      doc.setFont("helvetica", "normal");
+      doc.text(`Tipo de Atendimento: ${paciente.tipoAtendimento}`, 14, 42);
+      doc.text(`Data do Relatório: ${formatDate(new Date())}`, 14, 49);
+
+      // Tabela de Sessões e Evoluções do Prontuário
+      const rows = sessoes.map(s => {
+        const evo = evolucoes.find(e => e.sessaoId === s.id);
+        return [
+          formatDate(s.data),
+          s.status,
+          evo ? evo.queixa || 'Evolução registrada' : 'Sem evolução'
+        ];
       });
 
-      if (sessaoOrPacienteId) {
-        const sessoes = getDB(DB_KEY_SESSOES);
-        const s = sessoes.find(x => x.id === sessaoOrPacienteId);
-        if (s) {
-          // Editar Sessão
-          document.getElementById('sessao-id').value = s.id;
-          select.value = s.pacienteId;
-          document.getElementById('sessao-data').value = s.data;
-          document.getElementById('sessao-horario').value = s.horario;
-          document.getElementById('sessao-modalidade').value = s.modalidade;
-          document.getElementById('sessao-status').value = s.status;
-          document.getElementById('sessao-valor').value = s.valor;
-          document.getElementById('sessao-pagamento').value = s.pagamento;
-        } else {
-          // Nova sessão vinculada a paciente específico
-          select.value = sessaoOrPacienteId;
-        }
+      doc.autoTable({
+        startY: 55,
+        head: [['Data Sessão', 'Status', 'Resumo Clínico / Evolução']],
+        body: rows,
+        headStyles: { fillColor: [190, 18, 60] },
+        theme: 'striped'
+      });
+
+      // Converte para Base64 para anexar no banco
+      const pdfBase64 = doc.output('datauristring');
+      const semanaStr = `Semana ${getSemanaDoAno()}`;
+
+      await db.pdfsSemanais.add({
+        pacienteId: paciente.id,
+        semana: semanaStr,
+        dataCriacao: new Date().toISOString(),
+        nomeArquivo: `Prontuario_${paciente.nome.replace(/\s+/g, '_')}_${semanaStr}.pdf`,
+        periodo: `Semana de ${formatDate(new Date())}`,
+        conteudoBase64: pdfBase64
+      });
+
+      alert('PDF Semanal gerado com sucesso e anexado ao histórico do paciente!');
+      render();
+    }
+
+    // ==========================================
+    // 12. MODAIS DO SISTEMA (FORMULÁRIOS & EDICAO)
+    // ==========================================
+    async function openModalPaciente(id = null) {
+      let p = { nome: '', tipoAtendimento: 'Adulto', telefone: '', email: '', nomeResponsavel: '', parentesco: '', telefoneResponsavel: '', emailResponsavel: '' };
+      if (id) {
+        p = await db.pacientes.get(id);
       }
 
-      openModal('modal-sessao');
+      const modalHtml = `
+        <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-rose-100 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-rose-100 pb-3">
+              <h3 class="font-bold text-lg text-rose-950">${id ? 'Editar Paciente' : 'Cadastrar Novo Paciente'}</h3>
+              <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 font-bold">✕</button>
+            </div>
+
+            <form onsubmit="salvarPaciente(event, ${id || 'null'})" class="space-y-4 text-xs">
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Nome Completo *</label>
+                <input type="text" id="pacNome" value="${p.nome}" required class="w-full p-2.5 border border-rose-200 rounded-xl focus:ring-2 focus:ring-rose-500 outline-none">
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block font-bold text-slate-700 mb-1">Tipo Atendimento *</label>
+                  <select id="pacTipo" onchange="toggleCamposInfantil()" class="w-full p-2.5 border border-rose-200 rounded-xl font-bold text-rose-900">
+                    <option value="Adulto" ${p.tipoAtendimento === 'Adulto' ? 'selected' : ''}>Adulto</option>
+                    <option value="Infantil" ${p.tipoAtendimento === 'Infantil' ? 'selected' : ''}>Infantil</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block font-bold text-slate-700 mb-1">Telefone</label>
+                  <input type="text" id="pacTel" value="${p.telefone || ''}" class="w-full p-2.5 border border-rose-200 rounded-xl">
+                </div>
+              </div>
+
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">E-mail</label>
+                <input type="email" id="pacEmail" value="${p.email || ''}" class="w-full p-2.5 border border-rose-200 rounded-xl">
+              </div>
+
+              <!-- CAMPOS INFANTIL -->
+              <div id="secaoInfantil" class="p-4 bg-amber-50 rounded-xl border border-amber-200 space-y-3 ${p.tipoAtendimento === 'Infantil' ? '' : 'hidden'}">
+                <span class="font-bold text-amber-900 block border-b border-amber-200 pb-1">Dados do Responsável Legal</span>
+                <div>
+                  <label class="block font-bold text-amber-900 mb-1">Nome do Responsável *</label>
+                  <input type="text" id="pacRespNome" value="${p.nomeResponsavel || ''}" class="w-full p-2 border border-amber-300 rounded-lg">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="block font-bold text-amber-900 mb-1">Parentesco</label>
+                    <input type="text" id="pacRespParentesco" value="${p.parentesco || ''}" class="w-full p-2 border border-amber-300 rounded-lg">
+                  </div>
+                  <div>
+                    <label class="block font-bold text-amber-900 mb-1">Telefone Responsável</label>
+                    <input type="text" id="pacRespTel" value="${p.telefoneResponsavel || ''}" class="w-full p-2 border border-amber-300 rounded-lg">
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex justify-end gap-2 pt-2 border-t border-rose-100">
+                <button type="button" onclick="closeModal()" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl font-bold">Cancelar</button>
+                <button type="submit" class="px-4 py-2 bg-rose-600 text-white rounded-xl font-bold hover:bg-rose-700">Salvar Paciente</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+      document.getElementById('modalContainer').innerHTML = modalHtml;
     }
 
-    function salvarSessao(e) {
-      e.preventDefault();
-      const id = document.getElementById('sessao-id').value;
-      const pacienteId = document.getElementById('sessao-paciente-id').value;
-      const data = document.getElementById('sessao-data').value;
-      const horario = document.getElementById('sessao-horario').value;
-      const modalidade = document.getElementById('sessao-modalidade').value;
-      const status = document.getElementById('sessao-status').value;
-      const valor = document.getElementById('sessao-valor').value;
-      const pagamento = document.getElementById('sessao-pagamento').value;
+    function toggleCamposInfantil() {
+      const tipo = document.getElementById('pacTipo').value;
+      const secao = document.getElementById('secaoInfantil');
+      if (tipo === 'Infantil') secao.classList.remove('hidden');
+      else secao.classList.add('hidden');
+    }
 
-      let sessoes = getDB(DB_KEY_SESSOES);
+    async function salvarPaciente(e, id) {
+      e.preventDefault();
+      const dados = {
+        nome: document.getElementById('pacNome').value,
+        tipoAtendimento: document.getElementById('pacTipo').value,
+        telefone: document.getElementById('pacTel').value,
+        email: document.getElementById('pacEmail').value,
+        status: 'Ativo',
+        nomeResponsavel: document.getElementById('pacRespNome')?.value || '',
+        parentesco: document.getElementById('pacRespParentesco')?.value || '',
+        telefoneResponsavel: document.getElementById('pacRespTel')?.value || '',
+        dataCadastro: new Date().toISOString()
+      };
 
       if (id) {
-        const idx = sessoes.findIndex(x => x.id === id);
-        if (idx !== -1) {
-          sessoes[idx] = { ...sessoes[idx], pacienteId, data, horario, modalidade, status, valor, pagamento };
-        }
+        await db.pacientes.update(id, dados);
       } else {
-        const newSessao = {
-          id: 'sess_' + Date.now(),
-          pacienteId, data, horario, modalidade, status, valor, pagamento,
-          recibo: null
-        };
-        sessoes.push(newSessao);
+        await db.pacientes.add(dados);
       }
 
-      setDB(DB_KEY_SESSOES, sessoes);
-      closeModal('modal-sessao');
-
-      if (pacienteAtualId) carregarHistoricoCompletoProntuario();
-      renderSessoesGeralList();
-      renderDashboard();
+      closeModal();
+      render();
     }
 
-    function renderSessoesGeralList() {
-      const sessoes = getDB(DB_KEY_SESSOES);
-      const pacientes = getDB(DB_KEY_PACIENTES);
-      const body = document.getElementById('lista-sessoes-geral-body');
-      body.innerHTML = '';
+    async function openModalSessao(sessaoId = null, pacienteIdPadrao = null) {
+      const pacientes = await db.pacientes.toArray();
+      let s = { pacienteId: pacienteIdPadrao || (pacientes[0] ? pacientes[0].id : ''), data: new Date().toISOString().split('T')[0], horario: '14:00', modalidade: 'Presencial', status: 'Agendada', valor: 150, statusPagamento: 'Pendente', dataPagamento: '' };
 
-      sessoes.sort((a,b) => new Date(b.data + 'T' + b.horario) - new Date(a.data + 'T' + a.horario));
-
-      if (sessoes.length === 0) {
-        body.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400">Nenhuma sessão registrada.</td></tr>`;
-        return;
+      if (sessaoId) {
+        s = await db.sessoes.get(sessaoId);
       }
 
-      sessoes.forEach(s => {
-        const p = pacientes.find(x => x.id === s.pacienteId);
-        const tr = document.createElement('tr');
-        tr.className = 'hover:bg-pink-50/50 transition';
-        tr.innerHTML = `
-          <td class="p-4 font-semibold text-slate-700">${formataData(s.data)} ${s.horario}</td>
-          <td class="p-4 font-bold text-pink-900">${p ? p.nome : 'Paciente Removido'}</td>
-          <td class="p-4">${s.modalidade}</td>
-          <td class="p-4"><span class="px-2 py-0.5 text-xs rounded-full font-bold bg-pink-100 text-pink-800">${s.status}</span></td>
-          <td class="p-4">R$ ${parseFloat(s.valor || 0).toFixed(2)} (${s.pagamento})</td>
-          <td class="p-4 text-xs">${s.recibo ? '<span class="text-emerald-600 font-bold">Anexado</span>' : '<span class="text-slate-400">Sem Recibo</span>'}</td>
-          <td class="p-4 text-right">
-            <button onclick="openModalSessao('${s.id}')" class="bg-slate-200 text-slate-700 px-2 py-1 rounded text-xs font-semibold hover:bg-slate-300"><i class="fa-solid fa-pen"></i> Editar</button>
-          </td>
-        `;
-        body.appendChild(tr);
-      });
+      const modalHtml = `
+        <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-rose-100 space-y-4">
+            <div class="flex items-center justify-between border-b border-rose-100 pb-3">
+              <h3 class="font-bold text-lg text-rose-950">${sessaoId ? 'Editar Sessão' : 'Agendar / Registrar Sessão'}</h3>
+              <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 font-bold">✕</button>
+            </div>
+
+            <form onsubmit="salvarSessao(event, ${sessaoId || 'null'})" class="space-y-4 text-xs">
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Paciente *</label>
+                <select id="sesPaciente" required class="w-full p-2.5 border border-rose-200 rounded-xl font-bold text-slate-800">
+                  ${pacientes.map(p => `<option value="${p.id}" ${p.id == s.pacienteId ? 'selected' : ''}>${p.nome}</option>`).join('')}
+                </select>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block font-bold text-slate-700 mb-1">Data *</label>
+                  <input type="date" id="sesData" value="${s.data ? s.data.split('T')[0] : ''}" required class="w-full p-2.5 border border-rose-200 rounded-xl">
+                </div>
+                <div>
+                  <label class="block font-bold text-slate-700 mb-1">Horário</label>
+                  <input type="time" id="sesHora" value="${s.horario || '14:00'}" class="w-full p-2.5 border border-rose-200 rounded-xl">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block font-bold text-slate-700 mb-1">Modalidade</label>
+                  <select id="sesModalidade" class="w-full p-2.5 border border-rose-200 rounded-xl">
+                    <option value="Presencial" ${s.modalidade === 'Presencial' ? 'selected' : ''}>Presencial</option>
+                    <option value="Online" ${s.modalidade === 'Online' ? 'selected' : ''}>Online</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block font-bold text-slate-700 mb-1">Status Atendimento *</label>
+                  <select id="sesStatus" class="w-full p-2.5 border border-rose-200 rounded-xl font-bold text-rose-900">
+                    <option value="Agendada" ${s.status === 'Agendada' ? 'selected' : ''}>Agendada</option>
+                    <option value="Realizada" ${s.status === 'Realizada' ? 'selected' : ''}>Realizada</option>
+                    <option value="Falta" ${s.status === 'Falta' ? 'selected' : ''}>Falta</option>
+                    <option value="Cancelada" ${s.status === 'Cancelada' ? 'selected' : ''}>Cancelada</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-3 gap-2 p-3 bg-rose-50/50 rounded-xl border border-rose-100">
+                <div>
+                  <label class="block font-bold text-slate-700 mb-1">Valor (R$)</label>
+                  <input type="number" step="0.01" id="sesValor" value="${s.valor}" class="w-full p-2 border border-rose-200 rounded-lg">
+                </div>
+                <div>
+                  <label class="block font-bold text-slate-700 mb-1">Pagamento</label>
+                  <select id="sesPagStatus" class="w-full p-2 border border-rose-200 rounded-lg font-bold">
+                    <option value="Pendente" ${s.statusPagamento === 'Pendente' ? 'selected' : ''}>Pendente</option>
+                    <option value="Pago" ${s.statusPagamento === 'Pago' ? 'selected' : ''}>Pago / Liquidado</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block font-bold text-slate-700 mb-1">Data Pagamento</label>
+                  <input type="date" id="sesDataPag" value="${s.dataPagamento ? s.dataPagamento.split('T')[0] : ''}" class="w-full p-2 border border-rose-200 rounded-lg">
+                </div>
+              </div>
+
+              <div class="flex justify-end gap-2 pt-2 border-t border-rose-100">
+                <button type="button" onclick="closeModal()" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl font-bold">Cancelar</button>
+                <button type="submit" class="px-4 py-2 bg-rose-600 text-white rounded-xl font-bold hover:bg-rose-700">Salvar Sessão</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+      document.getElementById('modalContainer').innerHTML = modalHtml;
     }
 
-    // --- EVOLUÇÕES ---
-    function openModalEvolucao(sessaoId) {
-      document.getElementById('form-evolucao').reset();
-      document.getElementById('evolucao-sessao-id').value = sessaoId;
-
-      const evolucoes = getDB(DB_KEY_EVOLUCOES);
-      const evol = evolucoes.find(e => e.sessaoId === sessaoId);
-
-      if (evol) {
-        document.getElementById('evolucao-id').value = evol.id;
-        document.getElementById('evolucao-queixa').value = evol.queixa || '';
-        document.getElementById('evolucao-demanda').value = evol.demanda || '';
-        document.getElementById('evolucao-descricao').value = evol.descricao || '';
-        document.getElementById('evolucao-analise').value = evol.analise || '';
-        document.getElementById('evolucao-texto').value = evol.texto || '';
-      } else {
-        document.getElementById('evolucao-id').value = '';
-      }
-
-      openModal('modal-evolucao');
-    }
-
-    function salvarEvolucao(e) {
+    async function salvarSessao(e, id) {
       e.preventDefault();
-      const id = document.getElementById('evolucao-id').value;
-      const sessaoId = document.getElementById('evolucao-sessao-id').value;
-      const queixa = document.getElementById('evolucao-queixa').value;
-      const demanda = document.getElementById('evolucao-demanda').value;
-      const descricao = document.getElementById('evolucao-descricao').value;
-      const analise = document.getElementById('evolucao-analise').value;
-      const texto = document.getElementById('evolucao-texto').value;
-
-      let evolucoes = getDB(DB_KEY_EVOLUCOES);
+      const dados = {
+        pacienteId: Number(document.getElementById('sesPaciente').value),
+        data: document.getElementById('sesData').value,
+        horario: document.getElementById('sesHora').value,
+        modalidade: document.getElementById('sesModalidade').value,
+        status: document.getElementById('sesStatus').value,
+        valor: Number(document.getElementById('sesValor').value || 0),
+        statusPagamento: document.getElementById('sesPagStatus').value,
+        dataPagamento: document.getElementById('sesDataPag').value || (document.getElementById('sesPagStatus').value === 'Pago' ? new Date().toISOString().split('T')[0] : '')
+      };
 
       if (id) {
-        const idx = evolucoes.findIndex(x => x.id === id);
-        if (idx !== -1) {
-          evolucoes[idx] = { ...evolucoes[idx], queixa, demanda, descricao, analise, texto };
-        }
+        await db.sessoes.update(id, dados);
       } else {
-        const newEvol = {
-          id: 'evol_' + Date.now(),
-          sessaoId, pacienteId: pacienteAtualId,
-          queixa, demanda, descricao, analise, texto,
-          dataRegistro: new Date().toISOString()
-        };
-        evolucoes.push(newEvol);
+        await db.sessoes.add(dados);
       }
 
-      setDB(DB_KEY_EVOLUCOES, evolucoes);
-      closeModal('modal-evolucao');
-      if (pacienteAtualId) carregarHistoricoCompletoProntuario();
+      closeModal();
+      render();
     }
 
-    // --- RECIBOS ---
-    function openModalRecibo(sessaoId) {
-      document.getElementById('recibo-sessao-id').value = sessaoId;
-      const sessoes = getDB(DB_KEY_SESSOES);
-      const s = sessoes.find(x => x.id === sessaoId);
-
-      if (s && s.recibo) {
-        document.getElementById('box-upload-recibo').classList.add('hidden');
-        document.getElementById('box-view-recibo').classList.remove('hidden');
-        document.getElementById('recibo-tipo-label').innerText = s.recibo.tipo;
-      } else {
-        document.getElementById('box-upload-recibo').classList.remove('hidden');
-        document.getElementById('box-view-recibo').classList.add('hidden');
+    async function openModalEvolucao(sessaoId, evolucaoId = null) {
+      const sessao = await db.sessoes.get(sessaoId);
+      let e = { descricao: '', queixa: '', demanda: '', analise: '' };
+      if (evolucaoId) {
+        e = await db.evolucoes.get(evolucaoId);
       }
 
-      openModal('modal-recibo');
+      const modalHtml = `
+        <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-rose-100 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-rose-100 pb-3">
+              <h3 class="font-bold text-lg text-rose-950">${evolucaoId ? 'Editar Evolução Clínica' : 'Registrar Evolução Clínica'}</h3>
+              <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 font-bold">✕</button>
+            </div>
+
+            <form onsubmit="salvarEvolucao(event, ${sessaoId}, ${evolucaoId || 'null'}, ${sessao.pacienteId})" class="space-y-3 text-xs">
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Queixa Principal / Relato</label>
+                <textarea id="evoQueixa" rows="2" class="w-full p-2 border border-rose-200 rounded-xl">${e.queixa || ''}</textarea>
+              </div>
+
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Demanda Trabalhada</label>
+                <input type="text" id="evoDemanda" value="${e.demanda || ''}" class="w-full p-2 border border-rose-200 rounded-xl">
+              </div>
+
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Descrição Detalhada da Sessão</label>
+                <textarea id="evoDesc" rows="3" class="w-full p-2 border border-rose-200 rounded-xl">${e.descricao || ''}</textarea>
+              </div>
+
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Análise Técnica e Evolução</label>
+                <textarea id="evoAnalise" rows="3" class="w-full p-2 border border-rose-200 rounded-xl">${e.analise || ''}</textarea>
+              </div>
+
+              <div class="flex justify-end gap-2 pt-2 border-t border-rose-100">
+                <button type="button" onclick="closeModal()" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl font-bold">Cancelar</button>
+                <button type="submit" class="px-4 py-2 bg-rose-600 text-white rounded-xl font-bold hover:bg-rose-700">Salvar Evolução</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+      document.getElementById('modalContainer').innerHTML = modalHtml;
     }
 
-    function salvarAnexoRecibo() {
-      const sessaoId = document.getElementById('recibo-sessao-id').value;
-      const fileInput = document.getElementById('file-recibo-input');
-      const file = fileInput.files[0];
+    async function salvarEvolucao(ev, sessaoId, evolucaoId, pacienteId) {
+      ev.preventDefault();
+      const dados = {
+        pacienteId: pacienteId,
+        sessaoId: sessaoId,
+        queixa: document.getElementById('evoQueixa').value,
+        demanda: document.getElementById('evoDemanda').value,
+        descricao: document.getElementById('evoDesc').value,
+        analise: document.getElementById('evoAnalise').value,
+        data: new Date().toISOString()
+      };
 
-      if (!file) {
-        alert('Selecione um arquivo de recibo.');
-        return;
+      if (evolucaoId) {
+        await db.evolucoes.update(evolucaoId, dados);
+      } else {
+        await db.evolucoes.add(dados);
       }
 
+      closeModal();
+      render();
+    }
+
+    // MODAL DE RECIBO
+    function openModalAnexarRecibo(sessaoId) {
+      const modalHtml = `
+        <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-rose-100 space-y-4">
+            <h3 class="font-bold text-lg text-rose-950">Anexar Recibo de Pagamento</h3>
+            <input type="file" id="fileRecibo" accept="image/*,application/pdf" class="w-full text-xs p-2 border rounded-xl">
+            <div class="flex justify-end gap-2">
+              <button onclick="closeModal()" class="px-3 py-1.5 bg-slate-100 text-xs font-bold rounded-lg">Cancelar</button>
+              <button onclick="processarAnexoRecibo(${sessaoId})" class="px-3 py-1.5 bg-rose-600 text-white text-xs font-bold rounded-lg">Salvar Recibo</button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.getElementById('modalContainer').innerHTML = modalHtml;
+    }
+
+    async function processarAnexoRecibo(sessaoId) {
+      const fileInput = document.getElementById('fileRecibo');
+      if (!fileInput.files[0]) return alert('Selecione um arquivo.');
+
+      const sessao = await db.sessoes.get(sessaoId);
       const reader = new FileReader();
-      reader.onload = function(e) {
-        const base64 = e.target.result;
-        let sessoes = getDB(DB_KEY_SESSOES);
-        const idx = sessoes.findIndex(x => x.id === sessaoId);
-        if (idx !== -1) {
-          sessoes[idx].recibo = {
-            nome: file.name,
-            tipo: file.type,
-            dados: base64
-          };
-          setDB(DB_KEY_SESSOES, sessoes);
-          closeModal('modal-recibo');
-          if (pacienteAtualId) carregarHistoricoCompletoProntuario();
-          renderSessoesGeralList();
-        }
+      reader.onload = async function(e) {
+        await db.recibos.add({
+          pacienteId: sessao.pacienteId,
+          sessaoId: sessaoId,
+          dataCriacao: new Date().toISOString(),
+          conteudoBase64: e.target.result
+        });
+        closeModal();
+        render();
+      };
+      reader.readAsDataURL(fileInput.files[0]);
+    }
+
+    async function removerRecibo(id) {
+      if (confirm('Deseja realmente remover este recibo?')) {
+        await db.recibos.delete(id);
+        render();
+      }
+    }
+
+    // MODAL DE ANEXAR PDF SEMANAL MANUAL
+    function openModalAnexarPdfSemanal(pacienteId) {
+      const modalHtml = `
+        <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-rose-100 space-y-4">
+            <h3 class="font-bold text-lg text-rose-950">Adicionar PDF do Prontuário Semanal</h3>
+            <input type="file" id="filePdfSemanal" accept="application/pdf" class="w-full text-xs p-2 border rounded-xl">
+            <div class="flex justify-end gap-2">
+              <button onclick="closeModal()" class="px-3 py-1.5 bg-slate-100 text-xs font-bold rounded-lg">Cancelar</button>
+              <button onclick="processarAnexoPdfSemanal(${pacienteId})" class="px-3 py-1.5 bg-rose-600 text-white text-xs font-bold rounded-lg">Salvar PDF</button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.getElementById('modalContainer').innerHTML = modalHtml;
+    }
+
+    async function processarAnexoPdfSemanal(pacienteId) {
+      const fileInput = document.getElementById('filePdfSemanal');
+      if (!fileInput.files[0]) return alert('Selecione um arquivo PDF.');
+
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        const semanaStr = `Semana ${getSemanaDoAno()}`;
+        await db.pdfsSemanais.add({
+          pacienteId: pacienteId,
+          semana: semanaStr,
+          dataCriacao: new Date().toISOString(),
+          nomeArquivo: file.name,
+          periodo: `Semana de ${formatDate(new Date())}`,
+          conteudoBase64: e.target.result
+        });
+        closeModal();
+        render();
       };
       reader.readAsDataURL(file);
     }
 
-    function visualizarReciboAnexo() {
-      const sessaoId = document.getElementById('recibo-sessao-id').value;
-      const sessoes = getDB(DB_KEY_SESSOES);
-      const s = sessoes.find(x => x.id === sessaoId);
-      if (s && s.recibo) {
-        const w = window.open();
-        w.document.write(`<iframe src="${s.recibo.dados}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>`);
+    async function removerPdfSemanal(id) {
+      if (confirm('Remover este PDF semanal do prontuário?')) {
+        await db.pdfsSemanais.delete(id);
+        render();
       }
     }
 
-    function removerReciboAnexo() {
-      const sessaoId = document.getElementById('recibo-sessao-id').value;
-      let sessoes = getDB(DB_KEY_SESSOES);
-      const idx = sessoes.findIndex(x => x.id === sessaoId);
-      if (idx !== -1) {
-        sessoes[idx].recibo = null;
-        setDB(DB_KEY_SESSOES, sessoes);
-        closeModal('modal-recibo');
-        if (pacienteAtualId) carregarHistoricoCompletoProntuario();
-        renderSessoesGeralList();
+    function visualizarPdf(base64) {
+      const win = window.open();
+      win.document.write(`<iframe src="${base64}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>`);
+    }
+
+    function baixarPdf(base64, nome) {
+      const a = document.createElement('a');
+      a.href = base64;
+      a.download = nome;
+      a.click();
+    }
+
+    function closeModal() {
+      document.getElementById('modalContainer').innerHTML = '';
+    }
+
+    // ==========================================
+    // 13. FUNÇÕES AUXILIARES / FORMATADORES
+    // ==========================================
+    function formatDate(dateStr) {
+      if (!dateStr) return 'N/A';
+      const d = new Date(dateStr);
+      return d.toLocaleDateString('pt-BR');
+    }
+
+    function getMesAnoAtual() {
+      const d = new Date();
+      return d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+    }
+
+    function getMesesOptions(selected) {
+      const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+      return meses.map((m, i) => `<option value="${i}" ${i == selected ? 'selected' : ''}>${m}</option>`).join('');
+    }
+
+    function getStatusSessaoBadge(status) {
+      switch(status) {
+        case 'Realizada': return 'bg-emerald-100 text-emerald-800';
+        case 'Agendada': return 'bg-blue-100 text-blue-800';
+        case 'Falta': return 'bg-amber-100 text-amber-800';
+        case 'Cancelada': return 'bg-red-100 text-red-800';
+        default: return 'bg-slate-100 text-slate-800';
       }
     }
 
-    // --- DASHBOARD CALCULATIONS ---
-    function renderDashboard() {
-      const pacientes = getDB(DB_KEY_PACIENTES);
-      const sessoes = getDB(DB_KEY_SESSOES);
-
-      document.getElementById('dash-tot-pacientes').innerText = pacientes.length;
-      document.getElementById('dash-act-pacientes').innerText = pacientes.filter(p => p.status === 'Ativo').length;
-      document.getElementById('dash-ina-pacientes').innerText = pacientes.filter(p => p.status === 'Inativo').length;
-
-      document.getElementById('dash-sess-realizadas').innerText = sessoes.filter(s => s.status === 'Realizada').length;
-      document.getElementById('dash-sess-agendadas').innerText = sessoes.filter(s => s.status === 'Agendada').length;
-      document.getElementById('dash-faltas').innerText = sessoes.filter(s => s.status === 'Falta').length;
-      document.getElementById('dash-cancelamentos').innerText = sessoes.filter(s => s.status === 'Cancelada').length;
-
-      let rec = 0, pend = 0;
-      sessoes.forEach(s => {
-        const val = parseFloat(s.valor || 0);
-        if (s.pagamento === 'Pago') rec += val;
-        else pend += val;
-      });
-
-      document.getElementById('dash-recebido').innerText = `R$ ${rec.toFixed(2)}`;
-      document.getElementById('dash-pendente').innerText = `Pendente: R$ ${pend.toFixed(2)}`;
-    }
-
-    // UTILS
-    function formataData(dataStr) {
-      if (!dataStr) return '';
-      const partes = dataStr.split('-');
-      if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
-      return dataStr;
+    function getSemanaDoAno() {
+      const now = new Date();
+      const start = new Date(now.getFullYear(), 0, 1);
+      return Math.ceil((((now - start) / 86400000) + start.getDay() + 1) / 7);
     }
 
     // INICIALIZAÇÃO DO SISTEMA
     window.addEventListener('DOMContentLoaded', () => {
-      // Definir mês/ano padrão no seletor do prontuário
-      const hoje = new Date();
-      const mes = String(hoje.getMonth() + 1).padStart(2, '0');
-      document.getElementById('filtro-mes-ano-prontuario').value = `${hoje.getFullYear()}-${mes}`;
-
-      navigateTo('dashboard', false);
+      render();
     });
   </script>
 </body>
