@@ -1,1600 +1,943 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Gestão de Prontuário Psicológico - PsiControl</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-    <style>
-        :root {
-            --primary: #d81b60;
-            --primary-hover: #c2185b;
-            --primary-light: #fce4ec;
-            --primary-border: #f8bbd0;
-            --bg-body: #f8f9fa;
-            --text-dark: #2c3e50;
-            --text-muted: #6c757d;
-            --white: #ffffff;
-            --danger: #dc3545;
-            --success: #28a745;
-            --warning: #ffc107;
-            --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            --radius: 8px;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Psicologia - Daniele Sousa Santos</title>
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
 
-        body {
-            background-color: var(--bg-body);
-            color: var(--text-dark);
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-        }
+  <!-- html2pdf.js para geração de PDF elegante e ilimitado -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
-        /* Sidebar Responsive Styling */
-        .sidebar {
-            width: 250px;
-            background: var(--white);
-            border-right: 1px solid #e0e0e0;
-            display: flex;
-            flex-direction: column;
-            transition: all 0.3s;
-            z-index: 100;
-        }
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-        .sidebar-header {
-            padding: 20px;
-            background: var(--primary);
-            color: var(--white);
-            text-align: center;
-        }
+  <style>
+    /* -------------------------------------------------------------
+       1. VARIÁVEIS E PALETA DE CORES (ROSA SOFISTICADO & OFF-WHITE)
+       ------------------------------------------------------------- */
+    :root {
+      --bg-main: #FAF8F8;          /* Off-white levemente quente */
+      --bg-surface: #FFFFFF;       /* Branco puro para áreas elevadas */
+      --bg-subtle: #F5EFEB;        /* Rosa neutro/blush muito suave */
+      
+      --rose-light: #FBF0F3;      /* Destaque suave */
+      --rose-medium: #F4D3DC;     /* Bordas e interações delicadas */
+      --rose-primary: #D988A1;    /* Rosa sofisticado principal */
+      --rose-hover: #C5728B;      /* Hover do rosa principal */
+      
+      --text-main: #2D2B2C;       /* Cinza muito escuro para texto principal */
+      --text-muted: #7A7577;      /* Cinza médio suave */
+      --text-light: #A39E9F;      /* Cinza claro para rótulos */
 
-        .sidebar-header h2 {
-            font-size: 1.2rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+      --border-subtle: #EDE8E8;   /* Linhas extremamente suaves */
+      --status-success: #70A98B;  /* Verde discreto */
+      --status-warning: #E09F67;  /* Laranja discreto */
 
-        .sidebar-menu {
-            list-style: none;
-            padding: 10px 0;
-            overflow-y: auto;
-        }
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
 
-        .sidebar-menu li a {
-            display: flex;
-            align-items: center;
-            padding: 12px 20px;
-            color: var(--text-dark);
-            text-decoration: none;
-            font-weight: 500;
-            transition: 0.2s;
-        }
+      --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.02);
+    }
 
-        .sidebar-menu li a:hover, .sidebar-menu li a.active {
-            background: var(--primary-light);
-            color: var(--primary);
-            border-left: 4px solid var(--primary);
-        }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
 
-        .sidebar-menu li a i {
-            margin-right: 12px;
-            width: 20px;
-            text-align: center;
-        }
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      display: flex;
+      min-height: 100vh;
+      font-size: 14px;
+      line-height: 1.6;
+    }
 
-        /* Main Content Layout */
-        .main-wrapper {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-        }
+    /* -------------------------------------------------------------
+       2. LAYOUT & NAVEGAÇÃO LATERAL MINIMALISTA
+       ------------------------------------------------------------- */
+    aside.sidebar {
+      width: 250px;
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 32px 20px;
+      position: fixed;
+      height: 100vh;
+      z-index: 10;
+    }
 
-        header {
-            background: var(--white);
-            padding: 15px 25px;
-            border-bottom: 1px solid #e0e0e0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+    .brand {
+      padding: 0 12px 32px 12px;
+    }
 
-        .user-prof {
-            font-size: 0.9rem;
-            text-align: right;
-        }
+    .brand h1 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-main);
+      letter-spacing: -0.3px;
+    }
 
-        .user-prof strong {
-            color: var(--primary);
-            display: block;
-        }
+    .brand p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
 
-        .content {
-            padding: 25px;
-            flex: 1;
-        }
+    .nav-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
 
-        /* Cards & Metric Displays */
-        .grid-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 25px;
-        }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+    }
 
-        .card {
-            background: var(--white);
-            border-radius: var(--radius);
-            padding: 18px;
-            box-shadow: var(--shadow);
-            border-top: 3px solid var(--primary);
-        }
+    .nav-item:hover {
+      background-color: var(--bg-subtle);
+      color: var(--text-main);
+    }
 
-        .card-title {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            margin-bottom: 5px;
-        }
+    .nav-item.active {
+      background-color: var(--rose-light);
+      color: var(--rose-primary);
+      font-weight: 600;
+    }
 
-        .card-value {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: var(--text-dark);
-        }
+    .nav-item i {
+      width: 18px;
+      height: 18px;
+    }
 
-        /* System Notifications & Alerts */
-        .alerts-section {
-            background: var(--white);
-            border-radius: var(--radius);
-            padding: 20px;
-            box-shadow: var(--shadow);
-            margin-bottom: 25px;
-        }
+    main.content {
+      margin-left: 250px;
+      flex: 1;
+      padding: 40px 60px;
+      max-width: 1100px;
+    }
 
-        .alerts-section h3 {
-            color: var(--primary);
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+    /* -------------------------------------------------------------
+       3. COMPONENTES REUTILIZÁVEIS
+       ------------------------------------------------------------- */
+    .page-section {
+      display: none;
+      animation: fadeIn 0.3s ease-in-out;
+    }
 
-        .alert-item {
-            background: #fff5f5;
-            border-left: 4px solid var(--danger);
-            padding: 12px 15px;
-            margin-bottom: 8px;
-            border-radius: 4px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            transition: 0.2s;
-        }
+    .page-section.active {
+      display: block;
+    }
 
-        .alert-item:hover {
-            background: #ffe3e3;
-        }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
-        .alert-text {
-            color: #c53030;
-            font-weight: 500;
-            font-size: 0.9rem;
-        }
+    .header-title {
+      margin-bottom: 32px;
+    }
 
-        /* Button Framework */
-        .btn {
-            padding: 9px 16px;
-            border: none;
-            border-radius: var(--radius);
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.85rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: 0.2s;
-            text-decoration: none;
-        }
+    .header-title h2 {
+      font-size: 26px;
+      font-weight: 600;
+      color: var(--text-main);
+      letter-spacing: -0.5px;
+    }
 
-        .btn-primary {
-            background: var(--primary);
-            color: var(--white);
-        }
+    .header-title p {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
 
-        .btn-primary:hover {
-            background: var(--primary-hover);
-        }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition);
+      text-decoration: none;
+    }
 
-        .btn-outline {
-            background: transparent;
-            border: 1px solid var(--primary);
-            color: var(--primary);
-        }
+    .btn-primary {
+      background-color: var(--rose-primary);
+      color: white;
+    }
 
-        .btn-outline:hover {
-            background: var(--primary-light);
-        }
+    .btn-primary:hover {
+      background-color: var(--rose-hover);
+    }
 
-        .btn-secondary {
-            background: #6c757d;
-            color: var(--white);
-        }
+    .btn-secondary {
+      background-color: var(--bg-subtle);
+      color: var(--text-main);
+    }
 
-        .btn-danger {
-            background: var(--danger);
-            color: var(--white);
-        }
+    .btn-secondary:hover {
+      background-color: var(--rose-medium);
+    }
 
-        /* Tables & Lists */
-        .table-responsive {
-            background: var(--white);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            overflow-x: auto;
-        }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+    }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-        }
+    .btn-outline:hover {
+      background: var(--bg-subtle);
+      color: var(--text-main);
+    }
 
-        th, td {
-            padding: 12px 15px;
-            border-bottom: 1px solid #eee;
-            font-size: 0.9rem;
-        }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 500;
+    }
 
-        th {
-            background: var(--primary-light);
-            color: var(--primary);
-            font-weight: 600;
-        }
+    .tag-active {
+      background: #EAF5EF;
+      color: var(--status-success);
+    }
 
-        tr:hover {
-            background: #fafafa;
-        }
+    .tag-pending {
+      background: #FDF4EC;
+      color: var(--status-warning);
+    }
 
-        /* Status Badges */
-        .badge {
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
+    /* Search & Filter bar */
+    .filter-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
 
-        .badge-active { background: #e6fffa; color: #234e52; }
-        .badge-inactive { background: #edf2f7; color: #4a5568; }
-        .badge-pending { background: #fffaf0; color: #9c4221; }
+    .search-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      width: 320px;
+    }
 
-        /* Form Components */
-        .form-group {
-            margin-bottom: 15px;
-        }
+    .search-box input {
+      border: none;
+      outline: none;
+      width: 100%;
+      font-size: 13px;
+      background: transparent;
+      color: var(--text-main);
+    }
 
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            font-size: 0.85rem;
-            color: var(--text-dark);
-        }
+    .filter-pills {
+      display: flex;
+      gap: 8px;
+    }
 
-        .form-control {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: var(--radius);
-            font-size: 0.9rem;
-        }
+    .pill {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      color: var(--text-muted);
+      background: transparent;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: var(--transition);
+    }
 
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 2px var(--primary-border);
-        }
+    .pill.active {
+      background: var(--rose-light);
+      color: var(--rose-primary);
+      font-weight: 600;
+    }
 
-        textarea.form-control {
-            resize: vertical;
-            min-height: 100px;
-        }
+    /* -------------------------------------------------------------
+       4. ESTILOS HOME E PAINEL RESUMIDO
+       ------------------------------------------------------------- */
+    .summary-strip {
+      display: flex;
+      gap: 32px;
+      padding: 20px 24px;
+      background: var(--bg-surface);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      margin-bottom: 32px;
+    }
 
-        /* Modals & Overlays */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
+    .summary-item {
+      display: flex;
+      flex-direction: column;
+    }
 
-        .modal {
-            background: var(--white);
-            border-radius: var(--radius);
-            width: 90%;
-            max-width: 800px;
-            max-height: 90vh;
-            overflow-y: auto;
-            padding: 25px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        }
+    .summary-item .num {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
 
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
-            margin-bottom: 15px;
-        }
+    .summary-item .label {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
 
-        .modal-header h3 {
-            color: var(--primary);
-        }
+    .agenda-list, .attention-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
 
-        .close-btn {
-            background: none;
-            border: none;
-            font-size: 1.2rem;
-            cursor: pointer;
-            color: var(--text-muted);
-        }
+    .agenda-row {
+      display: flex;
+      align-items: center;
+      padding: 14px 20px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      transition: var(--transition);
+    }
 
-        /* Tabs Interface */
-        .tabs {
-            display: flex;
-            border-bottom: 2px solid #eee;
-            margin-bottom: 20px;
-        }
+    .agenda-row:hover {
+      border-color: var(--rose-medium);
+    }
 
-        .tab-btn {
-            padding: 10px 20px;
-            border: none;
-            background: none;
-            cursor: pointer;
-            font-weight: 600;
-            color: var(--text-muted);
-            border-bottom: 2px solid transparent;
-            margin-bottom: -2px;
-        }
+    .agenda-time {
+      width: 80px;
+      font-weight: 600;
+      color: var(--rose-primary);
+    }
 
-        .tab-btn.active {
-            color: var(--primary);
-            border-bottom-color: var(--primary);
-        }
+    .agenda-info {
+      flex: 1;
+    }
 
-        .tab-content {
-            display: none;
-        }
+    .agenda-info .patient {
+      font-weight: 500;
+    }
 
-        .tab-content.active {
-            display: block;
-        }
+    .agenda-info .type {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
 
-        .draft-status {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            font-style: italic;
-            margin-left: 10px;
-        }
+    /* -------------------------------------------------------------
+       5. ESTILOS PRONTUÁRIO & NAVEGAÇÃO INTERNA
+       ------------------------------------------------------------- */
+    .patient-nav {
+      display: flex;
+      gap: 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 24px;
+      padding-bottom: 8px;
+    }
 
-        /* Mobile Adjustments */
-        @media (max-width: 768px) {
-            body { flex-direction: column; }
-            .sidebar { width: 100%; height: auto; }
-            .sidebar-menu { display: flex; overflow-x: auto; }
-            .sidebar-menu li a { padding: 10px; flex-direction: column; font-size: 0.75rem; }
-            .sidebar-menu li a i { margin-right: 0; margin-bottom: 4px; }
-            .grid-cards { grid-template-columns: 1fr 1fr; }
-        }
-    </style>
+    .patient-nav-item {
+      color: var(--text-muted);
+      text-decoration: none;
+      padding-bottom: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .patient-nav-item.active {
+      color: var(--rose-primary);
+      font-weight: 600;
+    }
+
+    .patient-nav-item.active::after {
+      content: '';
+      position: absolute;
+      bottom: -9px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--rose-primary);
+      border-radius: 2px;
+    }
+
+    /* Timeline Elegante */
+    .timeline {
+      position: relative;
+      padding-left: 20px;
+      margin-top: 16px;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 6px;
+      bottom: 6px;
+      width: 1px;
+      background: var(--border-subtle);
+    }
+
+    .timeline-item {
+      position: relative;
+      padding-bottom: 24px;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -24px;
+      top: 6px;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--rose-primary);
+    }
+
+    .timeline-date {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--rose-primary);
+      margin-bottom: 4px;
+    }
+
+    .timeline-content {
+      color: var(--text-main);
+      font-size: 13px;
+    }
+
+    /* -------------------------------------------------------------
+       6. EDITOR DE EVOLUÇÃO (ESCRITA CONFORTÁVEL)
+       ------------------------------------------------------------- */
+    .editor-container {
+      background: var(--bg-surface);
+      border-radius: var(--radius-md);
+      padding: 32px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .editor-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .save-status {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .editor-field {
+      margin-bottom: 24px;
+    }
+
+    .editor-field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .editor-field textarea {
+      width: 100%;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text-main);
+      background: var(--bg-main);
+      resize: vertical;
+      outline: none;
+      transition: var(--transition);
+      min-height: 90px;
+    }
+
+    .editor-field textarea:focus {
+      border-color: var(--rose-medium);
+      background: var(--bg-surface);
+    }
+
+    /* -------------------------------------------------------------
+       7. MODAL MINIMALISTA
+       ------------------------------------------------------------- */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.15);
+      backdrop-filter: blur(2px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--bg-surface);
+      padding: 28px;
+      border-radius: var(--radius-md);
+      width: 100%;
+      max-width: 440px;
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-subtle);
+    }
+
+    .modal h3 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .modal p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    /* -------------------------------------------------------------
+       8. MODELO DE IMPRESSÃO DE PDF (OCULTO NA TELA)
+       ------------------------------------------------------------- */
+    #pdf-template {
+      display: none;
+      padding: 40px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: #2D2B2C;
+      background: #FFF;
+    }
+
+    .pdf-header {
+      border-bottom: 2px solid #F4D3DC;
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+    }
+
+    .pdf-header h1 { font-size: 20px; color: #D988A1; font-weight: 600; }
+    .pdf-header p { font-size: 12px; color: #7A7577; }
+
+    .pdf-session-block {
+      margin-bottom: 24px;
+      page-break-inside: avoid;
+    }
+
+    .pdf-session-title {
+      font-size: 14px;
+      font-weight: 600;
+      background: #FBF0F3;
+      padding: 6px 10px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+
+    .pdf-field-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #7A7577;
+      margin-top: 8px;
+    }
+
+    .pdf-field-content {
+      font-size: 13px;
+      line-height: 1.5;
+      margin-bottom: 8px;
+      white-space: pre-wrap;
+    }
+
+    .pdf-footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid #EDE8E8;
+      text-align: center;
+      page-break-inside: avoid;
+    }
+  </style>
 </head>
 <body>
 
-    <!-- Lateral Navigation Menu -->
-    <nav class="sidebar">
-        <div class="sidebar-header">
-            <h2>PsiControl</h2>
+  <!-- NAVEGAÇÃO LATERAL MINIMALISTA -->
+  <aside class="sidebar">
+    <div>
+      <div class="brand">
+        <h1>Daniele S. Santos</h1>
+        <p>Psicologia Clínica</p>
+      </div>
+      <ul class="nav-list">
+        <li><a class="nav-item active" onclick="switchTab('home')"><i data-lucide="home"></i> Início</a></li>
+        <li><a class="nav-item" onclick="switchTab('pacientes')"><i data-lucide="users"></i> Pacientes</a></li>
+        <li><a class="nav-item" onclick="switchTab('agenda')"><i data-lucide="calendar"></i> Agenda</a></li>
+        <li><a class="nav-item" onclick="switchTab('evolucao')"><i data-lucide="file-text"></i> Evoluções</a></li>
+        <li><a class="nav-item" onclick="switchTab('financeiro')"><i data-lucide="credit-card"></i> Financeiro</a></li>
+        <li><a class="nav-item" onclick="switchTab('documentos')"><i data-lucide="folder"></i> Documentos</a></li>
+      </ul>
+    </div>
+    <div>
+      <a class="nav-item"><i data-lucide="settings"></i> Configurações</a>
+    </div>
+  </aside>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <main class="content">
+
+    <!-- 1. HOME / DASHBOARD ELEGANTE -->
+    <section id="sec-home" class="page-section active">
+      <div class="header-title">
+        <h2>Olá, Daniele</h2>
+        <p>Aqui está tudo o que precisa da sua rotina de hoje.</p>
+      </div>
+
+      <div class="summary-strip">
+        <div class="summary-item">
+          <span class="num">4</span>
+          <span class="label">Atendimentos hoje</span>
         </div>
-        <ul class="sidebar-menu">
-            <li><a href="#" onclick="showSection('dashboard')" class="active"><i class="fas fa-chart-line"></i> Dashboard</a></li>
-            <li><a href="#" onclick="showSection('pacientes')"><i class="fas fa-user-friends"></i> Pacientes</a></li>
-            <li><a href="#" onclick="showSection('sessoes')"><i class="fas fa-calendar-alt"></i> Sessões</a></li>
-            <li><a href="#" onclick="showSection('financeiro')"><i class="fas fa-file-invoice-dollar"></i> Financeiro</a></li>
-        </ul>
-    </nav>
-
-    <!-- Main Workspace Container -->
-    <div class="main-wrapper">
-        <header>
-            <button class="btn btn-outline" id="btnBack" onclick="goBack()" style="display:none;"><i class="fas fa-arrow-left"></i> Voltar</button>
-            <div id="headerTitle"><strong>SISTEMA DE GESTÃO DE PRONTUÁRIO PSICOLÓGICO</strong></div>
-            <div class="user-prof">
-                <span>Psicóloga Responsável:</span>
-                <strong>Daniele Sousa Santos</strong>
-                <small>CRP: 22/07398</small>
-            </div>
-        </header>
-
-        <div class="content">
-
-            <!-- SECTION: DASHBOARD -->
-            <div id="sec-dashboard" class="section-block">
-                <div class="grid-cards">
-                    <div class="card"><div class="card-title">Total Pacientes</div><div class="card-value" id="dash-total-pacientes">0</div></div>
-                    <div class="card"><div class="card-title">Pacientes Ativos</div><div class="card-value" id="dash-ativos">0</div></div>
-                    <div class="card"><div class="card-title">Sessões Realizadas</div><div class="card-value" id="dash-sessoes-realizadas">0</div></div>
-                    <div class="card"><div class="card-title">Ganhos do Mês</div><div class="card-value" id="dash-ganhos">R$ 0,00</div></div>
-                    <div class="card"><div class="card-title">Valores Pendentes</div><div class="card-value" id="dash-pendente">R$ 0,00</div></div>
-                </div>
-
-                <div class="alerts-section">
-                    <h3><i class="fas fa-exclamation-triangle"></i> Pendências e Alertas do Sistema</h3>
-                    <div id="alerts-container">
-                        <!-- Dynamic Alert Notifications Render Here -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- SECTION: PACIENTES -->
-            <div id="sec-pacientes" class="section-block" style="display:none;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
-                    <div style="display: flex; gap: 10px; flex: 1; max-width: 500px;">
-                        <input type="text" id="searchPaciente" class="form-control" placeholder="Buscar paciente pelo nome..." oninput="renderPacientes()">
-                        <select id="filterStatus" class="form-control" style="width: 150px;" onchange="renderPacientes()">
-                            <option value="todos">Todos</option>
-                            <option value="ativo" selected>Ativos</option>
-                            <option value="inativo">Inativos</option>
-                            <option value="Adulto">Adultos</option>
-                            <option value="Infantil">Infantis</option>
-                            <option value="pendencias">Com Pendências</option>
-                        </select>
-                    </div>
-                    <button class="btn btn-primary" onclick="openModalPaciente()"><i class="fas fa-plus"></i> Novo Paciente</button>
-                </div>
-
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Nome</th>
-                                <th>Tipo</th>
-                                <th>Status</th>
-                                <th>Evolução</th>
-                                <th>PDF Semanal</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="table-pacientes-body">
-                            <!-- Dynamic Table Rows -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- SECTION: PRONTUÁRIO INDIVIDUAL -->
-            <div id="sec-prontuario" class="section-block" style="display:none;">
-                <div class="card" style="margin-bottom: 20px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap;">
-                        <div>
-                            <h2 id="pront-nome-paciente" style="color:var(--primary)">Nome do Paciente</h2>
-                            <p id="pront-info-sub" style="color:var(--text-muted); font-size: 0.85rem;"></p>
-                        </div>
-                        <div style="display: flex; gap: 10px;">
-                            <button class="btn btn-outline" id="btnToggleStatus" onclick="toggleStatusPaciente()"></button>
-                            <button class="btn btn-primary" onclick="triggerPDFGeracao()"><i class="fas fa-file-pdf"></i> Gerar PDF Integral</button>
-                            <button class="btn btn-secondary" onclick="gerarResumoProntuario()"><i class="fas fa-align-left"></i> Gerar Resumo</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="tabs">
-                    <button class="tab-btn active" onclick="switchTab('tab-dados')">Dados Cadastrais</button>
-                    <button class="tab-btn" onclick="switchTab('tab-sessoes')">Sessões e Evoluções</button>
-                    <button class="tab-btn" onclick="switchTab('tab-financeiro')">Financeiro e Recibos</button>
-                    <button class="tab-btn" onclick="switchTab('tab-pdfs')">Histórico de PDFs</button>
-                </div>
-
-                <!-- TAB: DADOS CADASTRAIS -->
-                <div id="tab-dados" class="tab-content active">
-                    <div class="card">
-                        <div id="pront-detalhes-cadastrais"></div>
-                        <br>
-                        <button class="btn btn-outline" onclick="editarPacienteAtual()"><i class="fas fa-edit"></i> Editar Dados</button>
-                    </div>
-                </div>
-
-                <!-- TAB: SESSÕES E EVOLUÇÕES -->
-                <div id="tab-sessoes" class="tab-content">
-                    <div style="margin-bottom: 15px; display: flex; justify-content: space-between;">
-                        <h3>Histórico de Atendimentos</h3>
-                        <button class="btn btn-primary" onclick="openModalSessao()"><i class="fas fa-plus"></i> Nova Sessão</button>
-                    </div>
-                    <div class="table-responsive">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Data / Hora</th>
-                                    <th>Modalidade</th>
-                                    <th>Status</th>
-                                    <th>Evolução</th>
-                                    <th>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="table-sessoes-body"></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- TAB: FINANCEIRO E RECIBOS -->
-                <div id="tab-financeiro" class="tab-content">
-                    <h3>Registros Financeiros</h3>
-                    <br>
-                    <div class="table-responsive">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Data Sessão</th>
-                                    <th>Valor</th>
-                                    <th>Status Pgto</th>
-                                    <th>Recibo</th>
-                                    <th>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="table-financeiro-body"></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- TAB: HISTÓRICO DE PDFS -->
-                <div id="tab-pdfs" class="tab-content">
-                    <div style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
-                        <h3>Documentos e PDFs Vinculados</h3>
-                        <input type="file" id="inputPdfExterno" accept="application/pdf" style="display:none;" onchange="uploadPDFExterno(event)">
-                        <button class="btn btn-outline" onclick="document.getElementById('inputPdfExterno').click()"><i class="fas fa-upload"></i> Adicionar PDF Externo</button>
-                    </div>
-                    <div class="table-responsive">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Data de Emissão</th>
-                                    <th>Nome do Arquivo</th>
-                                    <th>Tipo</th>
-                                    <th>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="table-pdfs-body"></tbody>
-                        </table>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- SECTION: SESSÕES GLOBAIS -->
-            <div id="sec-sessoes" class="section-block" style="display:none;">
-                <h3>Todas as Sessões Cadastradas</h3>
-                <br>
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Paciente</th>
-                                <th>Data/Hora</th>
-                                <th>Status</th>
-                                <th>Evolução</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="table-sessoes-global-body"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- SECTION: FINANCEIRO GLOBAL -->
-            <div id="sec-financeiro" class="section-block" style="display:none;">
-                <h3>Gestão Financeira Consolidada</h3>
-                <br>
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Paciente</th>
-                                <th>Data</th>
-                                <th>Valor</th>
-                                <th>Status</th>
-                                <th>Recibo</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="table-financeiro-global-body"></tbody>
-                    </table>
-                </div>
-            </div>
-
+        <div class="summary-item">
+          <span class="num">2</span>
+          <span class="label">Concluídos</span>
         </div>
+        <div class="summary-item">
+          <span class="num">1</span>
+          <span class="label">Pendência</span>
+        </div>
+        <div class="summary-item">
+          <span class="num">14:00</span>
+          <span class="label">Próximo atendimento</span>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 24px;">
+        <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 12px; color: var(--text-muted);">HOJE</h3>
+        <div class="agenda-list">
+          <div class="agenda-row">
+            <div class="agenda-time">14:00</div>
+            <div class="agenda-info">
+              <div class="patient">Mariana Silva</div>
+              <div class="type">Psicoterapia Individual</div>
+            </div>
+            <span class="tag tag-pending">Próximo</span>
+          </div>
+          <div class="agenda-row">
+            <div class="agenda-time">15:00</div>
+            <div class="agenda-info">
+              <div class="patient">Carlos Eduardo</div>
+              <div class="type">Psicoterapia Individual</div>
+            </div>
+            <span class="tag tag-active">Concluído</span>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 12px; color: var(--text-muted);">PRECISA DA SUA ATENÇÃO</h3>
+        <div class="attention-list">
+          <div class="agenda-row" onclick="switchTab('evolucao')" style="cursor: pointer;">
+            <i data-lucide="alert-circle" style="color: var(--status-warning); margin-right: 12px;"></i>
+            <div class="agenda-info">
+              <div class="patient">Evolução pendente</div>
+              <div class="type">Mariana Silva - Sessão de 02/09/2026</div>
+            </div>
+            <i data-lucide="chevron-right" style="color: var(--text-light);"></i>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. BIBLIOTECA DE PACIENTES -->
+    <section id="sec-pacientes" class="page-section">
+      <div class="header-title" style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+          <h2>Pacientes</h2>
+          <p>Seus acompanhamentos em um só lugar.</p>
+        </div>
+        <button class="btn btn-primary"><i data-lucide="plus"></i> Novo paciente</button>
+      </div>
+
+      <div class="filter-bar">
+        <div class="search-box">
+          <i data-lucide="search" style="width: 16px; color: var(--text-light);"></i>
+          <input type="text" placeholder="Buscar paciente...">
+        </div>
+        <div class="filter-pills">
+          <button class="pill active">Todos</button>
+          <button class="pill">Ativos</button>
+          <button class="pill">Inativos</button>
+          <button class="pill">Adultos</button>
+          <button class="pill">Infantis</button>
+        </div>
+      </div>
+
+      <div class="agenda-list">
+        <div class="agenda-row" onclick="openProntuario('Mariana Silva')" style="cursor: pointer;">
+          <div class="agenda-info">
+            <div class="patient">Mariana Silva</div>
+            <div class="type">Última sessão: 02/09/2026 • Próxima: 09/09/2026</div>
+          </div>
+          <span class="tag tag-active" style="margin-right: 12px;">Ativo</span>
+          <span style="font-size: 12px; color: var(--rose-primary); font-weight: 500;">Abrir prontuário →</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. PRONTUÁRIO INDIVIDUAL DO PACIENTE -->
+    <section id="sec-prontuario" class="page-section">
+      <div class="header-title" style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+          <h2 id="patient-name-heading">Mariana Silva</h2>
+          <p><span class="tag tag-active">• Ativo</span></p>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-secondary" onclick="switchTab('evolucao')"><i data-lucide="plus"></i> Nova evolução</button>
+          <button class="btn btn-primary" onclick="generatePDF()"><i data-lucide="download"></i> Gerar PDF Integral</button>
+        </div>
+      </div>
+
+      <div class="patient-nav">
+        <span class="patient-nav-item active">Visão geral</span>
+        <span class="patient-nav-item">Sessões</span>
+        <span class="patient-nav-item">Evoluções</span>
+        <span class="patient-nav-item">Financeiro</span>
+        <span class="patient-nav-item">Documentos</span>
+      </div>
+
+      <div class="summary-strip">
+        <div class="summary-item">
+          <span class="num">Jan 2026</span>
+          <span class="label">Início acompanhamento</span>
+        </div>
+        <div class="summary-item">
+          <span class="num">18</span>
+          <span class="label">Sessões realizadas</span>
+        </div>
+        <div class="summary-item">
+          <span class="num" style="color: var(--status-success);">Tudo em dia</span>
+          <span class="label">Status do Prontuário</span>
+        </div>
+      </div>
+
+      <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 16px; color: var(--text-muted);">HISTÓRICO DA TIMELINE</h3>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-date">02 SET 2026</div>
+          <div class="timeline-content">Sessão realizada • Evolução registrada • Pagamento confirmado</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-date">26 AGO 2026</div>
+          <div class="timeline-content">Sessão realizada • Evolução registrada</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. EDITOR DE EVOLUÇÃO (EXPERIÊNCIA CONFORTÁVEL) -->
+    <section id="sec-evolucao" class="page-section">
+      <div class="header-title">
+        <h2>Evolução</h2>
+        <p>Mariana Silva • Sessão de 02/09/2026</p>
+      </div>
+
+      <div class="editor-container">
+        <div class="editor-header">
+          <div class="save-status" id="save-status">
+            <i data-lucide="check-circle" style="width: 14px; color: var(--status-success);"></i> Rascunho salvo automaticamente
+          </div>
+          <button class="btn btn-primary" onclick="saveEvolucao()"><i data-lucide="save"></i> Salvar evolução</button>
+        </div>
+
+        <div class="editor-field">
+          <label>Queixa Principal / Relato</label>
+          <textarea id="txt-queixa" oninput="triggerAutoSave()">Paciente relata redução dos quadros de ansiedade durante a semana. Mantém rotina de higiene do sono.</textarea>
+        </div>
+
+        <div class="editor-field">
+          <label>Demanda Trabalhada</label>
+          <textarea id="txt-demanda" oninput="triggerAutoSave()">Reestruturação cognitiva e identificação de pensamentos automáticos disfuncionais referentes ao trabalho.</textarea>
+        </div>
+
+        <div class="editor-field">
+          <label>Descrição Detalhada da Sessão</label>
+          <textarea id="txt-descricao" oninput="triggerAutoSave()" style="min-height: 140px;">Sessão iniciada com a checagem da tarefa de casa sobre registro de pensamentos. A paciente apresentou engajamento e conseguiu identificar momentos gatilho durante suas reuniões corporativas.</textarea>
+        </div>
+
+        <div class="editor-field">
+          <label>Análise Técnica e Evolução</label>
+          <textarea id="txt-analise" oninput="triggerAutoSave()" style="min-height: 120px;">Paciente demonstra evolução satisfatória na regulação emocional, conseguindo aplicar estratégias de acalmamento antes da resposta ao estressor.</textarea>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. FINANCEIRO -->
+    <section id="sec-financeiro" class="page-section">
+      <div class="header-title">
+        <h2>Financeiro</h2>
+        <p>Visão simplificada de recebimentos do mês.</p>
+      </div>
+
+      <div class="summary-strip">
+        <div class="summary-item">
+          <span class="num">R$ 4.200</span>
+          <span class="label">Recebido este mês</span>
+        </div>
+        <div class="summary-item">
+          <span class="num" style="color: var(--status-warning);">R$ 350</span>
+          <span class="label">Pendente</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. AGENDA E DOCUMENTOS (SEÇÕES DE SUPORTE) -->
+    <section id="sec-agenda" class="page-section">
+      <div class="header-title"><h2>Agenda</h2><p>Visão limpa do calendário.</p></div>
+    </section>
+
+    <section id="sec-documentos" class="page-section">
+      <div class="header-title"><h2>Documentos</h2><p>Biblioteca de PDFs e recibos emitidos.</p></div>
+    </section>
+
+  </main>
+
+  <!-- ESTRUTURA OCULTA DE PDF INTEGRAL -->
+  <div id="pdf-template">
+    <div class="pdf-header">
+      <h1>Prontuário Psicológico Integral</h1>
+      <p><strong>Psicóloga Responsável:</strong> Daniele Sousa Santos — CRP: 22/07398</p>
+      <p><strong>Paciente:</strong> Mariana Silva</p>
     </div>
 
-    <!-- MODAL: CADASTRO/EDIÇÃO DE PACIENTE -->
-    <div id="modalPaciente" class="modal-overlay">
-        <div class="modal">
-            <div class="modal-header">
-                <h3 id="modalPacienteTitle">Cadastrar Paciente</h3>
-                <button class="close-btn" onclick="closeModal('modalPaciente')">&times;</button>
-            </div>
-            <form id="formPaciente" onsubmit="salvarPaciente(event)">
-                <input type="hidden" id="pacienteId">
-                <div class="form-group">
-                    <label>Nome Completo *</label>
-                    <input type="text" id="pacNome" class="form-control" required>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                    <div class="form-group">
-                        <label>Data de Nascimento *</label>
-                        <input type="date" id="pacDataNasc" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label>CPF</label>
-                        <input type="text" id="pacCpf" class="form-control">
-                    </div>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                    <div class="form-group">
-                        <label>Telefone / WhatsApp *</label>
-                        <input type="text" id="pacTelefone" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label>E-mail</label>
-                        <input type="email" id="pacEmail" class="form-control">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Endereço Residencial</label>
-                    <input type="text" id="pacEndereco" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Tipo de Atendimento *</label>
-                    <select id="pacTipo" class="form-control" onchange="toggleCamposInfantil()" required>
-                        <option value="Adulto">Adulto</option>
-                        <option value="Infantil">Infantil</option>
-                    </select>
-                </div>
+    <div class="pdf-session-block">
+      <div class="pdf-session-title">Sessão — 02/09/2026 às 14:00</div>
 
-                <!-- Campos específicos para atendimento infantil -->
-                <div id="containerInfantil" style="display: none; background: var(--primary-light); padding: 15px; border-radius: var(--radius); margin-bottom: 15px;">
-                    <h4>Informações do Responsável Legal</h4>
-                    <br>
-                    <div class="form-group">
-                        <label>Nome do Responsável *</label>
-                        <input type="text" id="respNome" class="form-control">
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
-                        <div class="form-group">
-                            <label>Parentesco *</label>
-                            <input type="text" id="respParentesco" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label>Telefone Responsável *</label>
-                            <input type="text" id="respTelefone" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label>E-mail Responsável</label>
-                            <input type="email" id="respEmail" class="form-control">
-                        </div>
-                    </div>
-                </div>
+      <div class="pdf-field-title">Queixa Principal / Relato</div>
+      <div class="pdf-field-content" id="pdf-out-queixa"></div>
 
-                <div style="text-align: right; margin-top: 20px;">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('modalPaciente')">CANCELAR</button>
-                    <button type="submit" class="btn btn-primary">SALVAR PACIENTE</button>
-                </div>
-            </form>
-        </div>
+      <div class="pdf-field-title">Demanda Trabalhada</div>
+      <div class="pdf-field-content" id="pdf-out-demanda"></div>
+
+      <div class="pdf-field-title">Descrição Detalhada da Sessão</div>
+      <div class="pdf-field-content" id="pdf-out-descricao"></div>
+
+      <div class="pdf-field-title">Análise Técnica e Evolução</div>
+      <div class="pdf-field-content" id="pdf-out-analise"></div>
     </div>
 
-    <!-- MODAL: SESSÃO -->
-    <div id="modalSessao" class="modal-overlay">
-        <div class="modal">
-            <div class="modal-header">
-                <h3>Agendar / Registrar Sessão</h3>
-                <button class="close-btn" onclick="closeModal('modalSessao')">&times;</button>
-            </div>
-            <form id="formSessao" onsubmit="salvarSessao(event)">
-                <input type="hidden" id="sessaoId">
-                <input type="hidden" id="sessaoPacienteId">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                    <div class="form-group">
-                        <label>Data da Sessão *</label>
-                        <input type="date" id="sesData" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Horário *</label>
-                        <input type="time" id="sesHora" class="form-control" required>
-                    </div>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
-                    <div class="form-group">
-                        <label>Modalidade *</label>
-                        <select id="sesModalidade" class="form-control" required>
-                            <option value="Presencial">Presencial</option>
-                            <option value="Online">Online</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Valor (R$) *</label>
-                        <input type="number" step="0.01" id="sesValor" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Status da Sessão *</label>
-                        <select id="sesStatus" class="form-control" required>
-                            <option value="Agendada">Agendada</option>
-                            <option value="Realizada">Realizada</option>
-                            <option value="Falta">Falta</option>
-                            <option value="Cancelada">Cancelada</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Status do Pagamento *</label>
-                    <select id="sesPagamento" class="form-control" required>
-                        <option value="Pendente">Pendente</option>
-                        <option value="Recebido">Recebido</option>
-                    </select>
-                </div>
-                <div style="text-align: right; margin-top: 20px;">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('modalSessao')">CANCELAR</button>
-                    <button type="submit" class="btn btn-primary">SALVAR SESSÃO</button>
-                </div>
-            </form>
-        </div>
+    <div class="pdf-footer">
+      <br><br>
+      <p>____________________________________________________</p>
+      <p><strong>Daniele Sousa Santos</strong></p>
+      <p>CRP: 22/07398</p>
     </div>
-
-    <!-- MODAL: REGISTRO DE EVOLUÇÃO -->
-    <div id="modalEvolucao" class="modal-overlay">
-        <div class="modal" style="max-width: 900px;">
-            <div class="modal-header">
-                <div>
-                    <h3>Registro de Evolução Psicológica</h3>
-                    <span id="draftIndicator" class="draft-status"></span>
-                </div>
-                <button class="close-btn" onclick="fecharEvolucaoComSeguranca()">&times;</button>
-            </div>
-            <form id="formEvolucao" onsubmit="salvarEvolucaoDefinitiva(event)">
-                <input type="hidden" id="evoSessaoId">
-                <input type="hidden" id="evoPacienteId">
-                
-                <div class="form-group">
-                    <label>Queixa Principal / Relato do Paciente</label>
-                    <textarea id="evoQueixa" class="form-control" oninput="autoSaveDraft()"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Demanda Trabalhada</label>
-                    <textarea id="evoDemanda" class="form-control" oninput="autoSaveDraft()"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Descrição Detalhada da Sessão</label>
-                    <textarea id="evoDescricao" class="form-control" style="min-height: 150px;" oninput="autoSaveDraft()"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Análise Técnica e Evolução Diagnóstica/Terapêutica</label>
-                    <textarea id="evoAnalise" class="form-control" style="min-height: 150px;" oninput="autoSaveDraft()"></textarea>
-                </div>
-
-                <div style="text-align: right; margin-top: 20px;">
-                    <button type="button" class="btn btn-secondary" onclick="fecharEvolucaoComSeguranca()">CANCELAR</button>
-                    <button type="submit" class="btn btn-primary">SALVAR EVOLUÇÃO</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL: VISUALIZAÇÃO COMPLETA DE EVOLUÇÃO -->
-    <div id="modalVerEvolucao" class="modal-overlay">
-        <div class="modal">
-            <div class="modal-header">
-                <h3>Evolução Registrada - Detalhes Completos</h3>
-                <button class="close-btn" onclick="closeModal('modalVerEvolucao')">&times;</button>
-            </div>
-            <div id="detalhesEvolucaoConteudo"></div>
-            <div style="text-align: right; margin-top: 20px;">
-                <button class="btn btn-primary" onclick="closeModal('modalVerEvolucao')">FECHAR</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL: RECIBO -->
-    <div id="modalRecibo" class="modal-overlay">
-        <div class="modal" style="max-width: 500px;">
-            <div class="modal-header">
-                <h3>Anexar Recibo de Pagamento</h3>
-                <button class="close-btn" onclick="closeModal('modalRecibo')">&times;</button>
-            </div>
-            <input type="hidden" id="reciboSessaoId">
-            <div class="form-group">
-                <label>Selecione o Comprovante (JPG, PNG, PDF)</label>
-                <input type="file" id="inputArquivoRecibo" class="form-control" accept="image/*,application/pdf">
-            </div>
-            <div style="text-align: right; margin-top: 20px;">
-                <button class="btn btn-secondary" onclick="closeModal('modalRecibo')">CANCELAR</button>
-                <button class="btn btn-primary" onclick="salvarReciboAnexo()">SALVAR RECIBO</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- SYSTEM CORE SCRIPTING ENGINE -->
-    <script>
-        /* INICIALIZAÇÃO DE DADOS MOCK PARA AMBIENTE SEM BASE PRÉVIA
-           (Respeita a regra de preservação sem sobrescrever a estrutura) */
-        const DB_KEY = 'psicontrol_db_v2';
-        
-        function getDB() {
-            const data = localStorage.getItem(DB_KEY);
-            if (!data) {
-                const initialDB = {
-                    pacientes: [],
-                    sessoes: [],
-                    evolues: [],
-                    pdfs: []
-                };
-                localStorage.setItem(DB_KEY, JSON.stringify(initialDB));
-                return initialDB;
-            }
-            return JSON.parse(data);
-        }
-
-        function saveDB(db) {
-            localStorage.setItem(DB_KEY, JSON.stringify(db));
-            refreshUI();
-        }
-
-        // Global State Trackers
-        let activePatientId = null;
-        let draftTimer = null;
-        let hasUnsavedEvoChanges = false;
-        let navigationHistory = ['dashboard'];
-
-        // Page Navigation Controller
-        function showSection(sectionId, pushHistory = true) {
-            document.querySelectorAll('.section-block').forEach(el => el.style.display = 'none');
-            document.getElementById(`sec-${sectionId}`).style.display = 'block';
-
-            document.querySelectorAll('.sidebar-menu a').forEach(el => el.classList.remove('active'));
-            const activeNav = document.querySelector(`.sidebar-menu a[onclick*="${sectionId}"]`);
-            if (activeNav) activeNav.classList.add('active');
-
-            if (pushHistory && navigationHistory[navigationHistory.length - 1] !== sectionId) {
-                navigationHistory.push(sectionId);
-            }
-
-            document.getElementById('btnBack').style.display = navigationHistory.length > 1 ? 'inline-flex' : 'none';
-            refreshUI();
-        }
-
-        function goBack() {
-            if (navigationHistory.length > 1) {
-                navigationHistory.pop();
-                const target = navigationHistory[navigationHistory.length - 1];
-                showSection(target, false);
-            }
-        }
-
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            
-            event.currentTarget.classList.add('active');
-            document.getElementById(tabId).classList.add('active');
-        }
-
-        // UI Refresh Matrix
-        function refreshUI() {
-            renderDashboard();
-            renderPacientes();
-            if (activePatientId) renderProntuario();
-            renderSessoesGlobal();
-            renderFinanceiroGlobal();
-        }
-
-        // Dashboard Metrics & Dynamic Alerts
-        function renderDashboard() {
-            const db = getDB();
-            const total = db.pacientes.length;
-            const ativos = db.pacientes.filter(p => p.status === 'Ativo').length;
-            const realizadas = db.sessoes.filter(s => s.status === 'Realizada').length;
-
-            let recebido = 0;
-            let pendente = 0;
-
-            db.sessoes.forEach(s => {
-                const val = parseFloat(s.valor) || 0;
-                if (s.pagamento === 'Recebido') recebido += val;
-                else if (s.pagamento === 'Pendente') pendente += val;
-            });
-
-            document.getElementById('dash-total-pacientes').innerText = total;
-            document.getElementById('dash-ativos').innerText = ativos;
-            document.getElementById('dash-sessoes-realizadas').innerText = realizadas;
-            document.getElementById('dash-ganhos').innerText = `R$ ${recebido.toFixed(2)}`;
-            document.getElementById('dash-pendente').innerText = `R$ ${pendente.toFixed(2)}`;
-
-            // Dynamic System Integrity Alerts
-            const alertsContainer = document.getElementById('alerts-container');
-            alertsContainer.innerHTML = '';
-
-            let hasAlerts = false;
-
-            db.sessoes.forEach(s => {
-                const pac = db.pacientes.find(p => p.id === s.pacienteId);
-                const pacNome = pac ? pac.nome : 'Paciente Desconhecido';
-
-                // Alert 1: Sessão Realizada sem Evolução
-                if (s.status === 'Realizada') {
-                    const temEvo = db.evolues.some(e => e.sessaoId === s.id);
-                    if (!temEvo) {
-                        hasAlerts = true;
-                        alertsContainer.innerHTML += `
-                            <div class="alert-item" onclick="abrirProntuarioComTab('${s.pacienteId}', 'tab-sessoes')">
-                                <span class="alert-text"><i class="fas fa-exclamation-circle"></i> Sessão realizada sem evolução registrada: <strong>${pacNome}</strong> (${s.data})</span>
-                                <i class="fas fa-arrow-right"></i>
-                            </div>`;
-                    }
-                }
-
-                // Alert 2: Pagamento Recebido sem Recibo
-                if (s.pagamento === 'Recebido' && !s.reciboAnexo) {
-                    hasAlerts = true;
-                    alertsContainer.innerHTML += `
-                        <div class="alert-item" onclick="abrirProntuarioComTab('${s.pacienteId}', 'tab-financeiro')">
-                            <span class="alert-text"><i class="fas fa-file-invoice"></i> Pagamento recebido sem recibo anexado: <strong>${pacNome}</strong> (${s.data})</span>
-                            <i class="fas fa-arrow-right"></i>
-                        </div>`;
-                }
-            });
-
-            // Alert 3: PDF Semanal Pendente
-            db.pacientes.filter(p => p.status === 'Ativo').forEach(p => {
-                const temAtendimentoSemana = db.sessoes.some(s => s.pacienteId === p.id && s.status === 'Realizada');
-                const temPdfSemanal = db.pdfs.some(pdf => pdf.pacienteId === p.id);
-                if (temAtendimentoSemana && !temPdfSemanal) {
-                    hasAlerts = true;
-                    alertsContainer.innerHTML += `
-                        <div class="alert-item" onclick="abrirProntuarioComTab('${p.id}', 'tab-pdfs')">
-                            <span class="alert-text"><i class="fas fa-file-pdf"></i> PDF Semanal Pendente de Geração: <strong>${p.nome}</strong></span>
-                            <i class="fas fa-arrow-right"></i>
-                        </div>`;
-                }
-            });
-
-            if (!hasAlerts) {
-                alertsContainer.innerHTML = '<p style="color:var(--success); font-weight:600;"><i class="fas fa-check-circle"></i> Nenhuma pendência identificada no momento.</p>';
-            }
-        }
-
-        // Patient Module Operations
-        function renderPacientes() {
-            const db = getDB();
-            const search = document.getElementById('searchPaciente').value.toLowerCase();
-            const filter = document.getElementById('filterStatus').value;
-
-            const tbody = document.getElementById('table-pacientes-body');
-            tbody.innerHTML = '';
-
-            let filtered = db.pacientes.filter(p => {
-                const matchesSearch = p.nome.toLowerCase().includes(search);
-                if (!matchesSearch) return false;
-
-                if (filter === 'ativo') return p.status === 'Ativo';
-                if (filter === 'inativo') return p.status === 'Inativo';
-                if (filter === 'Adulto') return p.tipo === 'Adulto';
-                if (filter === 'Infantil') return p.tipo === 'Infantil';
-                if (filter === 'pendencias') {
-                    const temSessaoSemEvo = db.sessoes.some(s => s.pacienteId === p.id && s.status === 'Realizada' && !db.evolues.some(e => e.sessaoId === s.id));
-                    return temSessaoSemEvo;
-                }
-                return true;
-            });
-
-            filtered.forEach(p => {
-                const temEvoPendente = db.sessoes.some(s => s.pacienteId === p.id && s.status === 'Realizada' && !db.evolues.some(e => e.sessaoId === s.id));
-                const temPdf = db.pdfs.some(pdf => pdf.pacienteId === p.id);
-
-                tbody.innerHTML += `
-                    <tr>
-                        <td><strong>${p.nome}</strong></td>
-                        <td>${p.tipo}</td>
-                        <td><span class="badge ${p.status === 'Ativo' ? 'badge-active' : 'badge-inactive'}">${p.status}</span></td>
-                        <td>${temEvoPendente ? '<span class="badge badge-pending">PENDENTE</span>' : '<span style="color:var(--success)"><i class="fas fa-check"></i> Em Dia</span>'}</td>
-                        <td>${temPdf ? '<span style="color:var(--success)"><i class="fas fa-check"></i> Gerado</span>' : '<span class="badge badge-pending">PENDENTE</span>'}</td>
-                        <td>
-                            <button class="btn btn-outline" style="padding: 4px 8px;" onclick="abrirProntuario('${p.id}')"><i class="fas fa-folder-open"></i> Prontuário</button>
-                        </td>
-                    </tr>
-                `;
-            });
-        }
-
-        function openModalPaciente(id = null) {
-            document.getElementById('formPaciente').reset();
-            document.getElementById('pacienteId').value = '';
-            document.getElementById('containerInfantil').style.display = 'none';
-            document.getElementById('modalPacienteTitle').innerText = 'Cadastrar Paciente';
-
-            if (id) {
-                const db = getDB();
-                const p = db.pacientes.find(item => item.id === id);
-                if (p) {
-                    document.getElementById('pacienteId').value = p.id;
-                    document.getElementById('pacNome').value = p.nome;
-                    document.getElementById('pacDataNasc').value = p.dataNascimento;
-                    document.getElementById('pacCpf').value = p.cpf || '';
-                    document.getElementById('pacTelefone').value = p.telefone;
-                    document.getElementById('pacEmail').value = p.email || '';
-                    document.getElementById('pacEndereco').value = p.endereco || '';
-                    document.getElementById('pacTipo').value = p.tipo;
-
-                    if (p.tipo === 'Infantil' && p.responsavel) {
-                        document.getElementById('containerInfantil').style.display = 'block';
-                        document.getElementById('respNome').value = p.responsavel.nome || '';
-                        document.getElementById('respParentesco').value = p.responsavel.parentesco || '';
-                        document.getElementById('respTelefone').value = p.responsavel.telefone || '';
-                        document.getElementById('respEmail').value = p.responsavel.email || '';
-                    }
-                    document.getElementById('modalPacienteTitle').innerText = 'Editar Paciente';
-                }
-            }
-            document.getElementById('modalPaciente').style.display = 'flex';
-        }
-
-        function toggleCamposInfantil() {
-            const tipo = document.getElementById('pacTipo').value;
-            document.getElementById('containerInfantil').style.display = tipo === 'Infantil' ? 'block' : 'none';
-        }
-
-        function salvarPaciente(e) {
-            e.preventDefault();
-            const db = getDB();
-            const id = document.getElementById('pacienteId').value;
-            const tipo = document.getElementById('pacTipo').value;
-
-            let respData = null;
-            if (tipo === 'Infantil') {
-                respData = {
-                    nome: document.getElementById('respNome').value,
-                    parentesco: document.getElementById('respParentesco').value,
-                    telefone: document.getElementById('respTelefone').value,
-                    email: document.getElementById('respEmail').value
-                };
-            }
-
-            if (id) {
-                // Update Existing without destroying historical references
-                const index = db.pacientes.findIndex(p => p.id === id);
-                if (index !== -1) {
-                    db.pacientes[index] = {
-                        ...db.pacientes[index],
-                        nome: document.getElementById('pacNome').value,
-                        dataNascimento: document.getElementById('pacDataNasc').value,
-                        cpf: document.getElementById('pacCpf').value,
-                        telefone: document.getElementById('pacTelefone').value,
-                        email: document.getElementById('pacEmail').value,
-                        endereco: document.getElementById('pacEndereco').value,
-                        tipo: tipo,
-                        responsavel: respData
-                    };
-                }
-            } else {
-                // Create New Record
-                const newPac = {
-                    id: 'pac_' + Date.now(),
-                    nome: document.getElementById('pacNome').value,
-                    dataNascimento: document.getElementById('pacDataNasc').value,
-                    cpf: document.getElementById('pacCpf').value,
-                    telefone: document.getElementById('pacTelefone').value,
-                    email: document.getElementById('pacEmail').value,
-                    endereco: document.getElementById('pacEndereco').value,
-                    tipo: tipo,
-                    status: 'Ativo',
-                    responsavel: respData
-                };
-                db.pacientes.push(newPac);
-                activePatientId = newPac.id;
-            }
-
-            saveDB(db);
-            closeModal('modalPaciente');
-            alert('✓ Paciente salvo com sucesso no banco de dados!');
-            if (activePatientId) abrirProntuario(activePatientId);
-        }
-
-        function toggleStatusPaciente() {
-            const db = getDB();
-            const p = db.pacientes.find(item => item.id === activePatientId);
-            if (!p) return;
-
-            const acao = p.status === 'Ativo' ? 'inativar' : 'reativar';
-            if (confirm(`Deseja realmente ${acao} o paciente ${p.nome}? Todo o histórico será preservado.`)) {
-                p.status = p.status === 'Ativo' ? 'Inativo' : 'Ativo';
-                saveDB(db);
-                renderProntuario();
-            }
-        }
-
-        // Individual Prontuário Hub
-        function abrirProntuario(id) {
-            activePatientId = id;
-            showSection('prontuario');
-        }
-
-        function abrirProntuarioComTab(id, tabId) {
-            activePatientId = id;
-            showSection('prontuario');
-            switchTab(tabId);
-        }
-
-        function renderProntuario() {
-            const db = getDB();
-            const p = db.pacientes.find(item => item.id === activePatientId);
-            if (!p) return;
-
-            document.getElementById('pront-nome-paciente').innerText = p.nome;
-            document.getElementById('pront-info-sub').innerText = `Tipo: ${p.tipo} | Status: ${p.status} | Telefone: ${p.telefone}`;
-            
-            const btnToggle = document.getElementById('btnToggleStatus');
-            if (p.status === 'Ativo') {
-                btnToggle.innerText = 'Inativar Paciente';
-                btnToggle.className = 'btn btn-danger';
-            } else {
-                btnToggle.innerText = 'Reativar Paciente';
-                btnToggle.className = 'btn btn-outline';
-            }
-
-            // Tab Details Rendering
-            let cadHtml = `
-                <p><strong>Data de Nascimento:</strong> ${p.dataNascimento}</p>
-                <p><strong>CPF:</strong> ${p.cpf || 'Não informado'}</p>
-                <p><strong>E-mail:</strong> ${p.email || 'Não informado'}</p>
-                <p><strong>Endereço:</strong> ${p.endereco || 'Não informado'}</p>
-            `;
-            if (p.tipo === 'Infantil' && p.responsavel) {
-                cadHtml += `
-                    <hr style="margin: 10px 0;">
-                    <p><strong>Responsável Legal:</strong> ${p.responsavel.nome} (${p.responsavel.parentesco})</p>
-                    <p><strong>Contato Responsável:</strong> ${p.responsavel.telefone} | ${p.responsavel.email || ''}</p>
-                `;
-            }
-            document.getElementById('pront-detalhes-cadastrais').innerHTML = cadHtml;
-
-            // Sessions Table for Active Patient
-            const sessoesPaciente = db.sessoes.filter(s => s.pacienteId === activePatientId);
-            const tbodySess = document.getElementById('table-sessoes-body');
-            tbodySess.innerHTML = '';
-
-            sessoesPaciente.forEach(s => {
-                const temEvo = db.evolues.some(e => e.sessaoId === s.id);
-                tbodySess.innerHTML += `
-                    <tr>
-                        <td>${s.data} ${s.hora}</td>
-                        <td>${s.modalidade}</td>
-                        <td>${s.status}</td>
-                        <td>${temEvo ? '<span style="color:var(--success)"><i class="fas fa-check"></i> Registrada</span>' : '<span class="badge badge-pending">PENDENTE</span>'}</td>
-                        <td>
-                            <button class="btn btn-outline" style="padding: 2px 6px;" onclick="openModalEvolucao('${s.id}')"><i class="fas fa-pen"></i> Evolução</button>
-                        </td>
-                    </tr>
-                `;
-            });
-
-            // Financial Table
-            const tbodyFin = document.getElementById('table-financeiro-body');
-            tbodyFin.innerHTML = '';
-            sessoesPaciente.forEach(s => {
-                tbodyFin.innerHTML += `
-                    <tr>
-                        <td>${s.data}</td>
-                        <td>R$ ${parseFloat(s.valor).toFixed(2)}</td>
-                        <td>${s.pagamento}</td>
-                        <td>${s.reciboAnexo ? '<span style="color:var(--success)"><i class="fas fa-paperclip"></i> Anexado</span>' : '<span class="badge badge-pending">Sem Recibo</span>'}</td>
-                        <td>
-                            <button class="btn btn-outline" style="padding: 2px 6px;" onclick="openModalRecibo('${s.id}')"><i class="fas fa-upload"></i> Recibo</button>
-                        </td>
-                    </tr>
-                `;
-            });
-
-            // PDFs Table
-            const pdfsPaciente = db.pdfs.filter(pdf => pdf.pacienteId === activePatientId);
-            const tbodyPdf = document.getElementById('table-pdfs-body');
-            tbodyPdf.innerHTML = '';
-            pdfsPaciente.forEach(pdf => {
-                tbodyPdf.innerHTML += `
-                    <tr>
-                        <td>${pdf.dataEmissao}</td>
-                        <td>${pdf.nomeArquivo}</td>
-                        <td>${pdf.tipo}</td>
-                        <td>
-                            <button class="btn btn-outline" style="padding: 2px 6px;" onclick="downloadPDFSimulado('${pdf.id}')"><i class="fas fa-download"></i> Baixar</button>
-                            <button class="btn btn-danger" style="padding: 2px 6px;" onclick="removerPDF('${pdf.id}')"><i class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>
-                `;
-            });
-        }
-
-        function editarPacienteAtual() {
-            openModalPaciente(activePatientId);
-        }
-
-        // Sessions Engine
-        function openModalSessao() {
-            document.getElementById('formSessao').reset();
-            document.getElementById('sessaoId').value = '';
-            document.getElementById('sessaoPacienteId').value = activePatientId;
-            document.getElementById('modalSessao').style.display = 'flex';
-        }
-
-        function salvarSessao(e) {
-            e.preventDefault();
-            const db = getDB();
-            const newSessao = {
-                id: 'ses_' + Date.now(),
-                pacienteId: document.getElementById('sessaoPacienteId').value,
-                data: document.getElementById('sesData').value,
-                hora: document.getElementById('sesHora').value,
-                modalidade: document.getElementById('sesModalidade').value,
-                valor: document.getElementById('sesValor').value,
-                status: document.getElementById('sesStatus').value,
-                pagamento: document.getElementById('sesPagamento').value,
-                reciboAnexo: null
-            };
-
-            db.sessoes.push(newSessao);
-            saveDB(db);
-            closeModal('modalSessao');
-            alert('✓ Sessão registrada com sucesso!');
-        }
-
-        // Evolução Core System & Auto-Draft Security
-        function openModalEvolucao(sessaoId) {
-            const db = getDB();
-            const sessao = db.sessoes.find(s => s.id === sessaoId);
-            if (!sessao) return;
-
-            document.getElementById('formEvolucao').reset();
-            document.getElementById('evoSessaoId').value = sessaoId;
-            document.getElementById('evoPacienteId').value = sessao.pacienteId;
-
-            // Load Existing Data or Draft
-            const evoExistente = db.evolues.find(e => e.sessaoId === sessaoId);
-            const draft = localStorage.getItem(`draft_evo_${sessaoId}`);
-
-            if (evoExistente) {
-                document.getElementById('evoQueixa').value = evoExistente.queixa;
-                document.getElementById('evoDemanda').value = evoExistente.demanda;
-                document.getElementById('evoDescricao').value = evoExistente.descricao;
-                document.getElementById('evoAnalise').value = evoExistente.analise;
-            } else if (draft) {
-                const draftObj = JSON.parse(draft);
-                document.getElementById('evoQueixa').value = draftObj.queixa;
-                document.getElementById('evoDemanda').value = draftObj.demanda;
-                document.getElementById('evoDescricao').value = draftObj.descricao;
-                document.getElementById('evoAnalise').value = draftObj.analise;
-                document.getElementById('draftIndicator').innerText = '(Rascunho recuperado dinamicamente)';
-            }
-
-            hasUnsavedEvoChanges = false;
-            document.getElementById('modalEvolucao').style.display = 'flex';
-        }
-
-        function autoSaveDraft() {
-            hasUnsavedEvoChanges = true;
-            document.getElementById('draftIndicator').innerText = 'Salvando rascunho...';
-            
-            clearTimeout(draftTimer);
-            draftTimer = setTimeout(() => {
-                const sessaoId = document.getElementById('evoSessaoId').value;
-                const draftObj = {
-                    queixa: document.getElementById('evoQueixa').value,
-                    demanda: document.getElementById('evoDemanda').value,
-                    descricao: document.getElementById('evoDescricao').value,
-                    analise: document.getElementById('evoAnalise').value
-                };
-                localStorage.setItem(`draft_evo_${sessaoId}`, JSON.stringify(draftObj));
-                document.getElementById('draftIndicator').innerText = '✓ Rascunho salvo localmente';
-            }, 1000);
-        }
-
-        function salvarEvolucaoDefinitiva(e) {
-            e.preventDefault();
-            const db = getDB();
-            const sessaoId = document.getElementById('evoSessaoId').value;
-            const pacienteId = document.getElementById('evoPacienteId').value;
-
-            const queixa = document.getElementById('evoQueixa').value;
-            const demanda = document.getElementById('evoDemanda').value;
-            const descricao = document.getElementById('evoDescricao').value;
-            const analise = document.getElementById('evoAnalise').value;
-
-            const index = db.evolues.findIndex(e => e.sessaoId === sessaoId);
-            const evoPayload = {
-                id: index !== -1 ? db.evolues[index].id : 'evo_' + Date.now(),
-                sessaoId,
-                pacienteId,
-                queixa,
-                demanda,
-                descricao,
-                analise,
-                dataRegistro: new Date().toISOString()
-            };
-
-            if (index !== -1) {
-                db.evolues[index] = evoPayload;
-            } else {
-                db.evolues.push(evoPayload);
-            }
-
-            // Clean draft tracker
-            localStorage.removeItem(`draft_evo_${sessaoId}`);
-            hasUnsavedEvoChanges = false;
-
-            saveDB(db);
-            closeModal('modalEvolucao');
-            alert('☑ Evolução salva com sucesso no prontuário.');
-        }
-
-        function fecharEvolucaoComSeguranca() {
-            if (hasUnsavedEvoChanges) {
-                if (confirm('Existem alterações não salvas no formulário. Deseja sair mesmo assim?')) {
-                    closeModal('modalEvolucao');
-                }
-            } else {
-                closeModal('modalEvolucao');
-            }
-        }
-
-        // Attachment / Receipt System
-        function openModalRecibo(sessaoId) {
-            document.getElementById('reciboSessaoId').value = sessaoId;
-            document.getElementById('modalRecibo').style.display = 'flex';
-        }
-
-        function salvarReciboAnexo() {
-            const sessaoId = document.getElementById('reciboSessaoId').value;
-            const fileInput = document.getElementById('inputArquivoRecibo');
-
-            if (!fileInput.files || fileInput.files.length === 0) {
-                alert('Por favor, selecione um arquivo.');
-                return;
-            }
-
-            const db = getDB();
-            const sessao = db.sessoes.find(s => s.id === sessaoId);
-            if (sessao) {
-                sessao.reciboAnexo = fileInput.files[0].name;
-                saveDB(db);
-                closeModal('modalRecibo');
-                alert('☑ Recibo anexado com sucesso!');
-            }
-        }
-
-        // PDF Generation Engine - Strictly Following Specifications
-        function triggerPDFGeracao() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            const db = getDB();
-            const paciente = db.pacientes.find(p => p.id === activePatientId);
-            const sessoes = db.sessoes.filter(s => s.pacienteId === activePatientId);
-
-            if (!paciente) return;
-
-            let yPos = 20;
-            const lineHeight = 7;
-            const pageMargin = 15;
-            const maxLineWidth = 180;
-
-            // Professional Header - Psychologist Identity Requirement
-            doc.setFontSize(14);
-            doc.setTextColor(216, 27, 96);
-            doc.text("IDENTIFICAÇÃO PROFISSIONAL", pageMargin, yPos);
-            yPos += lineHeight;
-            doc.setFontSize(10);
-            doc.setTextColor(40, 40, 40);
-            doc.text("Daniele Sousa Santos", pageMargin, yPos);
-            yPos += 5;
-            doc.text("CRP: 22/07398", pageMargin, yPos);
-            yPos += 10;
-
-            // Patient Identity Block
-            doc.setFontSize(12);
-            doc.setTextColor(216, 27, 96);
-            doc.text("IDENTIFICAÇÃO DO PACIENTE", pageMargin, yPos);
-            yPos += lineHeight;
-            doc.setFontSize(10);
-            doc.setTextColor(40, 40, 40);
-            doc.text(`Nome: ${paciente.nome}`, pageMargin, yPos);
-            yPos += 5;
-            doc.text(`Data de Nascimento: ${paciente.dataNascimento} | Tipo: ${paciente.tipo}`, pageMargin, yPos);
-            yPos += 10;
-
-            doc.text("PERÍODO DO PRONTUÁRIO: Registros integrais consolidados", pageMargin, yPos);
-            yPos += 12;
-
-            doc.setFontSize(12);
-            doc.setTextColor(216, 27, 96);
-            doc.text("SESSÕES E EVOLUÇÕES CLÍNICAS", pageMargin, yPos);
-            yPos += lineHeight;
-
-            sessoes.forEach((ses, idx) => {
-                const evo = db.evolues.find(e => e.sessaoId === ses.id);
-
-                // Auto Page Break Control
-                if (yPos > 240) {
-                    doc.addPage();
-                    yPos = 20;
-                }
-
-                doc.setFontSize(10);
-                doc.setTextColor(216, 27, 96);
-                doc.text(`Sessão ${idx + 1} - Data: ${ses.data} (${ses.hora}) - Modalidade: ${ses.modalidade} - Status: ${ses.status}`, pageMargin, yPos);
-                yPos += 6;
-
-                doc.setTextColor(40, 40, 40);
-                
-                const queixaText = evo ? evo.queixa : "Sem registro de evolução.";
-                const demandaText = evo ? evo.demanda : "N/A";
-                const descText = evo ? evo.descricao : "N/A";
-                const analiseText = evo ? evo.analise : "N/A";
-
-                const splitQueixa = doc.splitTextToSize(`Queixa Principal: ${queixaText}`, maxLineWidth);
-                doc.text(splitQueixa, pageMargin, yPos);
-                yPos += (splitQueixa.length * 5) + 2;
-
-                const splitDemanda = doc.splitTextToSize(`Demanda Trabalhada: ${demandaText}`, maxLineWidth);
-                doc.text(splitDemanda, pageMargin, yPos);
-                yPos += (splitDemanda.length * 5) + 2;
-
-                const splitDesc = doc.splitTextToSize(`Descrição Detalhada: ${descText}`, maxLineWidth);
-                doc.text(splitDesc, pageMargin, yPos);
-                yPos += (splitDesc.length * 5) + 2;
-
-                const splitAnalise = doc.splitTextToSize(`Análise Técnica: ${analiseText}`, maxLineWidth);
-                doc.text(splitAnalise, pageMargin, yPos);
-                yPos += (splitAnalise.length * 5) + 8;
-            });
-
-            // Final Page Signature Section
-            if (yPos > 230) {
-                doc.addPage();
-                yPos = 50;
-            } else {
-                yPos += 20;
-            }
-
-            doc.line(pageMargin, yPos, 100, yPos);
-            yPos += 5;
-            doc.text("Daniele Sousa Santos", pageMargin, yPos);
-            yPos += 5;
-            doc.text("CRP: 22/07398", pageMargin, yPos);
-
-            // Register PDF to DB
-            const fileName = `Prontuario_Integral_${paciente.nome.replace(/\s+/g, '_')}.pdf`;
-            db.pdfs.push({
-                id: 'pdf_' + Date.now(),
-                pacienteId: paciente.id,
-                nomeArquivo: fileName,
-                dataEmissao: new Date().toLocaleDateString('pt-BR'),
-                tipo: 'Integral'
-            });
-            saveDB(db);
-
-            // Trigger Download
-            doc.save(fileName);
-            alert("✓ PDF Integral gerado e vinculado ao prontuário do paciente com sucesso!");
-        }
-
-        function gerarResumoProntuario() {
-            const db = getDB();
-            const paciente = db.pacientes.find(p => p.id === activePatientId);
-            const sessoes = db.sessoes.filter(s => s.pacienteId === activePatientId);
-            
-            alert(`RESUMO DO PRONTUÁRIO\n\nPaciente: ${paciente.nome}\nTotal de Sessões Registradas: ${sessoes.length}\nSessões Realizadas: ${sessoes.filter(s => s.status === 'Realizada').length}\nStatus Geral: ${paciente.status}`);
-        }
-
-        function uploadPDFExterno(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const db = getDB();
-            db.pdfs.push({
-                id: 'pdf_' + Date.now(),
-                pacienteId: activePatientId,
-                nomeArquivo: file.name,
-                dataEmissao: new Date().toLocaleDateString('pt-BR'),
-                tipo: 'Externo'
-            });
-
-            saveDB(db);
-            alert('☑ PDF adicionado ao prontuário com sucesso.');
-        }
-
-        function removerPDF(id) {
-            if (confirm('Deseja realmente remover este arquivo PDF do prontuário?')) {
-                const db = getDB();
-                db.pdfs = db.pdfs.filter(p => p.id !== id);
-                saveDB(db);
-            }
-        }
-
-        function downloadPDFSimulado(id) {
-            alert('Iniciando download do documento...');
-        }
-
-        // Global Tables Renderers
-        function renderSessoesGlobal() {
-            const db = getDB();
-            const tbody = document.getElementById('table-sessoes-global-body');
-            tbody.innerHTML = '';
-
-            db.sessoes.forEach(s => {
-                const pac = db.pacientes.find(p => p.id === s.pacienteId);
-                const temEvo = db.evolues.some(e => e.sessaoId === s.id);
-
-                tbody.innerHTML += `
-                    <tr>
-                        <td><strong>${pac ? pac.nome : 'N/A'}</strong></td>
-                        <td>${s.data} ${s.hora}</td>
-                        <td>${s.status}</td>
-                        <td>${temEvo ? '<span style="color:var(--success)"><i class="fas fa-check"></i> Registrada</span>' : '<span class="badge badge-pending">PENDENTE</span>'}</td>
-                        <td>
-                            <button class="btn btn-outline" style="padding: 2px 6px;" onclick="abrirProntuarioComTab('${s.pacienteId}', 'tab-sessoes')"><i class="fas fa-eye"></i> Ver</button>
-                        </td>
-                    </tr>
-                `;
-            });
-        }
-
-        function renderFinanceiroGlobal() {
-            const db = getDB();
-            const tbody = document.getElementById('table-financeiro-global-body');
-            tbody.innerHTML = '';
-
-            db.sessoes.forEach(s => {
-                const pac = db.pacientes.find(p => p.id === s.pacienteId);
-
-                tbody.innerHTML += `
-                    <tr>
-                        <td><strong>${pac ? pac.nome : 'N/A'}</strong></td>
-                        <td>${s.data}</td>
-                        <td>R$ ${parseFloat(s.valor).toFixed(2)}</td>
-                        <td>${s.pagamento}</td>
-                        <td>${s.reciboAnexo ? '<span style="color:var(--success)"><i class="fas fa-paperclip"></i> Anexado</span>' : '<span class="badge badge-pending">Sem Recibo</span>'}</td>
-                        <td>
-                            <button class="btn btn-outline" style="padding: 2px 6px;" onclick="abrirProntuarioComTab('${s.pacienteId}', 'tab-financeiro')"><i class="fas fa-eye"></i> Ver</button>
-                        </td>
-                    </tr>
-                `;
-            });
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-
-        // Initialize Engine On Load
-        window.onload = () => {
-            getDB();
-            refreshUI();
-        };
-    </script>
+  </div>
+
+  <!-- JAVASCRIPT DE INTERATIVIDADE -->
+  <script>
+    // Inicializar ícones da biblioteca Lucide
+    lucide.createIcons();
+
+    // Controle de Transição de Abas
+    function switchTab(tabId) {
+      document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+
+      const target = document.getElementById('sec-' + tabId);
+      if(target) target.classList.add('active');
+
+      // Atualiza link visual ativo
+      event.currentTarget?.classList?.add('active');
+    }
+
+    // Abrir prontuário específico
+    function openProntuario(patientName) {
+      document.getElementById('patient-name-heading').innerText = patientName;
+      switchTab('prontuario');
+    }
+
+    // Lógica de Salvamento e Rascunho Automático
+    let saveTimeout;
+    function triggerAutoSave() {
+      const statusEl = document.getElementById('save-status');
+      statusEl.innerHTML = `<i data-lucide="refresh-cw" style="width:14px; animation: spin 1s infinite linear;"></i> Salvando rascunho...`;
+      lucide.createIcons();
+
+      clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(() => {
+        statusEl.innerHTML = `<i data-lucide="check-circle" style="width: 14px; color: var(--status-success);"></i> Rascunho salvo automaticamente`;
+        lucide.createIcons();
+      }, 1000);
+    }
+
+    function saveEvolucao() {
+      const statusEl = document.getElementById('save-status');
+      statusEl.innerHTML = `<i data-lucide="check-circle" style="width: 14px; color: var(--status-success);"></i> <strong>Evolução salva com sucesso!</strong>`;
+      lucide.createIcons();
+    }
+
+    // Geração de PDF Completo, Profissional e sem limite de páginas
+    function generatePDF() {
+      // Preencher o template
+      document.getElementById('pdf-out-queixa').innerText = document.getElementById('txt-queixa').value;
+      document.getElementById('pdf-out-demanda').innerText = document.getElementById('txt-demanda').value;
+      document.getElementById('pdf-out-descricao').innerText = document.getElementById('txt-descricao').value;
+      document.getElementById('pdf-out-analise').innerText = document.getElementById('txt-analise').value;
+
+      const element = document.getElementById('pdf-template');
+      element.style.display = 'block';
+
+      const opt = {
+        margin:       15,
+        filename:     'Prontuario_Mariana_Silva.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2 },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+
+      html2pdf().set(opt).from(element).save().then(() => {
+        element.style.display = 'none';
+      });
+    }
+  </script>
 </body>
 </html>
