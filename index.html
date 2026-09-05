@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Gestão de Prontuário Psicológico</title>
-    <!-- Biblioteca HTML2PDF para geração de relatórios em PDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Bibliotecas jspdf e html2canvas para geração de relatórios em PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <!-- Fonte Google Poppins -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -1004,7 +1005,7 @@
             }
         }
 
-        /* GERAÇÃO DE PDF INDIVIDUAL DA SESSÃO COM NOME E CRP */
+        /* GERAÇÃO DE PDF INDIVIDUAL DA SESSÃO VIA JSPDF VETORIAL NATIVO */
         async function generateSessionPDF(sessionId) {
             const session = await getById('sessoes', sessionId);
             if (!session) return;
@@ -1018,79 +1019,171 @@
                 return;
             }
 
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
+            const margin = 15;
+            const contentWidth = pageWidth - (margin * 2);
+
+            let currentY = 15;
+
+            // Cabeçalho Profissional
+            doc.setFillColor(136, 14, 79);
+            doc.rect(0, 0, pageWidth, 5, 'F');
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(16);
+            doc.setTextColor(136, 14, 79);
+            doc.text("Daniele Sousa Santos", pageWidth / 2, currentY, { align: 'center' });
+
+            currentY += 6;
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(10);
+            doc.setTextColor(80, 80, 80);
+            doc.text("Psicóloga - CRP: 22/07398", pageWidth / 2, currentY, { align: 'center' });
+
+            currentY += 5;
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(9);
+            doc.setTextColor(120, 120, 120);
+            doc.text("Relatório de Evolução Psicológica", pageWidth / 2, currentY, { align: 'center' });
+
+            currentY += 6;
+            doc.setDrawColor(216, 27, 96);
+            doc.setLineWidth(0.5);
+            doc.line(margin, currentY, pageWidth - margin, currentY);
+
+            currentY += 8;
+
+            // Bloco 1: Identificação do Paciente
+            doc.setFillColor(252, 228, 236);
+            doc.setDrawColor(244, 143, 177);
+            doc.setLineWidth(0.3);
+
+            let patientBoxHeight = patient.tipo === 'Infantil' ? 28 : 22;
+            doc.roundedRect(margin, currentY, contentWidth, patientBoxHeight, 2, 2, 'FD');
+
+            let boxY = currentY + 6;
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(10);
+            doc.setTextColor(136, 14, 79);
+            doc.text("IDENTIFICAÇÃO DO PACIENTE", margin + 4, boxY);
+
+            boxY += 5;
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(9);
+            doc.setTextColor(40, 40, 40);
+            doc.text(`Nome: ${patient.nome}`, margin + 4, boxY);
+            doc.text(`Tipo: ${patient.tipo}`, margin + 110, boxY);
+
+            boxY += 5;
+            doc.text(`Contato: ${patient.telefone}`, margin + 4, boxY);
+
+            if (patient.tipo === 'Infantil') {
+                boxY += 5;
+                doc.text(`Responsável Legal: ${patient.responsavel || 'Não informado'} (${patient.parentesco || ''}) - Tel: ${patient.telefoneResponsavel || 'N/A'}`, margin + 4, boxY);
+            }
+
+            currentY += patientBoxHeight + 6;
+
+            // Bloco 2: Dados da Sessão
+            doc.setFillColor(248, 249, 250);
+            doc.setDrawColor(220, 220, 220);
+            doc.roundedRect(margin, currentY, contentWidth, 20, 2, 2, 'FD');
+
+            let sessionY = currentY + 6;
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(10);
+            doc.setTextColor(136, 14, 79);
+            doc.text("DADOS DA SESSÃO", margin + 4, sessionY);
+
+            sessionY += 5;
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(9);
+            doc.setTextColor(40, 40, 40);
             const dt = new Date(session.dataHora).toLocaleString('pt-BR');
+            doc.text(`Data/Hora: ${dt}`, margin + 4, sessionY);
+            doc.text(`Modalidade: ${session.modalidade}`, margin + 80, sessionY);
+            doc.text(`Status: ${session.status.toUpperCase()}`, margin + 140, sessionY);
 
-            const container = document.createElement('div');
-            container.style.padding = '35px';
-            container.style.fontFamily = 'Arial, sans-serif';
-            container.style.color = '#333';
-            container.style.lineHeight = '1.6';
+            currentY += 26;
 
-            container.innerHTML = `
-                <div style="text-align: center; border-bottom: 2px solid #d81b60; padding-bottom: 12px; margin-bottom: 20px;">
-                    <h2 style="color: #880e4f; margin-bottom: 4px; font-size: 1.4rem;">Daniele Sousa Santos</h2>
-                    <p style="font-size: 0.95rem; color: #555; font-weight: bold;">Psicóloga - CRP: 22/07398</p>
-                    <p style="font-size: 0.85rem; color: #777; margin-top: 5px;">Relatório de Evolução Psicológica</p>
-                </div>
+            // Bloco 3: Registro Clínico da Evolução
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(11);
+            doc.setTextColor(136, 14, 79);
+            doc.text("REGISTRO CLÍNICO DA EVOLUÇÃO", margin, currentY);
 
-                <div style="background-color: #fce4ec; border: 1px solid #f48fb1; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                    <h3 style="color: #880e4f; font-size: 1.05rem; border-bottom: 1px solid #f48fb1; padding-bottom: 5px; margin-bottom: 8px;">IDENTIFICAÇÃO DO PACIENTE</h3>
-                    <p><strong>Nome:</strong> ${patient.nome}</p>
-                    <p><strong>Tipo:</strong> ${patient.tipo}</p>
-                    <p><strong>Contato:</strong> ${patient.telefone}</p>
-                    ${patient.tipo === 'Infantil' ? `
-                        <p><strong>Responsável Legal:</strong> ${patient.responsavel} (${patient.parentesco}) - Tel: ${patient.telefoneResponsavel}</p>
-                    ` : ''}
-                </div>
+            currentY += 3;
+            doc.setDrawColor(216, 27, 96);
+            doc.setLineWidth(0.3);
+            doc.line(margin, currentY, pageWidth - margin, currentY);
 
-                <div style="background-color: #f8f9fa; border: 1px solid #e0e0e0; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                    <h3 style="color: #880e4f; font-size: 1.05rem; border-bottom: 1px solid #ddd; padding-bottom: 5px; margin-bottom: 8px;">DADOS DA SESSÃO</h3>
-                    <p><strong>Data/Hora:</strong> ${dt}</p>
-                    <p><strong>Modalidade:</strong> ${session.modalidade}</p>
-                    <p><strong>Status:</strong> ${session.status.toUpperCase()}</p>
-                </div>
+            currentY += 6;
 
-                <div style="border: 1px solid #e0e0e0; padding: 18px; border-radius: 8px; margin-bottom: 25px;">
-                    <h3 style="color: #880e4f; font-size: 1.05rem; border-bottom: 1px solid #ddd; padding-bottom: 5px; margin-bottom: 12px;">REGISTRO CLÍNICO DA EVOLUÇÃO</h3>
-                    
-                    <div style="margin-bottom: 12px;">
-                        <strong style="color: #880e4f;">1. Queixa Principal / Relato:</strong>
-                        <p style="margin-top: 3px; white-space: pre-wrap; font-size: 0.95rem;">${evo.queixa || 'Não informada'}</p>
-                    </div>
+            function addClinicalSection(title, text) {
+                if (currentY > pageHeight - 35) {
+                    doc.addPage();
+                    currentY = 20;
+                }
 
-                    <div style="margin-bottom: 12px;">
-                        <strong style="color: #880e4f;">2. Demanda Trabalhada:</strong>
-                        <p style="margin-top: 3px; white-space: pre-wrap; font-size: 0.95rem;">${evo.demanda || 'Não informada'}</p>
-                    </div>
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(9.5);
+                doc.setTextColor(136, 14, 79);
+                doc.text(title, margin, currentY);
 
-                    <div style="margin-bottom: 12px;">
-                        <strong style="color: #880e4f;">3. Descrição Detalhada da Sessão:</strong>
-                        <p style="margin-top: 3px; white-space: pre-wrap; font-size: 0.95rem;">${evo.descricao || 'Sem descrição'}</p>
-                    </div>
+                currentY += 4.5;
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(9);
+                doc.setTextColor(50, 50, 50);
 
-                    <div style="margin-bottom: 12px;">
-                        <strong style="color: #880e4f;">4. Análise Técnica e Evolução:</strong>
-                        <p style="margin-top: 3px; white-space: pre-wrap; font-size: 0.95rem;">${evo.analise || 'Sem análise'}</p>
-                    </div>
-                </div>
+                const lines = doc.splitTextToSize(text || 'Não informada', contentWidth);
 
-                <div style="margin-top: 60px; text-align: center;">
-                    <div style="width: 280px; border-top: 1px solid #333; margin: 0 auto; padding-top: 6px;">
-                        <p style="font-size: 0.9rem; font-weight: bold;">Daniele Sousa Santos</p>
-                        <p style="font-size: 0.85rem; color: #555;">Psicóloga - CRP: 22/07398</p>
-                    </div>
-                </div>
-            `;
+                lines.forEach(line => {
+                    if (currentY > pageHeight - 25) {
+                        doc.addPage();
+                        currentY = 20;
+                    }
+                    doc.text(line, margin, currentY);
+                    currentY += 4.5;
+                });
 
-            const opt = {
-                margin:       10,
-                filename:     `Evolucao_${patient.nome.replace(/\s+/g, '_')}_${session.dataHora.substring(0,10)}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2 },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
+                currentY += 3;
+            }
 
-            html2pdf().set(opt).from(container).save();
+            addClinicalSection("1. Queixa Principal / Relato:", evo.queixa);
+            addClinicalSection("2. Demanda Trabalhada:", evo.demanda);
+            addClinicalSection("3. Descrição Detalhada da Sessão:", evo.descricao);
+            addClinicalSection("4. Análise Técnica e Evolução:", evo.analise);
+
+            // Rodapé com Assinatura
+            if (currentY > pageHeight - 40) {
+                doc.addPage();
+                currentY = pageHeight - 40;
+            } else {
+                currentY = Math.max(currentY + 15, pageHeight - 40);
+            }
+
+            doc.setDrawColor(80, 80, 80);
+            doc.setLineWidth(0.3);
+            doc.line(pageWidth / 2 - 45, currentY, pageWidth / 2 + 45, currentY);
+
+            currentY += 5;
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(9.5);
+            doc.setTextColor(40, 40, 40);
+            doc.text("Daniele Sousa Santos", pageWidth / 2, currentY, { align: 'center' });
+
+            currentY += 4;
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(8.5);
+            doc.setTextColor(100, 100, 100);
+            doc.text("Psicóloga - CRP: 22/07398", pageWidth / 2, currentY, { align: 'center' });
+
+            const fileName = `Evolucao_${patient.nome.replace(/\s+/g, '_')}_${session.dataHora.substring(0, 10)}.pdf`;
+            doc.save(fileName);
         }
 
         /* FINANCEIRO MENSAL */
