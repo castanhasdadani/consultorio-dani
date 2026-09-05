@@ -4,80 +4,108 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Gestão de Prontuário Psicológico</title>
-    <!-- Biblioteca HTML2PDF para geração direta de PDFs de sessões individuais no navegador -->
+    <!-- Biblioteca HTML2PDF para geração de relatórios em PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Fonte Google Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --accent-color: #27ae60;
-            --danger-color: #e74c3c;
-            --warning-color: #f39c12;
-            --bg-color: #f8f9fa;
+            --primary-pink: #d81b60;
+            --primary-hover: #c2185b;
+            --light-pink: #fce4ec;
+            --soft-pink: #f8bbd0;
+            --dark-pink: #880e4f;
+            --accent-pink: #ff4081;
+            --bg-color: #fff5f8;
             --card-bg: #ffffff;
-            --text-color: #333333;
-            --border-color: #e0e0e0;
+            --text-main: #37474f;
+            --text-muted: #78909c;
+            --border-color: #f48fb1;
+            --success-color: #2e7d32;
+            --warning-color: #ef6c00;
+            --danger-color: #c62828;
+            --shadow-sm: 0 2px 8px rgba(216, 27, 96, 0.08);
+            --shadow-md: 0 4px 15px rgba(216, 27, 96, 0.12);
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Poppins', sans-serif;
         }
 
         body {
             background-color: var(--bg-color);
-            color: var(--text-color);
+            color: var(--text-main);
             display: flex;
             min-height: 100vh;
         }
 
-        /* Sidebar & Layout */
+        /* Sidebar Navegação */
         .sidebar {
-            width: 250px;
-            background-color: var(--primary-color);
+            width: 260px;
+            background: linear-gradient(180deg, var(--dark-pink) 0%, #4a0072 100%);
             color: white;
-            padding: 20px;
+            padding: 25px 20px;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 25px;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.1);
         }
 
-        .sidebar h2 {
-            font-size: 1.2rem;
+        .sidebar-header {
             text-align: center;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-header p {
+            font-size: 0.75rem;
+            opacity: 0.8;
+            margin-top: 4px;
         }
 
         .nav-links {
             list-style: none;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
         }
 
         .nav-links button {
             width: 100%;
-            padding: 12px;
+            padding: 12px 16px;
             background: transparent;
             border: none;
-            color: white;
+            color: rgba(255,255,255,0.85);
             text-align: left;
-            font-size: 1rem;
+            font-size: 0.95rem;
+            font-weight: 500;
             cursor: pointer;
-            border-radius: 4px;
-            transition: background 0.2s;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .nav-links button:hover, .nav-links button.active {
-            background-color: var(--secondary-color);
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            transform: translateX(4px);
         }
 
+        /* Área Principal */
         .main-content {
             flex: 1;
-            padding: 30px;
+            padding: 35px;
             overflow-y: auto;
         }
 
@@ -85,25 +113,78 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
+        }
+
+        .header-actions h1 {
+            color: var(--dark-pink);
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        /* Botões Globais */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-pink) 0%, var(--accent-pink) 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.2s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary {
+            background-color: var(--light-pink);
+            color: var(--dark-pink);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn-secondary:hover { background-color: var(--soft-pink); }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+        .btn-danger:hover { opacity: 0.9; }
+
+        .btn-pdf {
+            background: linear-gradient(135deg, #8e24aa 0%, #ab47bc 100%);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            box-shadow: 0 2px 5px rgba(142, 36, 170, 0.2);
         }
 
         .btn-back {
-            background-color: #7f8c8d;
-            color: white;
+            background-color: #eceff1;
+            color: var(--text-main);
             border: none;
             padding: 8px 16px;
-            border-radius: 4px;
+            border-radius: 8px;
             cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 0.9rem;
+            font-weight: 500;
         }
 
-        .btn-back:hover { background-color: #95a5a6; }
-
-        /* Componentes de UI */
+        /* Cards e Dashboard */
         .card-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -113,158 +194,146 @@
 
         .card {
             background: var(--card-bg);
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            border: 1px solid var(--border-color);
+            padding: 22px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid rgba(244, 143, 177, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
         }
 
         .card h3 {
-            font-size: 0.9rem;
-            color: #666;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
             margin-bottom: 10px;
         }
 
         .card .value {
             font-size: 1.8rem;
-            font-weight: bold;
-            color: var(--primary-color);
+            font-weight: 700;
+            color: var(--dark-pink);
         }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        .form-group input, .form-group select, .form-group textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            font-size: 1rem;
-        }
-
-        .form-row {
-            display: flex;
-            gap: 15px;
-        }
-
-        .form-row .form-group { flex: 1; }
-
-        button.btn-primary {
-            background-color: var(--secondary-color);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1rem;
-        }
-
-        button.btn-primary:hover { background-color: #2980b9; }
-
-        button.btn-success {
-            background-color: var(--accent-color);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        button.btn-danger {
-            background-color: var(--danger-color);
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        button.btn-pdf {
-            background-color: #8e44ad;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.85rem;
-        }
-
-        button.btn-pdf:hover { background-color: #9b59b6; }
 
         /* Tabelas */
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            border: 1px solid rgba(244, 143, 177, 0.2);
+            margin-bottom: 25px;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            background: var(--card-bg);
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
         }
 
         th, td {
-            padding: 12px 15px;
+            padding: 14px 18px;
             text-align: left;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--light-pink);
+            font-size: 0.92rem;
         }
 
         th {
-            background-color: #f1f2f6;
+            background-color: var(--light-pink);
+            color: var(--dark-pink);
             font-weight: 600;
         }
 
+        tr:hover { background-color: #fff8fa; }
+
+        /* Badges e Status */
         .badge {
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            font-weight: bold;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            display: inline-block;
         }
-        .badge-active { background-color: #e8f8f5; color: #27ae60; }
-        .badge-inactive { background-color: #fed7d7; color: #c53030; }
+        .badge-active { background-color: #e8f5e9; color: var(--success-color); }
+        .badge-inactive { background-color: #ffebee; color: var(--danger-color); }
+        .badge-paid { background-color: #e8f5e9; color: var(--success-color); }
+        .badge-pending { background-color: #fff3e0; color: var(--warning-color); }
 
         .view-section { display: none; }
         .view-section.active { display: block; }
 
         .filter-bar {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             margin-bottom: 20px;
             align-items: center;
+            flex-wrap: wrap;
         }
 
-        /* Modais */
+        /* Modal */
         .modal {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(55, 71, 79, 0.5);
+            backdrop-filter: blur(3px);
             justify-content: center;
             align-items: center;
             z-index: 1000;
         }
         .modal.active { display: flex; }
+        
         .modal-content {
             background: white;
-            padding: 25px;
-            border-radius: 8px;
-            max-width: 600px;
-            width: 100%;
+            padding: 30px;
+            border-radius: 16px;
+            max-width: 650px;
+            width: 90%;
             max-height: 90vh;
             overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border-top: 5px solid var(--primary-pink);
         }
 
-        .action-buttons {
+        .modal-content h2 {
+            color: var(--dark-pink);
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+        }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            font-size: 0.88rem;
+            color: var(--text-main);
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #ffcdd2;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            border-color: var(--primary-pink);
+            box-shadow: 0 0 0 3px rgba(216, 27, 96, 0.1);
+        }
+
+        .form-row { display: flex; gap: 15px; }
+        .form-row .form-group { flex: 1; }
+
+        .action-btns {
             display: flex;
+            gap: 6px;
             flex-wrap: wrap;
-            gap: 5px;
         }
 
         @media (max-width: 768px) {
@@ -277,10 +346,14 @@
 <body>
 
     <div class="sidebar">
-        <h2>Consultório de Psicologia</h2>
+        <div class="sidebar-header">
+            <h2>Daniele Sousa Santos</h2>
+            <p>Psicóloga | CRP: 22/07398</p>
+        </div>
         <ul class="nav-links">
-            <li><button onclick="navigateTo('dashboard')" id="nav-dashboard" class="active">Dashboard</button></li>
-            <li><button onclick="navigateTo('pacientes')" id="nav-pacientes">Pacientes</button></li>
+            <li><button onclick="navigateTo('dashboard')" id="nav-dashboard" class="active">📊 Dashboard</button></li>
+            <li><button onclick="navigateTo('pacientes')" id="nav-pacientes">👥 Pacientes</button></li>
+            <li><button onclick="navigateTo('financeiro')" id="nav-financeiro">💰 Financeiro Mensal</button></li>
         </ul>
     </div>
 
@@ -290,10 +363,11 @@
             <h1 id="page-title">Dashboard</h1>
         </div>
 
+        <!-- DASHBOARD -->
         <div id="view-dashboard" class="view-section active">
             <div class="card-grid">
                 <div class="card">
-                    <h3>Total de Pacientes Ativos</h3>
+                    <h3>Pacientes Ativos</h3>
                     <div class="value" id="dash-active-patients">0</div>
                 </div>
                 <div class="card">
@@ -302,83 +376,139 @@
                 </div>
                 <div class="card">
                     <h3>Recebido no Mês</h3>
-                    <div class="value" id="dash-month-revenue">R$ 0,00</div>
+                    <div class="value" id="dash-month-revenue" style="color: var(--success-color);">R$ 0,00</div>
                 </div>
                 <div class="card">
-                    <h3>Valores Pendentes</h3>
-                    <div class="value" id="dash-month-pending">R$ 0,00</div>
+                    <h3>Pendente no Mês</h3>
+                    <div class="value" id="dash-month-pending" style="color: var(--warning-color);">R$ 0,00</div>
                 </div>
             </div>
             
-            <h2>Ações Rápidas</h2>
-            <br>
-            <button class="btn-primary" onclick="openPatientModal()">+ Cadastrar Novo Paciente</button>
+            <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: var(--shadow-sm);">
+                <h2 style="color: var(--dark-pink); margin-bottom: 15px; font-size: 1.2rem;">Ações Rápidas</h2>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button class="btn-primary" onclick="openPatientModal()">+ Cadastrar Novo Paciente</button>
+                    <button class="btn-secondary" onclick="navigateTo('pacientes')">Ver Todos os Pacientes</button>
+                    <button class="btn-secondary" onclick="navigateTo('financeiro')">Ver Relatório Financeiro</button>
+                </div>
+            </div>
         </div>
 
+        <!-- PACIENTES -->
         <div id="view-pacientes" class="view-section">
             <div class="filter-bar">
                 <button class="btn-primary" onclick="openPatientModal()">+ Novo Paciente</button>
-                <select id="patient-status-filter" onchange="renderPatientsList()" style="width: auto;">
-                    <option value="ativo">Pacientes Ativos</option>
-                    <option value="inativo">Pacientes Inativos</option>
-                    <option value="todos">Todos os Pacientes</option>
+                <input type="text" id="patient-search-input" placeholder="Buscar por nome..." oninput="renderPatientsList()" style="padding: 9px 14px; border: 1px solid var(--border-color); border-radius: 8px; width: 250px;">
+                <select id="patient-status-filter" onchange="renderPatientsList()" style="padding: 9px 14px; border: 1px solid var(--border-color); border-radius: 8px; width: auto;">
+                    <option value="ativo">Status: Ativos</option>
+                    <option value="inativo">Status: Inativos</option>
+                    <option value="todos">Status: Todos</option>
                 </select>
             </div>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>Nome</th>
-                        <th>Tipo</th>
-                        <th>Contato</th>
-                        <th>Status</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody id="patients-table-body"></tbody>
-            </table>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Tipo</th>
+                            <th>Contato</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="patients-table-body"></tbody>
+                </table>
+            </div>
         </div>
 
+        <!-- PRONTUÁRIO -->
         <div id="view-prontuario" class="view-section">
-            <div class="card" style="margin-bottom: 20px;">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div class="card" style="margin-bottom: 25px; border-left: 5px solid var(--primary-pink);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 15px;">
                     <div>
-                        <h2 id="pront-patient-name">Nome do Paciente</h2>
-                        <p id="pront-patient-details" style="color: #666; margin-top: 5px;"></p>
+                        <h2 id="pront-patient-name" style="color: var(--dark-pink); font-size: 1.4rem;">Nome do Paciente</h2>
+                        <p id="pront-patient-details" style="color: var(--text-muted); margin-top: 5px; font-size: 0.9rem;"></p>
                     </div>
                     <div style="display: flex; gap: 10px;">
-                        <button class="btn-primary" onclick="openMonthlySummaryModal()">Resumo Mensal</button>
-                        <button class="btn-success" onclick="openSessionModal()">+ Registrar Sessão</button>
+                        <button class="btn-secondary" onclick="openMonthlySummaryModal()">Resumo Mensal</button>
+                        <button class="btn-primary" onclick="openSessionModal()">+ Registrar Sessão</button>
                     </div>
                 </div>
             </div>
 
-            <h3>Histórico de Sessões, Evoluções e Pagamentos</h3>
-            <br>
+            <h3 style="color: var(--dark-pink); margin-bottom: 15px; font-size: 1.1rem;">Histórico de Sessões e Evoluções Clínicas</h3>
+            
             <div class="filter-bar">
-                <label>Filtrar Histórico Mensal:</label>
-                <input type="month" id="history-month-filter">
-                <button class="btn-primary" onclick="filterPatientHistory()">Buscar Histórico</button>
-                <button class="btn-back" onclick="resetPatientHistory()">Ver Histórico Completo</button>
+                <label style="font-size: 0.9rem; font-weight: 500;">Filtrar Mês:</label>
+                <input type="month" id="history-month-filter" style="padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 8px;">
+                <button class="btn-primary" onclick="filterPatientHistory()">Filtrar</button>
+                <button class="btn-secondary" onclick="resetPatientHistory()">Ver Histórico Completo</button>
             </div>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>Data/Hora</th>
-                        <th>Modalidade</th>
-                        <th>Status Sessão</th>
-                        <th>Valor</th>
-                        <th>Evolução</th>
-                        <th>Recibo</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody id="prontuario-table-body"></tbody>
-            </table>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data / Hora</th>
+                            <th>Modalidade</th>
+                            <th>Status & Valor</th>
+                            <th>Evolução Clínica</th>
+                            <th>Comprovante</th>
+                            <th>Ações da Sessão</th>
+                        </tr>
+                    </thead>
+                    <tbody id="prontuario-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- FINANCEIRO MENSAL -->
+        <div id="view-financeiro" class="view-section">
+            <div class="filter-bar">
+                <label style="font-weight: 600; color: var(--dark-pink);">Selecione o Mês Financeiro:</label>
+                <input type="month" id="finance-month-select" onchange="renderFinancialReport()" style="padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 8px;">
+            </div>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h3>Faturamento Bruto</h3>
+                    <div class="value" id="fin-total-gross">R$ 0,00</div>
+                </div>
+                <div class="card">
+                    <h3>Total Recebido</h3>
+                    <div class="value" id="fin-total-received" style="color: var(--success-color);">R$ 0,00</div>
+                </div>
+                <div class="card">
+                    <h3>Total Pendente</h3>
+                    <div class="value" id="fin-total-pending" style="color: var(--warning-color);">R$ 0,00</div>
+                </div>
+                <div class="card">
+                    <h3>Taxa de Adimplência</h3>
+                    <div class="value" id="fin-adimplence">0%</div>
+                </div>
+            </div>
+
+            <h3 style="color: var(--dark-pink); margin-bottom: 15px; font-size: 1.1rem;">Detalhamento das Sessões no Mês</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data/Hora</th>
+                            <th>Paciente</th>
+                            <th>Valor</th>
+                            <th>Status Sessão</th>
+                            <th>Status Pagamento</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="finance-table-body"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
+    <!-- MODAL PACIENTE -->
     <div id="modal-patient" class="modal">
         <div class="modal-content">
             <h2 id="modal-patient-title">Cadastrar Paciente</h2>
@@ -397,7 +527,7 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Telefone/WhatsApp *</label>
+                        <label>Telefone / WhatsApp *</label>
                         <input type="text" id="patient-phone" required>
                     </div>
                 </div>
@@ -406,8 +536,8 @@
                     <input type="email" id="patient-email" required>
                 </div>
 
-                <div id="infant-fields" style="display: none; border-top: 1px solid #ccc; padding-top: 10px; margin-top: 10px;">
-                    <h4>Dados do Responsável</h4>
+                <div id="infant-fields" style="display: none; background: var(--light-pink); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                    <h4 style="color: var(--dark-pink); margin-bottom: 10px;">Dados do Responsável Legal</h4>
                     <div class="form-group">
                         <label>Nome do Responsável *</label>
                         <input type="text" id="patient-guardian">
@@ -415,20 +545,16 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label>Parentesco *</label>
-                            <input type="text" id="patient-kinship">
+                            <input type="text" id="patient-kinship" placeholder="Ex: Mãe, Pai">
                         </div>
                         <div class="form-group">
                             <label>Telefone do Responsável *</label>
                             <input type="text" id="patient-guardian-phone">
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label>E-mail do Responsável *</label>
-                        <input type="email" id="patient-guardian-email">
-                    </div>
                 </div>
 
-                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px;">
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
                     <button type="button" class="btn-back" onclick="closeModal('modal-patient')">Cancelar</button>
                     <button type="submit" class="btn-primary">Salvar Paciente</button>
                 </div>
@@ -436,9 +562,10 @@
         </div>
     </div>
 
+    <!-- MODAL SESSÃO -->
     <div id="modal-session" class="modal">
         <div class="modal-content">
-            <h2>Registrar Sessão</h2>
+            <h2 id="modal-session-title">Registrar Sessão</h2>
             <form id="form-session" onsubmit="handleSessionSubmit(event)">
                 <input type="hidden" id="session-id">
                 <div class="form-row">
@@ -449,14 +576,14 @@
                     <div class="form-group">
                         <label>Modalidade *</label>
                         <select id="session-mode" required>
-                            <option value="Presencial">Presencial</option>
                             <option value="Online">Online</option>
+                            <option value="Presencial">Presencial</option>
                         </select>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Status *</label>
+                        <label>Status da Sessão *</label>
                         <select id="session-status" required>
                             <option value="realizada">Realizada</option>
                             <option value="cancelada">Cancelada</option>
@@ -475,7 +602,7 @@
                         <option value="pendente">Pendente</option>
                     </select>
                 </div>
-                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px;">
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
                     <button type="button" class="btn-back" onclick="closeModal('modal-session')">Cancelar</button>
                     <button type="submit" class="btn-primary">Salvar Sessão</button>
                 </div>
@@ -483,6 +610,7 @@
         </div>
     </div>
 
+    <!-- MODAL EVOLUÇÃO -->
     <div id="modal-evolution" class="modal">
         <div class="modal-content">
             <h2>Registro de Evolução Clínica</h2>
@@ -490,22 +618,22 @@
                 <input type="hidden" id="evolution-id">
                 <input type="hidden" id="evolution-session-id">
                 <div class="form-group">
-                    <label>Queixa Principal</label>
+                    <label>Queixa Principal / Relato</label>
                     <textarea id="evo-complaint" rows="2"></textarea>
                 </div>
                 <div class="form-group">
-                    <label>Demanda</label>
+                    <label>Demanda Trabalhada</label>
                     <textarea id="evo-demand" rows="2"></textarea>
                 </div>
                 <div class="form-group">
-                    <label>Descrição da Sessão</label>
+                    <label>Descrição Detalhada da Sessão *</label>
                     <textarea id="evo-description" rows="3" required></textarea>
                 </div>
                 <div class="form-group">
-                    <label>Análise e Evolução</label>
+                    <label>Análise Técnica e Evolução</label>
                     <textarea id="evo-analysis" rows="3"></textarea>
                 </div>
-                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px;">
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
                     <button type="button" class="btn-back" onclick="closeModal('modal-evolution')">Cancelar</button>
                     <button type="submit" class="btn-primary">Salvar Evolução</button>
                 </div>
@@ -513,44 +641,45 @@
         </div>
     </div>
 
+    <!-- MODAL RECIBO -->
     <div id="modal-receipt" class="modal">
         <div class="modal-content">
-            <h2>Anexo de Recibo</h2>
+            <h2>Comprovante de Pagamento</h2>
             <form id="form-receipt" onsubmit="handleReceiptSubmit(event)">
                 <input type="hidden" id="receipt-session-id">
                 <div class="form-group">
-                    <label>Arquivo do Recibo (PDF, JPG, JPEG, PNG)</label>
+                    <label>Anexar Comprovante / Recibo (PDF ou Imagem)</label>
                     <input type="file" id="receipt-file" accept=".pdf,.jpg,.jpeg,.png">
                 </div>
                 <div id="receipt-current-status" style="margin-bottom: 15px;"></div>
-                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px;">
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
                     <button type="button" class="btn-back" onclick="closeModal('modal-receipt')">Cancelar</button>
-                    <button type="button" id="btn-remove-receipt" class="btn-danger" style="display:none;" onclick="removeReceipt()">Remover Recibo</button>
-                    <button type="submit" class="btn-primary">Salvar Recibo</button>
+                    <button type="button" id="btn-remove-receipt" class="btn-danger" style="display:none;" onclick="removeReceipt()">Remover</button>
+                    <button type="submit" class="btn-primary">Salvar</button>
                 </div>
             </form>
         </div>
     </div>
 
+    <!-- MODAL RESUMO MENSAL -->
     <div id="modal-monthly-summary" class="modal">
         <div class="modal-content">
-            <h2>Resumo Mensal do Prontuário</h2>
-            <br>
+            <h2>Resumo Mensal do Paciente</h2>
             <div class="form-group">
-                <label>Selecione o Mês e Ano</label>
+                <label>Selecione o Mês/Ano</label>
                 <input type="month" id="summary-month-select" onchange="generateMonthlySummary()">
             </div>
             <div id="summary-results" class="card" style="margin-top: 15px;">
-                <p>Selecione um período acima para gerar o resumo.</p>
+                <p style="color: var(--text-muted);">Escolha um mês para visualizar o consolidado do paciente.</p>
             </div>
-            <div style="display: flex; justify-content: flex-end; margin-top: 15px;">
+            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
                 <button class="btn-back" onclick="closeModal('modal-monthly-summary')">Fechar</button>
             </div>
         </div>
     </div>
 
     <script>
-        /* === NAVEGAÇÃO E GERENCIAMENTO DE ESTADO DA TELA === */
+        /* NAV & ESTADO GLOBAL */
         const navigationHistory = [];
         let currentPatientId = null;
 
@@ -559,15 +688,10 @@
             const currentViewId = currentView ? currentView.id.replace('view-', '') : 'dashboard';
 
             if (!isBack && currentViewId !== viewId) {
-                navigationHistory.push({
-                    view: currentViewId,
-                    patientId: currentPatientId
-                });
+                navigationHistory.push({ view: currentViewId, patientId: currentPatientId });
             }
 
-            if (state.patientId !== undefined) {
-                currentPatientId = state.patientId;
-            }
+            if (state.patientId !== undefined) currentPatientId = state.patientId;
 
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-links button').forEach(el => el.classList.remove('active'));
@@ -584,13 +708,15 @@
             const titleMap = {
                 'dashboard': 'Dashboard',
                 'pacientes': 'Gestão de Pacientes',
-                'prontuario': 'Prontuário Psicológico'
+                'prontuario': 'Prontuário Psicológico',
+                'financeiro': 'Financeiro Mensal'
             };
             document.getElementById('page-title').innerText = titleMap[viewId] || '';
 
             if (viewId === 'dashboard') loadDashboardData();
             if (viewId === 'pacientes') renderPatientsList();
             if (viewId === 'prontuario' && currentPatientId) loadProntuarioData(currentPatientId);
+            if (viewId === 'financeiro') initFinanceView();
         }
 
         function goBack() {
@@ -600,17 +726,12 @@
             }
         }
 
-        function openModal(id) {
-            document.getElementById(id).classList.add('active');
-        }
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
-        function closeModal(id) {
-            document.getElementById(id).classList.remove('active');
-        }
-
-        /* === BANCO DE DADOS INDEXEDDB === */
+        /* DATABASE INDEXEDDB */
         let db;
-        const request = indexedDB.open('PsicoGestaoDB', 1);
+        const request = indexedDB.open('PsicoGestaoRosaDB', 2);
 
         request.onupgradeneeded = function(e) {
             db = e.target.result;
@@ -633,14 +754,7 @@
             loadDashboardData();
         };
 
-        request.onerror = function(e) {
-            console.error('Erro ao abrir IndexedDB:', e);
-        };
-
-        function dbTransaction(storeName, mode) {
-            return db.transaction([storeName], mode).objectStore(storeName);
-        }
-
+        function dbTransaction(storeName, mode) { return db.transaction([storeName], mode).objectStore(storeName); }
         function getAll(storeName) {
             return new Promise((resolve) => {
                 const store = dbTransaction(storeName, 'readonly');
@@ -648,7 +762,6 @@
                 req.onsuccess = () => resolve(req.result);
             });
         }
-
         function getById(storeName, id) {
             return new Promise((resolve) => {
                 const store = dbTransaction(storeName, 'readonly');
@@ -656,7 +769,6 @@
                 req.onsuccess = () => resolve(req.result);
             });
         }
-
         function saveItem(storeName, item) {
             return new Promise((resolve) => {
                 const store = dbTransaction(storeName, 'readwrite');
@@ -664,7 +776,6 @@
                 req.onsuccess = () => resolve(req.result);
             });
         }
-
         function deleteItem(storeName, id) {
             return new Promise((resolve) => {
                 const store = dbTransaction(storeName, 'readwrite');
@@ -673,19 +784,18 @@
             });
         }
 
-        /* === DASHBOARD === */
+        /* DASHBOARD LOGIC */
         async function loadDashboardData() {
             if (!db) return;
             const patients = await getAll('pacientes');
             const sessions = await getAll('sessoes');
 
-            const activePatients = patients.filter(p => p.status === 'ativo').length;
-            document.getElementById('dash-active-patients').innerText = activePatients;
+            document.getElementById('dash-active-patients').innerText = patients.filter(p => p.status === 'ativo').length;
 
             const now = new Date();
             const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-
             const monthSessions = sessions.filter(s => s.dataHora && s.dataHora.startsWith(currentMonthStr));
+
             document.getElementById('dash-month-sessions').innerText = monthSessions.length;
 
             let totalReceived = 0;
@@ -693,18 +803,15 @@
 
             monthSessions.forEach(s => {
                 const val = parseFloat(s.valor) || 0;
-                if (s.pagamentoStatus === 'pago') {
-                    totalReceived += val;
-                } else {
-                    totalPending += val;
-                }
+                if (s.pagamentoStatus === 'pago') totalReceived += val;
+                else totalPending += val;
             });
 
             document.getElementById('dash-month-revenue').innerText = totalReceived.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
             document.getElementById('dash-month-pending').innerText = totalPending.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
 
-        /* === LÓGICA DE PACIENTES === */
+        /* PACIENTES LOGIC */
         function toggleInfantFields() {
             const type = document.getElementById('patient-type').value;
             const infantDiv = document.getElementById('infant-fields');
@@ -736,7 +843,6 @@
                         document.getElementById('patient-guardian').value = p.responsavel || '';
                         document.getElementById('patient-kinship').value = p.parentesco || '';
                         document.getElementById('patient-guardian-phone').value = p.telefoneResponsavel || '';
-                        document.getElementById('patient-guardian-email').value = p.emailResponsavel || '';
                     }
                     document.getElementById('modal-patient-title').innerText = 'Editar Paciente';
                     openModal('modal-patient');
@@ -769,16 +875,12 @@
                 patientData.responsavel = document.getElementById('patient-guardian').value;
                 patientData.parentesco = document.getElementById('patient-kinship').value;
                 patientData.telefoneResponsavel = document.getElementById('patient-guardian-phone').value;
-                patientData.emailResponsavel = document.getElementById('patient-guardian-email').value;
             }
 
             await saveItem('pacientes', patientData);
             closeModal('modal-patient');
-            if (document.getElementById('view-pacientes').classList.contains('active')) {
-                renderPatientsList();
-            } else if (document.getElementById('view-prontuario').classList.contains('active')) {
-                loadProntuarioData(patientData.id);
-            }
+            if (document.getElementById('view-pacientes').classList.contains('active')) renderPatientsList();
+            if (document.getElementById('view-prontuario').classList.contains('active')) loadProntuarioData(patientData.id);
         }
 
         async function togglePatientStatus(id, newStatus) {
@@ -791,24 +893,29 @@
         async function renderPatientsList() {
             const patients = await getAll('pacientes');
             const filter = document.getElementById('patient-status-filter').value;
+            const searchQuery = document.getElementById('patient-search-input').value.toLowerCase();
             const tbody = document.getElementById('patients-table-body');
             tbody.innerHTML = '';
 
-            const filtered = patients.filter(p => filter === 'todos' ? true : p.status === filter);
+            const filtered = patients.filter(p => {
+                const matchesStatus = filter === 'todos' ? true : p.status === filter;
+                const matchesSearch = p.nome.toLowerCase().includes(searchQuery);
+                return matchesStatus && matchesSearch;
+            });
 
             filtered.forEach(p => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td><strong>${p.nome}</strong></td>
                     <td>${p.tipo}</td>
-                    <td>${p.telefone}<br><small>${p.email}</small></td>
+                    <td>${p.telefone}<br><small style="color:var(--text-muted)">${p.email}</small></td>
                     <td><span class="badge ${p.status === 'ativo' ? 'badge-active' : 'badge-inactive'}">${p.status.toUpperCase()}</span></td>
                     <td>
                         <button class="btn-primary" onclick="openProntuario(${p.id})">Prontuário</button>
-                        <button class="btn-back" onclick="openPatientModal(${p.id})">Editar</button>
+                        <button class="btn-secondary" onclick="openPatientModal(${p.id})">Editar</button>
                         ${p.status === 'ativo' 
                             ? `<button class="btn-danger" onclick="togglePatientStatus(${p.id}, 'inativo')">Inativar</button>`
-                            : `<button class="btn-success" onclick="togglePatientStatus(${p.id}, 'ativo')">Reativar</button>`
+                            : `<button class="btn-secondary" onclick="togglePatientStatus(${p.id}, 'ativo')">Reativar</button>`
                         }
                     </td>
                 `;
@@ -816,7 +923,7 @@
             });
         }
 
-        /* === PRONTUÁRIO & SESSÕES === */
+        /* PRONTUÁRIO LOGIC */
         function openProntuario(patientId) {
             navigateTo('prontuario', false, { patientId: patientId });
         }
@@ -836,10 +943,7 @@
             const allEvolutions = await getAll('evolucoes');
 
             let patientSessions = allSessions.filter(s => s.pacienteId === Number(patientId));
-
-            if (monthFilter) {
-                patientSessions = patientSessions.filter(s => s.dataHora.startsWith(monthFilter));
-            }
+            if (monthFilter) patientSessions = patientSessions.filter(s => s.dataHora.startsWith(monthFilter));
 
             patientSessions.sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora));
 
@@ -855,25 +959,30 @@
                 tr.innerHTML = `
                     <td>${dt}</td>
                     <td>${s.modalidade}</td>
-                    <td>${s.status.toUpperCase()}<br><small>(${s.pagamentoStatus})</small></td>
-                    <td>${val}</td>
                     <td>
-                        <div class="action-buttons">
+                        <strong>${val}</strong><br>
+                        <span class="badge ${s.pagamentoStatus === 'pago' ? 'badge-paid' : 'badge-pending'}">${s.pagamentoStatus.toUpperCase()}</span>
+                    </td>
+                    <td>
+                        <div class="action-btns">
                             ${evo 
-                                ? `<button class="btn-back" onclick="openEvolutionModal(${s.id}, ${evo.id})">Ver/Editar Evolução</button>
-                                   <button class="btn-pdf" onclick="generateSessionPDF(${s.id})">📄 Baixar PDF</button>` 
-                                : `<button class="btn-primary" onclick="openEvolutionModal(${s.id})">+ Nova Evolução</button>`
+                                ? `<button class="btn-secondary" onclick="openEvolutionModal(${s.id}, ${evo.id})">Editar Evolução</button>
+                                   <button class="btn-pdf" onclick="generateSessionPDF(${s.id})">📄 PDF Sessão</button>` 
+                                : `<button class="btn-primary" onclick="openEvolutionModal(${s.id})">+ Evolução</button>`
                             }
                         </div>
                     </td>
                     <td>
                         ${s.recibo 
-                            ? `<button class="btn-success" onclick="openReceiptModal(${s.id})">Ver Recibo</button>` 
-                            : `<button class="btn-back" onclick="openReceiptModal(${s.id})">Anexar Recibo</button>`
+                            ? `<button class="btn-secondary" onclick="openReceiptModal(${s.id})">Ver Comprovante</button>` 
+                            : `<button class="btn-secondary" style="border-style:dashed;" onclick="openReceiptModal(${s.id})">+ Anexar</button>`
                         }
                     </td>
                     <td>
-                        <button class="btn-back" onclick="openSessionModal(${s.id})">Editar</button>
+                        <div class="action-btns">
+                            <button class="btn-secondary" onclick="openSessionModal(${s.id})">Editar Sessão</button>
+                            <button class="btn-danger" onclick="deleteSession(${s.id})">Excluir</button>
+                        </div>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -882,19 +991,26 @@
 
         function filterPatientHistory() {
             const filterVal = document.getElementById('history-month-filter').value;
-            if (filterVal && currentPatientId) {
-                loadProntuarioData(currentPatientId, filterVal);
-            }
+            if (filterVal && currentPatientId) loadProntuarioData(currentPatientId, filterVal);
         }
 
         function resetPatientHistory() {
             document.getElementById('history-month-filter').value = '';
-            if (currentPatientId) {
+            if (currentPatientId) loadProntuarioData(currentPatientId);
+        }
+
+        /* APAGAR SESSÃO / EVOLUÇÃO */
+        async function deleteSession(sessionId) {
+            if (confirm("Tem certeza que deseja excluir esta sessão e todo seu registro de evolução?")) {
+                const evolutions = await getAll('evolucoes');
+                const evo = evolutions.find(e => e.sessaoId === Number(sessionId));
+                if (evo) await deleteItem('evolucoes', evo.id);
+                await deleteItem('sessoes', sessionId);
                 loadProntuarioData(currentPatientId);
             }
         }
 
-        /* === GERAÇÃO DE PDF INDIVIDUAL DA EVOLUÇÃO / SESSÃO SELECCIONADA === */
+        /* GERAÇÃO DE PDF INDIVIDUAL DA SESSÃO COM NOME E CRP */
         async function generateSessionPDF(sessionId) {
             const session = await getById('sessoes', sessionId);
             if (!session) return;
@@ -904,77 +1020,77 @@
             const evo = evolutions.find(e => e.sessaoId === session.id);
 
             if (!evo) {
-                alert("Nenhuma evolução cadastrada para esta sessão.");
+                alert("Cadastre primeiro uma evolução clínica nesta sessão para gerar o PDF.");
                 return;
             }
 
             const dt = new Date(session.dataHora).toLocaleString('pt-BR');
 
-            // Container temporário formatado em HTML simples para PDF
             const container = document.createElement('div');
-            container.style.padding = '30px';
+            container.style.padding = '35px';
             container.style.fontFamily = 'Arial, sans-serif';
             container.style.color = '#333';
             container.style.lineHeight = '1.6';
 
             container.innerHTML = `
-                <div style="text-align: center; border-bottom: 2px solid #2c3e50; padding-bottom: 15px; margin-bottom: 20px;">
-                    <h2 style="color: #2c3e50; margin-bottom: 5px;">Relatório de Evolução Psicológica Semanal</h2>
-                    <p style="font-size: 0.9rem; color: #666;">Prontuário Psicológico Individual</p>
+                <div style="text-align: center; border-bottom: 2px solid #d81b60; padding-bottom: 12px; margin-bottom: 20px;">
+                    <h2 style="color: #880e4f; margin-bottom: 4px; font-size: 1.4rem;">Daniele Sousa Santos</h2>
+                    <p style="font-size: 0.95rem; color: #555; font-weight: bold;">Psicóloga - CRP: 22/07398</p>
+                    <p style="font-size: 0.85rem; color: #777; margin-top: 5px;">Relatório de Evolução Psicológica</p>
                 </div>
 
-                <div style="background-color: #f8f9fa; border: 1px solid #e0e0e0; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
-                    <h3 style="color: #2c3e50; font-size: 1.1rem; border-bottom: 1px solid #ddd; padding-bottom: 5px; margin-bottom: 10px;">Dados do Paciente</h3>
+                <div style="background-color: #fce4ec; border: 1px solid #f48fb1; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <h3 style="color: #880e4f; font-size: 1.05rem; border-bottom: 1px solid #f48fb1; padding-bottom: 5px; margin-bottom: 8px;">IDENTIFICAÇÃO DO PACIENTE</h3>
                     <p><strong>Nome:</strong> ${patient.nome}</p>
                     <p><strong>Tipo:</strong> ${patient.tipo}</p>
                     <p><strong>Contato:</strong> ${patient.telefone} | ${patient.email}</p>
                     ${patient.tipo === 'Infantil' ? `
-                        <p><strong>Responsável:</strong> ${patient.responsavel} (${patient.parentesco})</p>
-                        <p><strong>Contato do Responsável:</strong> ${patient.telefoneResponsavel}</p>
+                        <p><strong>Responsável Legal:</strong> ${patient.responsavel} (${patient.parentesco}) - Tel: ${patient.telefoneResponsavel}</p>
                     ` : ''}
                 </div>
 
-                <div style="background-color: #f8f9fa; border: 1px solid #e0e0e0; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
-                    <h3 style="color: #2c3e50; font-size: 1.1rem; border-bottom: 1px solid #ddd; padding-bottom: 5px; margin-bottom: 10px;">Informações da Sessão</h3>
-                    <p><strong>Data e Hora:</strong> ${dt}</p>
+                <div style="background-color: #f8f9fa; border: 1px solid #e0e0e0; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <h3 style="color: #880e4f; font-size: 1.05rem; border-bottom: 1px solid #ddd; padding-bottom: 5px; margin-bottom: 8px;">DADOS DA SESSÃO</h3>
+                    <p><strong>Data/Hora:</strong> ${dt}</p>
                     <p><strong>Modalidade:</strong> ${session.modalidade}</p>
                     <p><strong>Status:</strong> ${session.status.toUpperCase()}</p>
                 </div>
 
-                <div style="border: 1px solid #e0e0e0; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
-                    <h3 style="color: #2c3e50; font-size: 1.1rem; border-bottom: 1px solid #ddd; padding-bottom: 5px; margin-bottom: 10px;">Registro Clínico da Evolução</h3>
+                <div style="border: 1px solid #e0e0e0; padding: 18px; border-radius: 8px; margin-bottom: 25px;">
+                    <h3 style="color: #880e4f; font-size: 1.05rem; border-bottom: 1px solid #ddd; padding-bottom: 5px; margin-bottom: 12px;">REGISTRO CLÍNICO DA EVOLUÇÃO</h3>
                     
                     <div style="margin-bottom: 12px;">
-                        <strong style="color: #2c3e50;">Queixa Principal:</strong>
-                        <p style="margin-top: 3px; white-space: pre-wrap;">${evo.queixa || 'Não informada'}</p>
+                        <strong style="color: #880e4f;">1. Queixa Principal / Relato:</strong>
+                        <p style="margin-top: 3px; white-space: pre-wrap; font-size: 0.95rem;">${evo.queixa || 'Não informada'}</p>
                     </div>
 
                     <div style="margin-bottom: 12px;">
-                        <strong style="color: #2c3e50;">Demanda:</strong>
-                        <p style="margin-top: 3px; white-space: pre-wrap;">${evo.demanda || 'Não informada'}</p>
+                        <strong style="color: #880e4f;">2. Demanda Trabalhada:</strong>
+                        <p style="margin-top: 3px; white-space: pre-wrap; font-size: 0.95rem;">${evo.demanda || 'Não informada'}</p>
                     </div>
 
                     <div style="margin-bottom: 12px;">
-                        <strong style="color: #2c3e50;">Descrição da Sessão:</strong>
-                        <p style="margin-top: 3px; white-space: pre-wrap;">${evo.descricao || 'Sem descrição'}</p>
+                        <strong style="color: #880e4f;">3. Descrição Detalhada da Sessão:</strong>
+                        <p style="margin-top: 3px; white-space: pre-wrap; font-size: 0.95rem;">${evo.descricao || 'Sem descrição'}</p>
                     </div>
 
                     <div style="margin-bottom: 12px;">
-                        <strong style="color: #2c3e50;">Análise e Evolução:</strong>
-                        <p style="margin-top: 3px; white-space: pre-wrap;">${evo.analise || 'Sem análise'}</p>
+                        <strong style="color: #880e4f;">4. Análise Técnica e Evolução:</strong>
+                        <p style="margin-top: 3px; white-space: pre-wrap; font-size: 0.95rem;">${evo.analise || 'Sem análise'}</p>
                     </div>
                 </div>
 
-                <div style="margin-top: 50px; text-align: center;">
-                    <div style="width: 250px; border-top: 1px solid #000; margin: 0 auto; padding-top: 5px;">
-                        <p style="font-size: 0.9rem;"><strong>Assinatura do Profissional</strong></p>
+                <div style="margin-top: 60px; text-align: center;">
+                    <div style="width: 280px; border-top: 1px solid #333; margin: 0 auto; padding-top: 6px;">
+                        <p style="font-size: 0.9rem; font-weight: bold;">Daniele Sousa Santos</p>
+                        <p style="font-size: 0.85rem; color: #555;">Psicóloga - CRP: 22/07398</p>
                     </div>
                 </div>
             `;
 
             const opt = {
                 margin:       10,
-                filename:     `Evolucao_${patient.nome.replace(/\s+/g, '_')}_${session.dataHora.substring(0, 10)}.pdf`,
+                filename:     `Evolucao_${patient.nome.replace(/\s+/g, '_')}_${session.dataHora.substring(0,10)}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2 },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
@@ -983,7 +1099,73 @@
             html2pdf().set(opt).from(container).save();
         }
 
-        /* === MODAL REGISTRO DE SESSÃO === */
+        /* FINANCEIRO MENSAL */
+        function initFinanceView() {
+            const now = new Date();
+            const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+            document.getElementById('finance-month-select').value = currentMonthStr;
+            renderFinancialReport();
+        }
+
+        async function renderFinancialReport() {
+            const selectedMonth = document.getElementById('finance-month-select').value;
+            if (!selectedMonth) return;
+
+            const sessions = await getAll('sessoes');
+            const patients = await getAll('pacientes');
+
+            const monthSessions = sessions.filter(s => s.dataHora && s.dataHora.startsWith(selectedMonth));
+
+            let totalGross = 0;
+            let totalReceived = 0;
+            let totalPending = 0;
+
+            const tbody = document.getElementById('finance-table-body');
+            tbody.innerHTML = '';
+
+            monthSessions.forEach(s => {
+                const patient = patients.find(p => p.id === s.pacienteId);
+                const val = parseFloat(s.valor) || 0;
+                totalGross += val;
+
+                if (s.pagamentoStatus === 'pago') totalReceived += val;
+                else totalPending += val;
+
+                const dt = new Date(s.dataHora).toLocaleString('pt-BR');
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${dt}</td>
+                    <td><strong>${patient ? patient.nome : 'Paciente Não Encontrado'}</strong></td>
+                    <td>${val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
+                    <td>${s.status.toUpperCase()}</td>
+                    <td><span class="badge ${s.pagamentoStatus === 'pago' ? 'badge-paid' : 'badge-pending'}">${s.pagamentoStatus.toUpperCase()}</span></td>
+                    <td>
+                        <button class="btn-secondary" onclick="togglePaymentStatusFromFinance(${s.id})">
+                            Alternar para ${s.pagamentoStatus === 'pago' ? 'Pendente' : 'Pago'}
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('fin-total-gross').innerText = totalGross.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            document.getElementById('fin-total-received').innerText = totalReceived.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            document.getElementById('fin-total-pending').innerText = totalPending.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+            const adimplenceRate = totalGross > 0 ? Math.round((totalReceived / totalGross) * 100) : 0;
+            document.getElementById('fin-adimplence').innerText = `${adimplenceRate}%`;
+        }
+
+        async function togglePaymentStatusFromFinance(sessionId) {
+            const session = await getById('sessoes', sessionId);
+            session.pagamentoStatus = session.pagamentoStatus === 'pago' ? 'pendente' : 'pago';
+            await saveItem('sessoes', session);
+            renderFinancialReport();
+            loadDashboardData();
+        }
+
+        /* MODAIS DE SESSÃO, EVOLUÇÃO E RECIBOS */
         function openSessionModal(sessionId = null) {
             document.getElementById('form-session').reset();
             document.getElementById('session-id').value = '';
@@ -1025,9 +1207,9 @@
             await saveItem('sessoes', sessionData);
             closeModal('modal-session');
             loadProntuarioData(currentPatientId);
+            loadDashboardData();
         }
 
-        /* === MODAL EVOLUÇÃO CLINICA === */
         function openEvolutionModal(sessionId, evolutionId = null) {
             document.getElementById('form-evolution').reset();
             document.getElementById('evolution-id').value = '';
@@ -1068,7 +1250,6 @@
             loadProntuarioData(currentPatientId);
         }
 
-        /* === MODAL RECIBO === */
         async function openReceiptModal(sessionId) {
             document.getElementById('form-receipt').reset();
             document.getElementById('receipt-session-id').value = sessionId;
@@ -1077,10 +1258,10 @@
 
             const session = await getById('sessoes', sessionId);
             if (session && session.recibo) {
-                statusDiv.innerHTML = `<p style="color: green;">✔ Recibo atualmente anexado: <strong>${session.recibo.nome}</strong></p>`;
+                statusDiv.innerHTML = `<p style="color: var(--success-color);">✔ Recibo Anexado: <strong>${session.recibo.nome}</strong></p>`;
                 btnRemove.style.display = 'inline-block';
             } else {
-                statusDiv.innerHTML = `<p style="color: #666;">Nenhum recibo anexado para esta sessão.</p>`;
+                statusDiv.innerHTML = `<p style="color: var(--text-muted);">Nenhum recibo anexado.</p>`;
                 btnRemove.style.display = 'none';
             }
             openModal('modal-receipt');
@@ -1097,11 +1278,7 @@
 
                 reader.onload = async function(event) {
                     const session = await getById('sessoes', sessionId);
-                    session.recibo = {
-                        nome: file.name,
-                        tipo: file.type,
-                        conteudo: event.target.result
-                    };
+                    session.recibo = { nome: file.name, tipo: file.type, conteudo: event.target.result };
                     await saveItem('sessoes', session);
                     closeModal('modal-receipt');
                     loadProntuarioData(currentPatientId);
@@ -1124,10 +1301,9 @@
             }
         }
 
-        /* === RESUMO MENSAL === */
         function openMonthlySummaryModal() {
             document.getElementById('summary-month-select').value = '';
-            document.getElementById('summary-results').innerHTML = '<p>Selecione um período acima para gerar o resumo.</p>';
+            document.getElementById('summary-results').innerHTML = '<p style="color: var(--text-muted);">Escolha um mês para visualizar o consolidado do paciente.</p>';
             openModal('modal-monthly-summary');
         }
 
@@ -1139,11 +1315,8 @@
             const patientSessions = allSessions.filter(s => s.pacienteId === Number(currentPatientId) && s.dataHora.startsWith(monthVal));
 
             let totalSessions = patientSessions.length;
-            let realizadas = 0;
-            let canceladas = 0;
-            let faltas = 0;
-            let valorTotal = 0;
-            let valorPago = 0;
+            let realizadas = 0, canceladas = 0, faltas = 0;
+            let valorTotal = 0, valorPago = 0;
 
             patientSessions.forEach(s => {
                 if (s.status === 'realizada') realizadas++;
@@ -1155,13 +1328,12 @@
                 if (s.pagamentoStatus === 'pago') valorPago += v;
             });
 
-            const resultsDiv = document.getElementById('summary-results');
-            resultsDiv.innerHTML = `
+            document.getElementById('summary-results').innerHTML = `
                 <p><strong>Total de Sessões no Mês:</strong> ${totalSessions}</p>
                 <p><strong>Realizadas:</strong> ${realizadas} | <strong>Canceladas:</strong> ${canceladas} | <strong>Faltas:</strong> ${faltas}</p>
-                <hr style="margin: 10px 0;">
-                <p><strong>Valor Faturado:</strong> ${valorTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
-                <p><strong>Valor Quitado:</strong> ${valorPago.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+                <hr style="margin: 10px 0; border-color: var(--light-pink);">
+                <p><strong>Faturado:</strong> ${valorTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+                <p><strong>Pago:</strong> ${valorPago.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
                 <p><strong>Pendente:</strong> ${(valorTotal - valorPago).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
             `;
         }
