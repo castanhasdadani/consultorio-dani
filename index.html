@@ -215,9 +215,9 @@ th, td {
   padding: 14px 18px;
   text-align: left;
   border-bottom: 1px solid var(--light-pink);
+  font-size: 0.92rem;
 }
 th {
-  font-size: 0.92rem;
   background-color: var(--light-pink);
   color: var(--dark-pink);
   font-weight: 600;
@@ -309,314 +309,325 @@ tr:hover { background-color: #fff8fa; }
 </head>
 <body>
 <div class="sidebar">
-<div class="sidebar-header">
-<h2>Daniele Sousa Santos</h2>
-<p>Psicóloga | CRP: 22/07398</p>
+  <div class="sidebar-header">
+    <h2>Daniele Sousa Santos</h2>
+    <p>Psicóloga | CRP: 22/07398</p>
+  </div>
+  <ul class="nav-links">
+    <li><button onclick="navigateTo('dashboard')" id="nav-dashboard" class="active">Dashboard</button></li>
+    <li><button onclick="navigateTo('pacientes')" id="nav-pacientes">Pacientes</button></li>
+    <li><button onclick="navigateTo('financeiro')" id="nav-financeiro">Financeiro Mensal</button></li>
+  </ul>
 </div>
-<ul class="nav-links">
-<li><button onclick="navigateTo('dashboard')" id="nav-dashboard" class="active">Dashboard</button></li>
-<li><button onclick="navigateTo('pacientes')" id="nav-pacientes">Pacientes</button></li>
-<li><button onclick="navigateTo('financeiro')" id="nav-financeiro">Financeiro Mensal</button></li>
-</ul>
-</div>
+
 <div class="main-content">
-<div class="header-actions">
-<button id="btn-global-back" class="btn-back" onclick="goBack()" style="display:none;">< Voltar</button>
-<h1 id="page-title">Dashboard</h1>
+  <div class="header-actions">
+    <button id="btn-global-back" class="btn-back" onclick="goBack()" style="display:none;">< Voltar</button>
+    <h1 id="page-title">Dashboard</h1>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="view-dashboard" class="view-section active">
+    <div class="card-grid">
+      <div class="card">
+        <h3>Pacientes Ativos</h3>
+        <div class="value" id="dash-active-patients">0</div>
+      </div>
+      <div class="card">
+        <h3>Sessões no Mês</h3>
+        <div class="value" id="dash-month-sessions">0</div>
+      </div>
+      <div class="card">
+        <h3>Recebido no Mês</h3>
+        <div class="value" id="dash-month-revenue" style="color: var(--success-color);">R$ 0,00</div>
+      </div>
+      <div class="card">
+        <h3>Pendente no Mês</h3>
+        <div class="value" id="dash-month-pending" style="color: var(--warning-color);">R$ 0,00</div>
+      </div>
+    </div>
+    <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: var(--shadow-sm);">
+      <h2 style="color: var(--dark-pink); margin-bottom: 15px; font-size: 1.2rem;">Ações Rápidas</h2>
+      <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <button class="btn-primary" onclick="openPatientModal()">+ Cadastrar Novo Paciente</button>
+        <button class="btn-secondary" onclick="navigateTo('pacientes')">Ver Todos os Pacientes</button>
+        <button class="btn-secondary" onclick="navigateTo('financeiro')">Ver Relatório Financeiro</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PACIENTES -->
+  <div id="view-pacientes" class="view-section">
+    <div class="filter-bar">
+      <button class="btn-primary" onclick="openPatientModal()">+ Novo Paciente</button>
+      <input type="text" id="patient-search-input" placeholder="Buscar por nome..." oninput="renderPatientsList()" style="padding: 9px 14px; border: 1px solid var(--border-color); border-radius: 8px; width: 250px;">
+      <select id="patient-status-filter" onchange="renderPatientsList()" style="padding: 9px 14px; border: 1px solid var(--border-color); border-radius: 8px; width: auto;">
+        <option value="ativo">Status: Ativos</option>
+        <option value="inativo">Status: Inativos</option>
+        <option value="todos">Status: Todos</option>
+      </select>
+    </div>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Tipo</th>
+            <th>Contato</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="patients-table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- PRONTUÁRIO -->
+  <div id="view-prontuario" class="view-section">
+    <div class="card" style="margin-bottom: 25px; border-left: 5px solid var(--primary-pink);">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 15px;">
+        <div>
+          <h2 id="pront-patient-name" style="color: var(--dark-pink); font-size: 1.4rem;">Nome do Paciente</h2>
+          <p id="pront-patient-details" style="color: var(--text-muted); margin-top: 5px; font-size: 0.9rem;"></p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn-secondary" onclick="openMonthlySummaryModal()">Resumo Mensal</button>
+          <button class="btn-primary" onclick="openSessionModal()">+ Registrar Sessão</button>
+        </div>
+      </div>
+    </div>
+    <h3 style="color: var(--dark-pink); margin-bottom: 15px; font-size: 1.1rem;">Histórico de Sessões e Evoluções Clínicas</h3>
+    <div class="filter-bar">
+      <label style="font-size: 0.9rem; font-weight: 500;">Filtrar Mês:</label>
+      <input type="month" id="history-month-filter" style="padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 8px;">
+      <button class="btn-primary" onclick="filterPatientHistory()">Filtrar</button>
+      <button class="btn-secondary" onclick="resetPatientHistory()">Ver Histórico Completo</button>
+    </div>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Data / Hora</th>
+            <th>Modalidade</th>
+            <th>Status & Valor</th>
+            <th>Evolução Clínica</th>
+            <th>Comprovante</th>
+            <th>Ações da Sessão</th>
+          </tr>
+        </thead>
+        <tbody id="prontuario-table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- FINANCEIRO MENSAL -->
+  <div id="view-financeiro" class="view-section">
+    <div class="filter-bar">
+      <label style="font-weight: 600; color: var(--dark-pink);">Selecione o Mês Financeiro:</label>
+      <input type="month" id="finance-month-select" onchange="renderFinancialReport()" style="padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 8px;">
+    </div>
+    <div class="card-grid">
+      <div class="card">
+        <h3>Faturamento Bruto</h3>
+        <div class="value" id="fin-total-gross">R$ 0,00</div>
+      </div>
+      <div class="card">
+        <h3>Total Recebido</h3>
+        <div class="value" id="fin-total-received" style="color: var(--success-color);">R$ 0,00</div>
+      </div>
+      <div class="card">
+        <h3>Total Pendente</h3>
+        <div class="value" id="fin-total-pending" style="color: var(--warning-color);">R$ 0,00</div>
+      </div>
+      <div class="card">
+        <h3>Taxa de Adimplência</h3>
+        <div class="value" id="fin-adimplence">0%</div>
+      </div>
+    </div>
+    <h3 style="color: var(--dark-pink); margin-bottom: 15px; font-size: 1.1rem;">Detalhamento das Sessões no Mês</h3>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Data/Hora</th>
+            <th>Paciente</th>
+            <th>Valor</th>
+            <th>Status Sessão</th>
+            <th>Status Pagamento</th>
+            <th>Ação</th>
+          </tr>
+        </thead>
+        <tbody id="finance-table-body"></tbody>
+      </table>
+    </div>
+  </div>
 </div>
-<!-- DASHBOARD -->
-<div id="view-dashboard" class="view-section active">
-<div class="card-grid">
-<div class="card">
-<h3>Pacientes Ativos</h3>
-<div class="value" id="dash-active-patients">0</div>
-</div>
-<div class="card">
-<h3>Sessões no Mês</h3>
-<div class="value" id="dash-month-sessions">0</div>
-</div>
-<div class="card">
-<h3>Recebido no Mês</h3>
-<div class="value" id="dash-month-revenue" style="color: var(--success-color);">R$ 0,00</div>
-</div>
-<div class="card">
-<h3>Pendente no Mês</h3>
-<div class="value" id="dash-month-pending" style="color: var(--warning-color);">R$ 0,00</div>
-</div>
-</div>
-<div style="background: white; padding: 25px; border-radius: 12px; box-shadow: var(--shadow-sm);">
-<h2 style="color: var(--dark-pink); margin-bottom: 15px; font-size: 1.2rem;">Ações Rápidas</h2>
-<div style="display: flex; gap: 12px; flex-wrap: wrap;">
-<button class="btn-primary" onclick="openPatientModal()">+ Cadastrar Novo Paciente</button>
-<button class="btn-secondary" onclick="navigateTo('pacientes')">Ver Todos os Pacientes</button>
-<button class="btn-secondary" onclick="navigateTo('financeiro')">Ver Relatório Financeiro</button>
-</div>
-</div>
-</div>
-<!-- PACIENTES -->
-<div id="view-pacientes" class="view-section">
-<div class="filter-bar">
-<button class="btn-primary" onclick="openPatientModal()">+ Novo Paciente</button>
-<input type="text" id="patient-search-input" placeholder="Buscar por nome..." oninput="renderPatientsList()" style="padding: 9px 14px; border: 1px solid var(--border-color); border-radius: 8px; width: 250px;">
-<select id="patient-status-filter" onchange="renderPatientsList()" style="padding: 9px 14px; border: 1px solid var(--border-color); border-radius: 8px; width: auto;">
-<option value="ativo">Status: Ativos</option>
-<option value="inativo">Status: Inativos</option>
-<option value="todos">Status: Todos</option>
-</select>
-</div>
-<div class="table-container">
-<table>
-<thead>
-<tr>
-<th>Nome</th>
-<th>Tipo</th>
-<th>Contato</th>
-<th>Status</th>
-<th>Ações</th>
-</tr>
-</thead>
-<tbody id="patients-table-body"></tbody>
-</table>
-</div>
-</div>
-<!-- PRONTUÁRIO -->
-<div id="view-prontuario" class="view-section">
-<div class="card" style="margin-bottom: 25px; border-left: 5px solid var(--primary-pink);">
-<div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 15px;">
-<div>
-<h2 id="pront-patient-name" style="color: var(--dark-pink); font-size: 1.4rem;">Nome do Paciente</h2>
-<p id="pront-patient-details" style="color: var(--text-muted); margin-top: 5px; font-size: 0.9rem;"></p>
-</div>
-<div style="display: flex; gap: 10px;">
-<button class="btn-secondary" onclick="openMonthlySummaryModal()">Resumo Mensal</button>
-<button class="btn-primary" onclick="openSessionModal()">+ Registrar Sessão</button>
-</div>
-</div>
-</div>
-<h3 style="color: var(--dark-pink); margin-bottom: 15px; font-size: 1.1rem;">Histórico de Sessões e Evoluções Clínicas</h3>
-<div class="filter-bar">
-<label style="font-size: 0.9rem; font-weight: 500;">Filtrar Mês:</label>
-<input type="month" id="history-month-filter" style="padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 8px;">
-<button class="btn-primary" onclick="filterPatientHistory()">Filtrar</button>
-<button class="btn-secondary" onclick="resetPatientHistory()">Ver Histórico Completo</button>
-</div>
-<div class="table-container">
-<table>
-<thead>
-<tr>
-<th>Data / Hora</th>
-<th>Modalidade</th>
-<th>Status & Valor</th>
-<th>Evolução Clínica</th>
-<th>Comprovante</th>
-<th>Ações da Sessão</th>
-</tr>
-</thead>
-<tbody id="prontuario-table-body"></tbody>
-</table>
-</div>
-</div>
-<!-- FINANCEIRO MENSAL -->
-<div id="view-financeiro" class="view-section">
-<div class="filter-bar">
-<label style="font-weight: 600; color: var(--dark-pink);">Selecione o Mês Financeiro:</label>
-<input type="month" id="finance-month-select" onchange="renderFinancialReport()" style="padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 8px;">
-</div>
-<div class="card-grid">
-<div class="card">
-<h3>Faturamento Bruto</h3>
-<div class="value" id="fin-total-gross">R$ 0,00</div>
-</div>
-<div class="card">
-<h3>Total Recebido</h3>
-<div class="value" id="fin-total-received" style="color: var(--success-color);">R$ 0,00</div>
-</div>
-<div class="card">
-<h3>Total Pendente</h3>
-<div class="value" id="fin-total-pending" style="color: var(--warning-color);">R$ 0,00</div>
-</div>
-<div class="card">
-<h3>Taxa de Adimplência</h3>
-<div class="value" id="fin-adimplence">0%</div>
-</div>
-</div>
-<h3 style="color: var(--dark-pink); margin-bottom: 15px; font-size: 1.1rem;">Detalhamento das Sessões no Mês</h3>
-<div class="table-container">
-<table>
-<thead>
-<tr>
-<th>Data/Hora</th>
-<th>Paciente</th>
-<th>Valor</th>
-<th>Status Sessão</th>
-<th>Status Pagamento</th>
-<th>Ação</th>
-</tr>
-</thead>
-<tbody id="finance-table-body"></tbody>
-</table>
-</div>
-</div>
-</div>
+
 <!-- MODAL PACIENTE -->
 <div id="modal-patient" class="modal">
-<div class="modal-content">
-<h2 id="modal-patient-title">Cadastrar Paciente</h2>
-<form id="form-patient" onsubmit="handlePatientSubmit(event)">
-<input type="hidden" id="patient-id">
-<div class="form-group">
-<label>Nome Completo *</label>
-<input type="text" id="patient-name" required>
+  <div class="modal-content">
+    <h2 id="modal-patient-title">Cadastrar Paciente</h2>
+    <form id="form-patient" onsubmit="handlePatientSubmit(event)">
+      <input type="hidden" id="patient-id">
+      <div class="form-group">
+        <label>Nome Completo *</label>
+        <input type="text" id="patient-name" required>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tipo de Atendimento *</label>
+          <select id="patient-type" required onchange="toggleInfantFields()">
+            <option value="Adulto">Adulto</option>
+            <option value="Infantil">Infantil</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Telefone / WhatsApp *</label>
+          <input type="text" id="patient-phone" required>
+        </div>
+      </div>
+      <div id="infant-fields" style="display: none; background: var(--light-pink); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+        <h4 style="color: var(--dark-pink); margin-bottom: 10px;">Dados do Responsável Legal</h4>
+        <div class="form-group">
+          <label>Nome do Responsável *</label>
+          <input type="text" id="patient-guardian">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Parentesco *</label>
+            <input type="text" id="patient-kinship" placeholder="Ex: Mãe, Pai">
+          </div>
+          <div class="form-group">
+            <label>Telefone do Responsável *</label>
+            <input type="text" id="patient-guardian-phone">
+          </div>
+        </div>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+        <button type="button" class="btn-back" onclick="closeModal('modal-patient')">Cancelar</button>
+        <button type="submit" class="btn-primary">Salvar Paciente</button>
+      </div>
+    </form>
+  </div>
 </div>
-<div class="form-row">
-<div class="form-group">
-<label>Tipo de Atendimento *</label>
-<select id="patient-type" required onchange="toggleInfantFields()">
-<option value="Adulto">Adulto</option>
-<option value="Infantil">Infantil</option>
-</select>
-</div>
-<div class="form-group">
-<label>Telefone / WhatsApp *</label>
-<input type="text" id="patient-phone" required>
-</div>
-</div>
-<div id="infant-fields" style="display: none; background: var(--light-pink); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-<h4 style="color: var(--dark-pink); margin-bottom: 10px;">Dados do Responsável Legal</h4>
-<div class="form-group">
-<label>Nome do Responsável *</label>
-<input type="text" id="patient-guardian">
-</div>
-<div class="form-row">
-<div class="form-group">
-<label>Parentesco *</label>
-<input type="text" id="patient-kinship" placeholder="Ex: Mãe, Pai">
-</div>
-<div class="form-group">
-<label>Telefone do Responsável *</label>
-<input type="text" id="patient-guardian-phone">
-</div>
-</div>
-</div>
-<div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
-<button type="button" class="btn-back" onclick="closeModal('modal-patient')">Cancelar</button>
-<button type="submit" class="btn-primary">Salvar Paciente</button>
-</div>
-</form>
-</div>
-</div>
+
 <!-- MODAL SESSÃO -->
 <div id="modal-session" class="modal">
-<div class="modal-content">
-<h2 id="modal-session-title">Registrar Sessão</h2>
-<form id="form-session" onsubmit="handleSessionSubmit(event)">
-<input type="hidden" id="session-id">
-<div class="form-row">
-<div class="form-group">
-<label>Data e Hora *</label>
-<input type="datetime-local" id="session-datetime" required>
+  <div class="modal-content">
+    <h2 id="modal-session-title">Registrar Sessão</h2>
+    <form id="form-session" onsubmit="handleSessionSubmit(event)">
+      <input type="hidden" id="session-id">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Data e Hora *</label>
+          <input type="datetime-local" id="session-datetime" required>
+        </div>
+        <div class="form-group">
+          <label>Modalidade *</label>
+          <select id="session-mode" required>
+            <option value="Online">Online</option>
+            <option value="Presencial">Presencial</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Status da Sessão *</label>
+          <select id="session-status" required>
+            <option value="realizada">Realizada</option>
+            <option value="cancelada">Cancelada</option>
+            <option value="falta">Falta</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Valor (R$) *</label>
+          <input type="number" step="0.01" id="session-value" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Situação do Pagamento *</label>
+        <select id="session-payment-status" required>
+          <option value="pago">Pago</option>
+          <option value="pendente">Pendente</option>
+        </select>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+        <button type="button" class="btn-back" onclick="closeModal('modal-session')">Cancelar</button>
+        <button type="submit" class="btn-primary">Salvar Sessão</button>
+      </div>
+    </form>
+  </div>
 </div>
-<div class="form-group">
-<label>Modalidade *</label>
-<select id="session-mode" required>
-<option value="Online">Online</option>
-<option value="Presencial">Presencial</option>
-</select>
-</div>
-</div>
-<div class="form-row">
-<div class="form-group">
-<label>Status da Sessão *</label>
-<select id="session-status" required>
-<option value="realizada">Realizada</option>
-<option value="cancelada">Cancelada</option>
-<option value="falta">Falta</option>
-</select>
-</div>
-<div class="form-group">
-<label>Valor (R$) *</label>
-<input type="number" step="0.01" id="session-value" required>
-</div>
-</div>
-<div class="form-group">
-<label>Situação do Pagamento *</label>
-<select id="session-payment-status" required>
-<option value="pago">Pago</option>
-<option value="pendente">Pendente</option>
-</select>
-</div>
-<div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
-<button type="button" class="btn-back" onclick="closeModal('modal-session')">Cancelar</button>
-<button type="submit" class="btn-primary">Salvar Sessão</button>
-</div>
-</form>
-</div>
-</div>
+
 <!-- MODAL EVOLUÇÃO -->
 <div id="modal-evolution" class="modal">
-<div class="modal-content">
-<h2>Registro de Evolução Clínica</h2>
-<form id="form-evolution" onsubmit="handleEvolutionSubmit(event)">
-<input type="hidden" id="evolution-id">
-<input type="hidden" id="evolution-session-id">
-<div class="form-group">
-<label>Queixa Principal / Relato</label>
-<textarea id="evo-complaint" rows="2"></textarea>
+  <div class="modal-content">
+    <h2>Registro de Evolução Clínica</h2>
+    <form id="form-evolution" onsubmit="handleEvolutionSubmit(event)">
+      <input type="hidden" id="evolution-id">
+      <input type="hidden" id="evolution-session-id">
+      <div class="form-group">
+        <label>Queixa Principal / Relato</label>
+        <textarea id="evo-complaint" rows="2"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Demanda Trabalhada</label>
+        <textarea id="evo-demand" rows="2"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Descrição Detalhada da Sessão *</label>
+        <textarea id="evo-description" rows="3" required></textarea>
+      </div>
+      <div class="form-group">
+        <label>Análise Técnica e Evolução</label>
+        <textarea id="evo-analysis" rows="3"></textarea>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+        <button type="button" class="btn-back" onclick="closeModal('modal-evolution')">Cancelar</button>
+        <button type="submit" class="btn-primary">Salvar Evolução</button>
+      </div>
+    </form>
+  </div>
 </div>
-<div class="form-group">
-<label>Demanda Trabalhada</label>
-<textarea id="evo-demand" rows="2"></textarea>
-</div>
-<div class="form-group">
-<label>Descrição Detalhada da Sessão *</label>
-<textarea id="evo-description" rows="3" required></textarea>
-</div>
-<div class="form-group">
-<label>Análise Técnica e Evolução</label>
-<textarea id="evo-analysis" rows="3"></textarea>
-</div>
-<div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
-<button type="button" class="btn-back" onclick="closeModal('modal-evolution')">Cancelar</button>
-<button type="submit" class="btn-primary">Salvar Evolução</button>
-</div>
-</form>
-</div>
-</div>
+
 <!-- MODAL RECIBO -->
 <div id="modal-receipt" class="modal">
-<div class="modal-content">
-<h2>Comprovante de Pagamento</h2>
-<form id="form-receipt" onsubmit="handleReceiptSubmit(event)">
-<input type="hidden" id="receipt-session-id">
-<div class="form-group">
-<label>Anexar Comprovante / Recibo (PDF ou Imagem)</label>
-<input type="file" id="receipt-file" accept=".pdf,.jpg,.jpeg,.png">
+  <div class="modal-content">
+    <h2>Comprovante de Pagamento</h2>
+    <form id="form-receipt" onsubmit="handleReceiptSubmit(event)">
+      <input type="hidden" id="receipt-session-id">
+      <div class="form-group">
+        <label>Anexar Comprovante / Recibo (PDF ou Imagem)</label>
+        <input type="file" id="receipt-file" accept=".pdf,.jpg,.jpeg,.png">
+      </div>
+      <div id="receipt-current-status" style="margin-bottom: 15px;"></div>
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+        <button type="button" class="btn-back" onclick="closeModal('modal-receipt')">Cancelar</button>
+        <button type="button" id="btn-remove-receipt" class="btn-danger" style="display:none;" onclick="removeReceipt()">Remover</button>
+        <button type="submit" class="btn-primary">Salvar</button>
+      </div>
+    </form>
+  </div>
 </div>
-<div id="receipt-current-status" style="margin-bottom: 15px;"></div>
-<div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
-<button type="button" class="btn-back" onclick="closeModal('modal-receipt')">Cancelar</button>
-<button type="button" id="btn-remove-receipt" class="btn-danger" style="display:none;" onclick="removeReceipt()">Remover</button>
-<button type="submit" class="btn-primary">Salvar</button>
-</div>
-</form>
-</div>
-</div>
+
 <!-- MODAL RESUMO MENSAL -->
 <div id="modal-monthly-summary" class="modal">
-<div class="modal-content">
-<h2>Resumo Mensal do Paciente</h2>
-<div class="form-group">
-<label>Selecione o Mês/Ano</label>
-<input type="month" id="summary-month-select" onchange="generateMonthlySummary()">
+  <div class="modal-content">
+    <h2>Resumo Mensal do Paciente</h2>
+    <div class="form-group">
+      <label>Selecione o Mês/Ano</label>
+      <input type="month" id="summary-month-select" onchange="generateMonthlySummary()">
+    </div>
+    <div id="summary-results" class="card" style="margin-top: 15px;">
+      <p style="color: var(--text-muted);">Escolha um mês para visualizar o consolidado do paciente.</p>
+    </div>
+    <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+      <button class="btn-back" onclick="closeModal('modal-monthly-summary')">Fechar</button>
+    </div>
+  </div>
 </div>
-<div id="summary-results" class="card" style="margin-top: 15px;">
-<p style="color: var(--text-muted);">Escolha um mês para visualizar o consolidado do paciente.</p>
-</div>
-<div style="display: flex; justify-content: flex-end; margin-top: 20px;">
-<button class="btn-back" onclick="closeModal('modal-monthly-summary')">Fechar</button>
-</div>
-</div>
-</div>
+
 <script>
 /* NAV & ESTADO GLOBAL */
 const navigationHistory = [];
@@ -629,13 +640,16 @@ function navigateTo(viewId, isBack = false, state = {}) {
     navigationHistory.push({ view: currentViewId, patientId: currentPatientId });
   }
   if (state.patientId !== undefined) currentPatientId = state.patientId;
+
   document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.nav-links button').forEach(el => el.classList.remove('active'));
 
   const targetView = document.getElementById(`view-${viewId}`);
   if (targetView) targetView.classList.add('active');
+
   const navBtn = document.getElementById(`nav-${viewId}`);
   if (navBtn) navBtn.classList.add('active');
+
   const backBtn = document.getElementById('btn-global-back');
   backBtn.style.display = navigationHistory.length > 0 ? 'inline-flex' : 'none';
 
@@ -666,6 +680,7 @@ function closeModal(id) { document.getElementById(id).classList.remove('active')
 /* DATABASE INDEXEDDB */
 let db;
 const request = indexedDB.open('PsicoGestaoRosaDB', 2);
+
 request.onupgradeneeded = function(e) {
   db = e.target.result;
   if (!db.objectStoreNames.contains('pacientes')) {
@@ -673,12 +688,12 @@ request.onupgradeneeded = function(e) {
   }
   if (!db.objectStoreNames.contains('sessoes')) {
     const sessoesStore = db.createObjectStore('sessoes', { keyPath: 'id', autoIncrement: true });
-    sessoesStore.createIndex('pacienteId', 'pacienteId', { unique: false });
+    sessoesStore.createIndex('pacienteld', 'pacienteld', { unique: false });
   }
   if (!db.objectStoreNames.contains('evolucoes')) {
     const evolucoesStore = db.createObjectStore('evolucoes', { keyPath: 'id', autoIncrement: true });
-    evolucoesStore.createIndex('sessaoId', 'sessaoId', { unique: true });
-    evolucoesStore.createIndex('pacienteId', 'pacienteId', { unique: false });
+    evolucoesStore.createIndex('sessaold', 'sessaold', { unique: true });
+    evolucoesStore.createIndex('pacienteld', 'pacienteld', { unique: false });
   }
 };
 
@@ -728,19 +743,24 @@ async function loadDashboardData() {
   if (!db) return;
   const patients = await getAll('pacientes');
   const sessions = await getAll('sessoes');
+
   document.getElementById('dash-active-patients').innerText = patients.filter(p => p.status === 'ativo').length;
+
   const now = new Date();
   const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-  const monthSessions = sessions.filter(s => (s.dataHora || s.datetime || '').startsWith(currentMonthStr));
+  const monthSessions = sessions.filter(s => s.dataHora && s.dataHora.startsWith(currentMonthStr));
+
   document.getElementById('dash-month-sessions').innerText = monthSessions.length;
+
   let totalReceived = 0;
   let totalPending = 0;
+
   monthSessions.forEach(s => {
-    const val = parseFloat(s.valor || s.value) || 0;
-    const isPaid = (s.pagamentoStatus || s.paymentStatus) === 'pago';
-    if (isPaid) totalReceived += val;
+    const val = parseFloat(s.valor) || 0;
+    if (s.pagamentoStatus === 'pago') totalReceived += val;
     else totalPending += val;
   });
+
   document.getElementById('dash-month-revenue').innerText = totalReceived.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   document.getElementById('dash-month-pending').innerText = totalPending.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
@@ -750,6 +770,7 @@ function toggleInfantFields() {
   const type = document.getElementById('patient-type').value;
   const infantDiv = document.getElementById('infant-fields');
   const reqs = infantDiv.querySelectorAll('input');
+
   if (type === 'Infantil') {
     infantDiv.style.display = 'block';
     reqs.forEach(r => r.required = true);
@@ -764,17 +785,18 @@ function openPatientModal(patientId = null) {
   document.getElementById('patient-id').value = '';
   document.getElementById('modal-patient-title').innerText = 'Cadastrar Paciente';
   toggleInfantFields();
+
   if (patientId) {
     getById('pacientes', patientId).then(p => {
       document.getElementById('patient-id').value = p.id;
-      document.getElementById('patient-name').value = p.nome || p.name || '';
-      document.getElementById('patient-type').value = p.tipo || p.type || 'Adulto';
-      document.getElementById('patient-phone').value = p.telefone || p.phone || '';
+      document.getElementById('patient-name').value = p.nome;
+      document.getElementById('patient-type').value = p.tipo;
+      document.getElementById('patient-phone').value = p.telefone;
       toggleInfantFields();
-      if ((p.tipo || p.type) === 'Infantil') {
-        document.getElementById('patient-guardian').value = p.responsavel || p.guardian || '';
-        document.getElementById('patient-kinship').value = p.parentesco || p.kinship || '';
-        document.getElementById('patient-guardian-phone').value = p.telefoneResponsavel || p.guardianPhone || '';
+      if (p.tipo === 'Infantil') {
+        document.getElementById('patient-guardian').value = p.responsavel || '';
+        document.getElementById('patient-kinship').value = p.parentesco || '';
+        document.getElementById('patient-guardian-phone').value = p.telefoneResponsavel || '';
       }
       document.getElementById('modal-patient-title').innerText = 'Editar Paciente';
       openModal('modal-patient');
@@ -788,31 +810,36 @@ async function handlePatientSubmit(e) {
   e.preventDefault();
   const id = document.getElementById('patient-id').value;
   const type = document.getElementById('patient-type').value;
+
   const patientData = {
     nome: document.getElementById('patient-name').value,
     tipo: type,
     telefone: document.getElementById('patient-phone').value,
     status: 'ativo'
   };
+
   if (id) {
     const existing = await getById('pacientes', id);
     patientData.id = Number(id);
     patientData.status = existing.status;
   }
+
   if (type === 'Infantil') {
     patientData.responsavel = document.getElementById('patient-guardian').value;
     patientData.parentesco = document.getElementById('patient-kinship').value;
     patientData.telefoneResponsavel = document.getElementById('patient-guardian-phone').value;
   }
+
   await saveItem('pacientes', patientData);
   closeModal('modal-patient');
+
   if (document.getElementById('view-pacientes').classList.contains('active')) renderPatientsList();
   if (document.getElementById('view-prontuario').classList.contains('active')) loadProntuarioData(patientData.id);
 }
 
 async function togglePatientStatus(id, newStatus) {
   const patient = await getById('pacientes', id);
-  patient.status = newStatus || (patient.status === 'ativo' ? 'inativo' : 'ativo');
+  patient.status = newStatus;
   await saveItem('pacientes', patient);
   renderPatientsList();
 }
@@ -823,30 +850,29 @@ async function renderPatientsList() {
   const searchQuery = document.getElementById('patient-search-input').value.toLowerCase();
   const tbody = document.getElementById('patients-table-body');
   tbody.innerHTML = '';
+
   const filtered = patients.filter(p => {
     const matchesStatus = filter === 'todos' ? true : p.status === filter;
-    const pName = (p.nome || p.name || '').toLowerCase();
-    const matchesSearch = pName.includes(searchQuery);
+    const matchesSearch = p.nome.toLowerCase().includes(searchQuery);
     return matchesStatus && matchesSearch;
   });
+
   filtered.forEach(p => {
     const tr = document.createElement('tr');
-    const pName = p.nome || p.name || '';
-    const pType = p.tipo || p.type || '';
-    const pPhone = p.telefone || p.phone || '';
     tr.innerHTML = `
-      <td><strong>${pName}</strong></td>
-      <td>${pType}</td>
-      <td>${pPhone}</td>
+      <td><strong>${p.nome}</strong></td>
+      <td>${p.tipo}</td>
+      <td>${p.telefone}</td>
       <td><span class="badge ${p.status === 'ativo' ? 'badge-active' : 'badge-inactive'}">${p.status.toUpperCase()}</span></td>
       <td>
         <button class="btn-primary" onclick="openProntuario(${p.id})">Prontuário</button>
         <button class="btn-secondary" onclick="openPatientModal(${p.id})">Editar</button>
-        ${p.status === 'ativo'
+        ${p.status === 'ativo' 
           ? `<button class="btn-danger" onclick="togglePatientStatus(${p.id}, 'inativo')">Inativar</button>`
           : `<button class="btn-secondary" onclick="togglePatientStatus(${p.id}, 'ativo')">Reativar</button>`
         }
-      </td>`;
+      </td>
+    `;
     tbody.appendChild(tr);
   });
 }
@@ -859,56 +885,49 @@ function openProntuario(patientId) {
 async function loadProntuarioData(patientId, monthFilter = null) {
   const patient = await getById('pacientes', patientId);
   if (!patient) return;
-  const pName = patient.nome || patient.name || '';
-  const pType = patient.tipo || patient.type || '';
-  const pPhone = patient.telefone || patient.phone || '';
-  document.getElementById('pront-patient-name').innerText = `${pName} (${pType})`;
-  let details = `Tel: ${pPhone}`;
-  if (pType === 'Infantil') {
-    const pResp = patient.responsavel || patient.guardian || '';
-    const pKin = patient.parentesco || patient.kinship || '';
-    const pRespTel = patient.telefoneResponsavel || patient.guardianPhone || '';
-    details += ` | Resp: ${pResp} (${pKin}) - Tel Resp: ${pRespTel}`;
+
+  document.getElementById('pront-patient-name').innerText = `${patient.nome} (${patient.tipo})`;
+  let details = `Tel: ${patient.telefone}`;
+  if (patient.tipo === 'Infantil') {
+    details += ` | Resp: ${patient.responsavel} (${patient.parentesco}) - Tel Resp: ${patient.telefoneResponsavel}`;
   }
   document.getElementById('pront-patient-details').innerText = details;
 
   const allSessions = await getAll('sessoes');
   const allEvolutions = await getAll('evolucoes');
-  let patientSessions = allSessions.filter(s => s.pacienteId === Number(patientId));
-  if (monthFilter) {
-    patientSessions = patientSessions.filter(s => (s.dataHora || s.datetime || '').startsWith(monthFilter));
-  }
-  patientSessions.sort((a, b) => new Date(b.dataHora || b.datetime) - new Date(a.dataHora || a.datetime));
+
+  let patientSessions = allSessions.filter(s => s.pacienteld === Number(patientId));
+  if (monthFilter) patientSessions = patientSessions.filter(s => s.dataHora.startsWith(monthFilter));
+
+  patientSessions.sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora));
+
   const tbody = document.getElementById('prontuario-table-body');
   tbody.innerHTML = '';
+
   patientSessions.forEach(s => {
-    const evo = allEvolutions.find(e => e.sessaoId === s.id);
-    const dtStr = s.dataHora || s.datetime;
-    const dt = new Date(dtStr).toLocaleString('pt-BR');
-    const valNum = parseFloat(s.valor || s.value || 0);
-    const val = valNum.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-    const payStatus = s.pagamentoStatus || s.paymentStatus || 'pendente';
-    const mode = s.modalidade || s.mode || '';
+    const evo = allEvolutions.find(e => e.sessaold === s.id);
+    const dt = new Date(s.dataHora).toLocaleString('pt-BR');
+    const val = parseFloat(s.valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${dt}</td>
-      <td>${mode}</td>
+      <td>${s.modalidade}</td>
       <td>
         <strong>${val}</strong><br>
-        <span class="badge ${payStatus === 'pago' ? 'badge-paid' : 'badge-pending'}">${payStatus.toUpperCase()}</span>
+        <span class="badge ${s.pagamentoStatus === 'pago' ? 'badge-paid' : 'badge-pending'}">${s.pagamentoStatus.toUpperCase()}</span>
       </td>
       <td>
         <div class="action-btns">
-        ${evo
-          ? `<button class="btn-secondary" onclick="openEvolutionModal(${s.id}, ${evo.id})">Editar Evolução</button>
-             <button class="btn-pdf" onclick="generateSessionPDF(${s.id})">PDF Sessão</button>`
-          : `<button class="btn-primary" onclick="openEvolutionModal(${s.id})">+ Evolução</button>`
-        }
+          ${evo 
+            ? `<button class="btn-secondary" onclick="openEvolutionModal(${s.id}, ${evo.id})">Editar Evolução</button>
+               <button class="btn-pdf" onclick="generateSessionPDF(${s.id})">PDF Sessão</button>`
+            : `<button class="btn-primary" onclick="openEvolutionModal(${s.id})">+ Evolução</button>`
+          }
         </div>
       </td>
       <td>
-        ${(s.recibo || s.receipt)
+        ${s.recibo 
           ? `<button class="btn-secondary" onclick="openReceiptModal(${s.id})">Ver Comprovante</button>`
           : `<button class="btn-secondary" style="border-style:dashed;" onclick="openReceiptModal(${s.id})">+ Anexar</button>`
         }
@@ -918,7 +937,8 @@ async function loadProntuarioData(patientId, monthFilter = null) {
           <button class="btn-secondary" onclick="openSessionModal(${s.id})">Editar Sessão</button>
           <button class="btn-danger" onclick="deleteSession(${s.id})">Excluir</button>
         </div>
-      </td>`;
+      </td>
+    `;
     tbody.appendChild(tr);
   });
 }
@@ -937,29 +957,29 @@ function resetPatientHistory() {
 async function deleteSession(sessionId) {
   if (confirm("Tem certeza que deseja excluir esta sessão e todo seu registro de evolução?")) {
     const evolutions = await getAll('evolucoes');
-    const evo = evolutions.find(e => e.sessaoId === Number(sessionId));
+    const evo = evolutions.find(e => e.sessaold === Number(sessionId));
     if (evo) await deleteItem('evolucoes', evo.id);
     await deleteItem('sessoes', sessionId);
     loadProntuarioData(currentPatientId);
   }
 }
 
-/* GERAÇÃO DE PDF DA SESSÃO VIA HTML2CANVAS E JSPDF (INTEGRAÇÃO DO CÓDIGO 2) */
-async function generatePDF(sessionId) {
+/* GERAÇÃO DE PDF VIA HTML2CANVAS (CÓDIGO 2 MAPPING PARA ALINHAMENTO E PARÁGRAFOS EXATOS) */
+async function generateSessionPDF(sessionId) {
   const session = await getById('sessoes', sessionId);
   if (!session) return;
-  const patient = await getById('pacientes', session.pacienteId);
+  const patient = await getById('pacientes', session.pacienteld);
   const evolutions = await getAll('evolucoes');
-  const evo = evolutions.find(e => e.sessaoId === Number(sessionId));
-  
+  const evo = evolutions.find(e => e.sessaold === session.id);
+
   if (!evo) {
-    alert('Evolução clínica não encontrada.');
+    alert("Cadastre primeiro uma evolução clínica nesta sessão para gerar o PDF.");
     return;
   }
-  
+
   const { jsPDF } = window.jspdf;
-  
-  // Cria um contêiner temporário estilizado no padrão Folha A4
+
+  // Cria um container temporário estilizado no padrão Folha A4
   const container = document.createElement('div');
   container.style.position = 'absolute';
   container.style.left = '-9999px';
@@ -971,26 +991,19 @@ async function generatePDF(sessionId) {
   container.style.fontFamily = "'Poppins', sans-serif";
   container.style.boxSizing = 'border-box';
 
-  const pName = patient.nome || patient.name || '';
-  const pType = patient.tipo || patient.type || '';
-  const pPhone = patient.telefone || patient.phone || '';
-  const pGuardian = patient.responsavel || patient.guardian || '';
-  const pKinship = patient.parentesco || patient.kinship || 'Resp.';
-  const pGuardianPhone = patient.telefoneResponsavel || patient.guardianPhone || 'N/A';
-
   let guardianHTML = '';
-  if (pType === 'Infantil' && pGuardian) {
-    guardianHTML = `<p style="margin: 4px 0; font-size: 0.9rem;"><strong>Responsável Legal:</strong> ${pGuardian} (${pKinship}) - <strong>Tel:</strong> ${pGuardianPhone}</p>`;
+  if (patient.tipo === 'Infantil' && (patient.responsavel || patient.guardian)) {
+    const guardianName = patient.responsavel || patient.guardian;
+    const kinship = patient.parentesco || patient.kinship || 'Resp.';
+    const phoneResp = patient.telefoneResponsavel || patient.guardianPhone || 'N/A';
+    guardianHTML = `<p style="margin: 4px 0; font-size: 0.9rem;"><strong>Responsável Legal:</strong> ${guardianName} (${kinship}) - <strong>Tel:</strong> ${phoneResp}</p>`;
   }
 
-  const dtStr = session.dataHora || session.datetime;
-  const dateFormatted = new Date(dtStr).toLocaleString('pt-BR');
-  const mode = session.modalidade || session.mode || '';
-  const status = session.status || '';
-  const complaint = evo.queixa || evo.complaint || '';
-  const demand = evo.demanda || evo.demand || '';
-  const description = evo.descricao || evo.description || '';
-  const analysis = evo.analise || evo.analysis || '';
+  const dateFormatted = new Date(session.dataHora || session.datetime).toLocaleString('pt-BR');
+  const queixaVal = evo.queixa || evo.complaint;
+  const demandaVal = evo.demanda || evo.demand;
+  const descricaoVal = evo.descricao || evo.description;
+  const analiseVal = evo.analise || evo.analysis;
 
   container.innerHTML = `
     <div style="text-align: center; border-bottom: 2px solid #d81b60; padding-bottom: 15px; margin-bottom: 25px;">
@@ -998,42 +1011,46 @@ async function generatePDF(sessionId) {
       <p style="color: #78909c; font-size: 0.9rem; margin: 0;">Psicóloga - CRP: 22/07398</p>
       <h2 style="color: #d81b60; font-size: 1.1rem; margin-top: 15px; text-transform: uppercase; letter-spacing: 0.5px;">Relatório de Evolução Psicológica</h2>
     </div>
+
     <div style="background: #fff5f8; padding: 15px; border-radius: 8px; border: 1px solid #f48fb1; margin-bottom: 20px;">
       <h3 style="color: #880e4f; font-size: 0.95rem; text-transform: uppercase; margin-bottom: 8px; border-bottom: 1px solid #f8bbd0; padding-bottom: 4px;">Identificação do Paciente</h3>
-      <p style="margin: 4px 0; font-size: 0.9rem;"><strong>Nome:</strong> ${pName}</p>
-      <p style="margin: 4px 0; font-size: 0.9rem;"><strong>Contato:</strong> ${pPhone}</p>
-      <p style="margin: 4px 0; font-size: 0.9rem;"><strong>Tipo:</strong> ${pType}</p>
+      <p style="margin: 4px 0; font-size: 0.9rem;"><strong>Nome:</strong> ${patient.nome || patient.name}</p>
+      <p style="margin: 4px 0; font-size: 0.9rem;"><strong>Contato:</strong> ${patient.telefone || patient.phone}</p>
+      <p style="margin: 4px 0; font-size: 0.9rem;"><strong>Tipo:</strong> ${patient.tipo || patient.type}</p>
       ${guardianHTML}
     </div>
+
     <div style="background: #fff5f8; padding: 15px; border-radius: 8px; border: 1px solid #f48fb1; margin-bottom: 25px;">
       <h3 style="color: #880e4f; font-size: 0.95rem; text-transform: uppercase; margin-bottom: 8px; border-bottom: 1px solid #f8bbd0; padding-bottom: 4px;">Dados da Sessão</h3>
       <p style="margin: 4px 0; font-size: 0.9rem;"><strong>Data/Hora:</strong> ${dateFormatted}</p>
-      <p style="margin: 4px 0; font-size: 0.9rem;"><strong>Modalidade:</strong> ${mode}</p>
-      <p style="margin: 4px 0; font-size: 0.9rem;"><strong>Status:</strong> ${status.toUpperCase()}</p>
+      <p style="margin: 4px 0; font-size: 0.9rem;"><strong>Modalidade:</strong> ${session.modalidade || session.mode}</p>
+      <p style="margin: 4px 0; font-size: 0.9rem;"><strong>Status:</strong> ${session.status.toUpperCase()}</p>
     </div>
+
     <div style="margin-bottom: 25px;">
       <h3 style="color: #880e4f; font-size: 1rem; border-bottom: 1px solid #d81b60; padding-bottom: 5px; margin-bottom: 15px;">REGISTRO CLÍNICO DA EVOLUÇÃO</h3>
-      ${complaint ? `<div style="margin-bottom: 15px;">
+      ${queixaVal ? `<div style="margin-bottom: 15px;">
         <h4 style="color: #d81b60; font-size: 0.9rem; margin-bottom: 4px;">1. Queixa Principal / Relato:</h4>
-        <p style="font-size: 0.88rem; line-height: 1.5; white-space: pre-wrap; margin: 0; text-align: justify;">${complaint}</p>
+        <p style="font-size: 0.88rem; line-height: 1.5; white-space: pre-wrap; margin: 0; text-align: justify;">${queixaVal}</p>
       </div>` : ''}
-      ${demand ? `<div style="margin-bottom: 15px;">
+      ${demandaVal ? `<div style="margin-bottom: 15px;">
         <h4 style="color: #d81b60; font-size: 0.9rem; margin-bottom: 4px;">2. Demanda Trabalhada:</h4>
-        <p style="font-size: 0.88rem; line-height: 1.5; white-space: pre-wrap; margin: 0; text-align: justify;">${demand}</p>
+        <p style="font-size: 0.88rem; line-height: 1.5; white-space: pre-wrap; margin: 0; text-align: justify;">${demandaVal}</p>
       </div>` : ''}
       <div style="margin-bottom: 15px;">
         <h4 style="color: #d81b60; font-size: 0.9rem; margin-bottom: 4px;">3. Descrição Detalhada da Sessão:</h4>
-        <p style="font-size: 0.88rem; line-height: 1.5; white-space: pre-wrap; margin: 0; text-align: justify;">${description}</p>
+        <p style="font-size: 0.88rem; line-height: 1.5; white-space: pre-wrap; margin: 0; text-align: justify;">${descricaoVal || 'Não informada'}</p>
       </div>
-      ${analysis ? `<div style="margin-bottom: 15px;">
+      ${analiseVal ? `<div style="margin-bottom: 15px;">
         <h4 style="color: #d81b60; font-size: 0.9rem; margin-bottom: 4px;">4. Análise Técnica e Evolução:</h4>
-        <p style="font-size: 0.88rem; line-height: 1.5; white-space: pre-wrap; margin: 0; text-align: justify;">${analysis}</p>
+        <p style="font-size: 0.88rem; line-height: 1.5; white-space: pre-wrap; margin: 0; text-align: justify;">${analiseVal}</p>
       </div>` : ''}
     </div>
+
     <div style="margin-top: 60px; text-align: center;">
-      <div style="display: inline-block; width: 280px; border-top: 1px solid #37474f; padding-top: 6px;">
-        <p style="margin: 0; font-size: 0.88rem; font-weight: 600; color: #37474f;">Daniele Sousa Santos</p>
-        <p style="margin: 0; font-size: 0.8rem; color: #78909c;">Psicóloga - CRP: 22/07398</p>
+      <div style="display: inline-block; width: 280px; border-top: 1px solid #37474f; padding-top: 8px;">
+        <p style="margin: 0; font-weight: 600; font-size: 0.95rem; color: #37474f;">Daniele Sousa Santos</p>
+        <p style="margin: 2px 0 0 0; font-size: 0.85rem; color: #78909c;">Psicóloga - CRP: 22/07398</p>
       </div>
     </div>
   `;
@@ -1041,38 +1058,23 @@ async function generatePDF(sessionId) {
   document.body.appendChild(container);
 
   try {
-    const canvas = await html2canvas(container, { scale: 2, useCORS: true });
+    const canvas = await html2canvas(container, { scale: 2 });
     const imgData = canvas.toDataURL('image/png');
-    const doc = new jsPDF('p', 'mm', 'a4');
-    const imgWidth = 210;
-    const pageHeight = 297;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    let heightLeft = imgHeight;
-    let position = 0;
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
-    doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
+    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
 
-    while (heightLeft >= 0) {
-      position = heightLeft - imgHeight;
-      doc.addPage();
-      doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-    }
-
-    const dateFileStr = (session.dataHora || session.datetime || '').substring(0, 10);
-    const fileName = `Evolucao_${pName.replace(/\s+/g, '_')}_${dateFileStr}.pdf`;
-    doc.save(fileName);
+    const dateStr = (session.dataHora || session.datetime).substring(0, 10);
+    const safeName = (patient.nome || patient.name).replace(/\s+/g, '_');
+    pdf.save(`Evolucao_${safeName}_${dateStr}.pdf`);
   } catch (err) {
-    console.error("Erro ao gerar o PDF:", err);
+    console.error("Erro ao gerar PDF:", err);
     alert("Ocorreu um erro ao gerar o PDF da evolução.");
   } finally {
     document.body.removeChild(container);
   }
-}
-
-function generateSessionPDF(sessionId) {
-  generatePDF(sessionId);
 }
 
 /* FINANCEIRO MENSAL */
@@ -1086,57 +1088,64 @@ function initFinanceView() {
 async function renderFinancialReport() {
   const selectedMonth = document.getElementById('finance-month-select').value;
   if (!selectedMonth) return;
+
   const sessions = await getAll('sessoes');
   const patients = await getAll('pacientes');
-  const monthSessions = sessions.filter(s => (s.dataHora || s.datetime || '').startsWith(selectedMonth));
+
+  const monthSessions = sessions.filter(s => {
+    const dt = s.dataHora || s.datetime;
+    return dt && dt.startsWith(selectedMonth);
+  });
+
   let totalGross = 0;
   let totalReceived = 0;
   let totalPending = 0;
+
   const tbody = document.getElementById('finance-table-body');
   tbody.innerHTML = '';
-  monthSessions.forEach(s => {
-    const patient = patients.find(p => p.id === s.pacienteId);
-    const val = parseFloat(s.valor || s.value) || 0;
-    totalGross += val;
-    const isPaid = (s.pagamentoStatus || s.paymentStatus) === 'pago';
-    if (isPaid) totalReceived += val;
-    else totalPending += val;
-    const dtStr = s.dataHora || s.datetime;
-    const dt = new Date(dtStr).toLocaleString('pt-BR');
-    const pName = patient ? (patient.nome || patient.name) : 'Paciente Não Encontrado';
-    const sStatus = s.status || '';
-    const pStatus = s.pagamentoStatus || s.paymentStatus || 'pendente';
 
+  monthSessions.forEach(s => {
+    const patient = patients.find(p => p.id === s.pacienteld);
+    const val = parseFloat(s.valor || s.value) || 0;
+    const payStatus = s.pagamentoStatus || s.paymentStatus;
+
+    totalGross += val;
+    if (payStatus === 'pago') totalReceived += val;
+    else totalPending += val;
+
+    const dt = new Date(s.dataHora || s.datetime).toLocaleString('pt-BR');
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${dt}</td>
-      <td><strong>${pName}</strong></td>
+      <td><strong>${patient ? (patient.nome || patient.name) : 'Paciente Não Encontrado'}</strong></td>
       <td>${val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
-      <td>${sStatus.toUpperCase()}</td>
-      <td><span class="badge ${pStatus === 'pago' ? 'badge-paid' : 'badge-pending'}">${pStatus.toUpperCase()}</span></td>
+      <td>${s.status.toUpperCase()}</td>
+      <td><span class="badge ${payStatus === 'pago' ? 'badge-paid' : 'badge-pending'}">${payStatus.toUpperCase()}</span></td>
       <td>
         <button class="btn-secondary" onclick="togglePaymentStatusFromFinance(${s.id})">
-          Alternar para ${pStatus === 'pago' ? 'Pendente' : 'Pago'}
+          Alternar para ${payStatus === 'pago' ? 'Pendente' : 'Pago'}
         </button>
-      </td>`;
+      </td>
+    `;
     tbody.appendChild(tr);
   });
 
   document.getElementById('fin-total-gross').innerText = totalGross.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   document.getElementById('fin-total-received').innerText = totalReceived.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   document.getElementById('fin-total-pending').innerText = totalPending.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
   const adimplenceRate = totalGross > 0 ? Math.round((totalReceived / totalGross) * 100) : 0;
   document.getElementById('fin-adimplence').innerText = `${adimplenceRate}%`;
 }
 
 async function togglePaymentStatusFromFinance(sessionId) {
   const session = await getById('sessoes', sessionId);
-  const currentP = session.pagamentoStatus || session.paymentStatus;
-  const newP = currentP === 'pago' ? 'pendente' : 'pago';
-  if (session.pagamentoStatus !== undefined) session.pagamentoStatus = newP;
-  if (session.paymentStatus !== undefined) session.paymentStatus = newP;
-  if (session.pagamentoStatus === undefined && session.paymentStatus === undefined) session.pagamentoStatus = newP;
-  
+  const currentStatus = session.pagamentoStatus || session.paymentStatus;
+  const newStatus = currentStatus === 'pago' ? 'pendente' : 'pago';
+
+  if (session.pagamentoStatus !== undefined) session.pagamentoStatus = newStatus;
+  if (session.paymentStatus !== undefined) session.paymentStatus = newStatus;
+
   await saveItem('sessoes', session);
   renderFinancialReport();
   loadDashboardData();
@@ -1146,14 +1155,15 @@ async function togglePaymentStatusFromFinance(sessionId) {
 function openSessionModal(sessionId = null) {
   document.getElementById('form-session').reset();
   document.getElementById('session-id').value = '';
+
   if (sessionId) {
     getById('sessoes', sessionId).then(s => {
       document.getElementById('session-id').value = s.id;
-      document.getElementById('session-datetime').value = s.dataHora || s.datetime || '';
-      document.getElementById('session-mode').value = s.modalidade || s.mode || 'Online';
-      document.getElementById('session-status').value = s.status || 'realizada';
-      document.getElementById('session-value').value = s.valor || s.value || '';
-      document.getElementById('session-payment-status').value = s.pagamentoStatus || s.paymentStatus || 'pendente';
+      document.getElementById('session-datetime').value = s.dataHora || s.datetime;
+      document.getElementById('session-mode').value = s.modalidade || s.mode;
+      document.getElementById('session-status').value = s.status;
+      document.getElementById('session-value').value = s.valor || s.value;
+      document.getElementById('session-payment-status').value = s.pagamentoStatus || s.paymentStatus;
       openModal('modal-session');
     });
   } else {
@@ -1167,20 +1177,24 @@ function openSessionModal(sessionId = null) {
 async function handleSessionSubmit(e) {
   e.preventDefault();
   const id = document.getElementById('session-id').value;
+
   const sessionData = {
-    pacienteId: Number(currentPatientId),
+    pacienteld: Number(currentPatientId),
     dataHora: document.getElementById('session-datetime').value,
     modalidade: document.getElementById('session-mode').value,
     status: document.getElementById('session-status').value,
     valor: parseFloat(document.getElementById('session-value').value),
     pagamentoStatus: document.getElementById('session-payment-status').value
   };
+
   if (id) {
     const existing = await getById('sessoes', id);
     sessionData.id = Number(id);
-    if (existing.recibo) sessionData.recibo = existing.recibo;
-    if (existing.receipt) sessionData.receipt = existing.receipt;
+    if (existing.recibo || existing.receipt) {
+      sessionData.recibo = existing.recibo || existing.receipt;
+    }
   }
+
   await saveItem('sessoes', sessionData);
   closeModal('modal-session');
   loadProntuarioData(currentPatientId);
@@ -1191,6 +1205,7 @@ function openEvolutionModal(sessionId, evolutionId = null) {
   document.getElementById('form-evolution').reset();
   document.getElementById('evolution-id').value = '';
   document.getElementById('evolution-session-id').value = sessionId;
+
   if (evolutionId) {
     getById('evolucoes', evolutionId).then(e => {
       document.getElementById('evolution-id').value = e.id;
@@ -1209,15 +1224,18 @@ async function handleEvolutionSubmit(e) {
   e.preventDefault();
   const id = document.getElementById('evolution-id').value;
   const sessionId = document.getElementById('evolution-session-id').value;
+
   const evoData = {
-    sessaoId: Number(sessionId),
-    pacienteId: Number(currentPatientId),
+    sessaold: Number(sessionId),
+    pacienteld: Number(currentPatientId),
     queixa: document.getElementById('evo-complaint').value,
     demanda: document.getElementById('evo-demand').value,
     descricao: document.getElementById('evo-description').value,
     analise: document.getElementById('evo-analysis').value
   };
+
   if (id) evoData.id = Number(id);
+
   await saveItem('evolucoes', evoData);
   closeModal('modal-evolution');
   loadProntuarioData(currentPatientId);
@@ -1226,12 +1244,15 @@ async function handleEvolutionSubmit(e) {
 async function openReceiptModal(sessionId) {
   document.getElementById('form-receipt').reset();
   document.getElementById('receipt-session-id').value = sessionId;
+
   const statusDiv = document.getElementById('receipt-current-status');
   const btnRemove = document.getElementById('btn-remove-receipt');
+
   const session = await getById('sessoes', sessionId);
-  const rec = session ? (session.recibo || session.receipt) : null;
-  if (rec) {
-    statusDiv.innerHTML = `<p style="color: var(--success-color);">Recibo Anexado: <strong>${rec.nome || rec.name}</strong></p>`;
+  const receipt = session ? (session.recibo || session.receipt) : null;
+
+  if (receipt) {
+    statusDiv.innerHTML = `<p style="color: var(--success-color);">Recibo Anexado: <strong>${receipt.nome || receipt.name}</strong></p>`;
     btnRemove.style.display = 'inline-block';
   } else {
     statusDiv.innerHTML = '<p style="color: var(--text-muted);">Nenhum recibo anexado.</p>';
@@ -1244,9 +1265,11 @@ async function handleReceiptSubmit(e) {
   e.preventDefault();
   const sessionId = document.getElementById('receipt-session-id').value;
   const fileInput = document.getElementById('receipt-file');
+
   if (fileInput.files.length > 0) {
     const file = fileInput.files[0];
     const reader = new FileReader();
+
     reader.onload = async function(event) {
       const session = await getById('sessoes', sessionId);
       session.recibo = { nome: file.name, tipo: file.type, conteudo: event.target.result };
@@ -1281,19 +1304,29 @@ function openMonthlySummaryModal() {
 async function generateMonthlySummary() {
   const monthVal = document.getElementById('summary-month-select').value;
   if (!monthVal || !currentPatientId) return;
+
   const allSessions = await getAll('sessoes');
-  const patientSessions = allSessions.filter(s => s.pacienteId === Number(currentPatientId) && (s.dataHora || s.datetime || '').startsWith(monthVal));
+  const patientSessions = allSessions.filter(s => {
+    const dt = s.dataHora || s.datetime;
+    return s.pacienteld === Number(currentPatientId) && dt && dt.startsWith(monthVal);
+  });
+
   let totalSessions = patientSessions.length;
   let realizadas = 0, canceladas = 0, faltas = 0;
   let valorTotal = 0, valorPago = 0;
+
   patientSessions.forEach(s => {
     if (s.status === 'realizada') realizadas++;
     if (s.status === 'cancelada') canceladas++;
     if (s.status === 'falta') faltas++;
+
     const v = parseFloat(s.valor || s.value) || 0;
     valorTotal += v;
-    if ((s.pagamentoStatus || s.paymentStatus) === 'pago') valorPago += v;
+
+    const payStatus = s.pagamentoStatus || s.paymentStatus;
+    if (payStatus === 'pago') valorPago += v;
   });
+
   document.getElementById('summary-results').innerHTML = `
     <p><strong>Total de Sessões no Mês:</strong> ${totalSessions}</p>
     <p><strong>Realizadas:</strong> ${realizadas} | <strong>Canceladas:</strong> ${canceladas} | <strong>Faltas:</strong> ${faltas}</p>
