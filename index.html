@@ -8,7 +8,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <!-- Fonte Google Poppins -->
-<link href="https://fonts.googleapis.com/css?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
   --primary-pink: #d81b60;
@@ -28,18 +28,21 @@
   --shadow-sm: 0 2px 8px rgba(216, 27, 96, 0.08);
   --shadow-md: 0 4px 15px rgba(216, 27, 96, 0.12);
 }
+
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
   font-family: 'Poppins', sans-serif;
 }
+
 body {
   background-color: var(--bg-color);
   color: var(--text-main);
   display: flex;
   min-height: 100vh;
 }
+
 /* Sidebar Navegação */
 .sidebar {
   width: 260px;
@@ -51,27 +54,32 @@ body {
   gap: 25px;
   box-shadow: 4px 0 15px rgba(0,0,0,0.1);
 }
+
 .sidebar-header {
   text-align: center;
   padding-bottom: 15px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
+
 .sidebar-header h2 {
   font-size: 1.2rem;
   font-weight: 600;
   letter-spacing: 0.5px;
 }
+
 .sidebar-header p {
   font-size: 0.75rem;
   opacity: 0.8;
   margin-top: 4px;
 }
+
 .nav-links {
   list-style: none;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
+
 .nav-links button {
   width: 100%;
   padding: 12px 16px;
@@ -88,28 +96,33 @@ body {
   align-items: center;
   gap: 10px;
 }
+
 .nav-links button:hover, .nav-links button.active {
   background: rgba(255, 255, 255, 0.2);
   color: white;
   transform: translateX(4px);
 }
+
 /* Área Principal */
 .main-content {
   flex: 1;
   padding: 35px;
   overflow-y: auto;
 }
+
 .header-actions {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 30px;
 }
+
 .header-actions h1 {
   color: var(--dark-pink);
   font-size: 1.8rem;
   font-weight: 600;
 }
+
 /* Botões Globais */
 .btn-primary {
   background: linear-gradient(135deg, var(--primary-pink) 0%, var(--accent-pink) 100%);
@@ -122,10 +135,12 @@ body {
   box-shadow: var(--shadow-sm);
   transition: all 0.2s ease;
 }
+
 .btn-primary:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }
+
 .btn-secondary {
   background-color: var(--light-pink);
   color: var(--dark-pink);
@@ -136,7 +151,9 @@ body {
   font-weight: 500;
   transition: all 0.2s;
 }
+
 .btn-secondary:hover { background-color: var(--soft-pink); }
+
 .btn-danger {
   background-color: var(--danger-color);
   color: white;
@@ -147,7 +164,9 @@ body {
   font-size: 0.85rem;
   transition: opacity 0.2s;
 }
+
 .btn-danger:hover { opacity: 0.9; }
+
 .btn-pdf {
   background: linear-gradient(135deg, #8e24aa 0%, #ab47bc 100%);
   color: white;
@@ -158,6 +177,7 @@ body {
   font-size: 0.85rem;
   box-shadow: 0 2px 5px rgba(142, 36, 170, 0.2);
 }
+
 .btn-back {
   background-color: #eceff1;
   color: var(--text-main);
@@ -167,6 +187,7 @@ body {
   cursor: pointer;
   font-weight: 500;
 }
+
 /* Cards e Dashboard */
 .card-grid {
   display: grid;
@@ -174,6 +195,7 @@ body {
   gap: 20px;
   margin-bottom: 30px;
 }
+
 .card {
   background: var(--card-bg);
   padding: 22px;
@@ -182,10 +204,12 @@ body {
   border: 1px solid rgba(244, 143, 177, 0.3);
   transition: transform 0.2s, box-shadow 0.2s;
 }
+
 .card:hover {
   transform: translateY(-3px);
   box-shadow: var(--shadow-md);
 }
+
 .card h3 {
   font-size: 0.85rem;
   text-transform: uppercase;
@@ -193,11 +217,13 @@ body {
   color: var(--text-muted);
   margin-bottom: 10px;
 }
+
 .card .value {
   font-size: 1.8rem;
   font-weight: 700;
   color: var(--dark-pink);
 }
+
 /* Tabelas */
 .table-container {
   background: white;
@@ -207,22 +233,27 @@ body {
   border: 1px solid rgba(244, 143, 177, 0.2);
   margin-bottom: 25px;
 }
+
 table {
   width: 100%;
   border-collapse: collapse;
 }
+
 th, td {
   padding: 14px 18px;
   text-align: left;
   border-bottom: 1px solid var(--light-pink);
-  font-size: 0.92rem;
 }
+
 th {
+  font-size: 0.92rem;
   background-color: var(--light-pink);
   color: var(--dark-pink);
   font-weight: 600;
 }
+
 tr:hover { background-color: #fff8fa; }
+
 /* Badges e Status */
 .badge {
   padding: 4px 10px;
@@ -231,12 +262,15 @@ tr:hover { background-color: #fff8fa; }
   font-weight: 600;
   display: inline-block;
 }
+
 .badge-active { background-color: #e8f5e9; color: var(--success-color); }
 .badge-inactive { background-color: #ffebee; color: var(--danger-color); }
 .badge-paid { background-color: #e8f5e9; color: var(--success-color); }
 .badge-pending { background-color: #fff3e0; color: var(--warning-color); }
+
 .view-section { display: none; }
 .view-section.active { display: block; }
+
 .filter-bar {
   display: flex;
   gap: 12px;
@@ -244,6 +278,7 @@ tr:hover { background-color: #fff8fa; }
   align-items: center;
   flex-wrap: wrap;
 }
+
 /* Modal */
 .modal {
   display: none;
@@ -255,7 +290,9 @@ tr:hover { background-color: #fff8fa; }
   align-items: center;
   z-index: 1000;
 }
+
 .modal.active { display: flex; }
+
 .modal-content {
   background: white;
   padding: 30px;
@@ -267,12 +304,15 @@ tr:hover { background-color: #fff8fa; }
   box-shadow: 0 10px 30px rgba(0,0,0,0.15);
   border-top: 5px solid var(--primary-pink);
 }
+
 .modal-content h2 {
   color: var(--dark-pink);
   margin-bottom: 20px;
   font-size: 1.4rem;
 }
+
 .form-group { margin-bottom: 16px; }
+
 .form-group label {
   display: block;
   margin-bottom: 6px;
@@ -280,6 +320,7 @@ tr:hover { background-color: #fff8fa; }
   font-size: 0.88rem;
   color: var(--text-main);
 }
+
 .form-group input, .form-group select, .form-group textarea {
   width: 100%;
   padding: 10px 14px;
@@ -289,17 +330,21 @@ tr:hover { background-color: #fff8fa; }
   outline: none;
   transition: border-color 0.2s;
 }
+
 .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
   border-color: var(--primary-pink);
   box-shadow: 0 0 0 3px rgba(216, 27, 96, 0.1);
 }
+
 .form-row { display: flex; gap: 15px; }
 .form-row .form-group { flex: 1; }
+
 .action-btns {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
 }
+
 @media (max-width: 768px) {
   body { flex-direction: column; }
   .sidebar { width: 100%; }
@@ -308,6 +353,7 @@ tr:hover { background-color: #fff8fa; }
 </style>
 </head>
 <body>
+
 <div class="sidebar">
   <div class="sidebar-header">
     <h2>Daniele Sousa Santos</h2>
@@ -322,7 +368,7 @@ tr:hover { background-color: #fff8fa; }
 
 <div class="main-content">
   <div class="header-actions">
-    <button id="btn-global-back" class="btn-back" onclick="goBack()" style="display:none;">< Voltar</button>
+    <button id="btn-global-back" class="btn-back" onclick="goBack()" style="display:none;">&lt; Voltar</button>
     <h1 id="page-title">Dashboard</h1>
   </div>
 
@@ -636,9 +682,11 @@ let currentPatientId = null;
 function navigateTo(viewId, isBack = false, state = {}) {
   const currentView = document.querySelector('.view-section.active');
   const currentViewId = currentView ? currentView.id.replace('view-', '') : 'dashboard';
+  
   if (!isBack && currentViewId !== viewId) {
     navigationHistory.push({ view: currentViewId, patientId: currentPatientId });
   }
+  
   if (state.patientId !== undefined) currentPatientId = state.patientId;
 
   document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
@@ -688,12 +736,12 @@ request.onupgradeneeded = function(e) {
   }
   if (!db.objectStoreNames.contains('sessoes')) {
     const sessoesStore = db.createObjectStore('sessoes', { keyPath: 'id', autoIncrement: true });
-    sessoesStore.createIndex('pacienteld', 'pacienteld', { unique: false });
+    sessoesStore.createIndex('pacienteId', 'pacienteId', { unique: false });
   }
   if (!db.objectStoreNames.contains('evolucoes')) {
     const evolucoesStore = db.createObjectStore('evolucoes', { keyPath: 'id', autoIncrement: true });
-    evolucoesStore.createIndex('sessaold', 'sessaold', { unique: true });
-    evolucoesStore.createIndex('pacienteld', 'pacienteld', { unique: false });
+    evolucoesStore.createIndex('sessaoId', 'sessaoId', { unique: true });
+    evolucoesStore.createIndex('pacienteId', 'pacienteId', { unique: false });
   }
 };
 
@@ -748,7 +796,7 @@ async function loadDashboardData() {
 
   const now = new Date();
   const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-  const monthSessions = sessions.filter(s => s.dataHora && s.dataHora.startsWith(currentMonthStr));
+  const monthSessions = sessions.filter(s => (s.dataHora || s.datetime || '').startsWith(currentMonthStr));
 
   document.getElementById('dash-month-sessions').innerText = monthSessions.length;
 
@@ -756,8 +804,9 @@ async function loadDashboardData() {
   let totalPending = 0;
 
   monthSessions.forEach(s => {
-    const val = parseFloat(s.valor) || 0;
-    if (s.pagamentoStatus === 'pago') totalReceived += val;
+    const val = parseFloat(s.valor || s.value) || 0;
+    const isPaid = (s.pagamentoStatus || s.paymentStatus) === 'pago';
+    if (isPaid) totalReceived += val;
     else totalPending += val;
   });
 
@@ -770,7 +819,6 @@ function toggleInfantFields() {
   const type = document.getElementById('patient-type').value;
   const infantDiv = document.getElementById('infant-fields');
   const reqs = infantDiv.querySelectorAll('input');
-
   if (type === 'Infantil') {
     infantDiv.style.display = 'block';
     reqs.forEach(r => r.required = true);
@@ -789,14 +837,14 @@ function openPatientModal(patientId = null) {
   if (patientId) {
     getById('pacientes', patientId).then(p => {
       document.getElementById('patient-id').value = p.id;
-      document.getElementById('patient-name').value = p.nome;
-      document.getElementById('patient-type').value = p.tipo;
-      document.getElementById('patient-phone').value = p.telefone;
+      document.getElementById('patient-name').value = p.nome || p.name || '';
+      document.getElementById('patient-type').value = p.tipo || p.type || 'Adulto';
+      document.getElementById('patient-phone').value = p.telefone || p.phone || '';
       toggleInfantFields();
-      if (p.tipo === 'Infantil') {
-        document.getElementById('patient-guardian').value = p.responsavel || '';
-        document.getElementById('patient-kinship').value = p.parentesco || '';
-        document.getElementById('patient-guardian-phone').value = p.telefoneResponsavel || '';
+      if ((p.tipo || p.type) === 'Infantil') {
+        document.getElementById('patient-guardian').value = p.responsavel || p.guardian || '';
+        document.getElementById('patient-kinship').value = p.parentesco || p.kinship || '';
+        document.getElementById('patient-guardian-phone').value = p.telefoneResponsavel || p.guardianPhone || '';
       }
       document.getElementById('modal-patient-title').innerText = 'Editar Paciente';
       openModal('modal-patient');
@@ -821,7 +869,7 @@ async function handlePatientSubmit(e) {
   if (id) {
     const existing = await getById('pacientes', id);
     patientData.id = Number(id);
-    patientData.status = existing.status;
+    patientData.status = existing ? existing.status : 'ativo';
   }
 
   if (type === 'Infantil') {
@@ -832,16 +880,20 @@ async function handlePatientSubmit(e) {
 
   await saveItem('pacientes', patientData);
   closeModal('modal-patient');
-
+  
   if (document.getElementById('view-pacientes').classList.contains('active')) renderPatientsList();
   if (document.getElementById('view-prontuario').classList.contains('active')) loadProntuarioData(patientData.id);
+  loadDashboardData();
 }
 
 async function togglePatientStatus(id, newStatus) {
   const patient = await getById('pacientes', id);
-  patient.status = newStatus;
-  await saveItem('pacientes', patient);
-  renderPatientsList();
+  if (patient) {
+    patient.status = newStatus || (patient.status === 'ativo' ? 'inativo' : 'ativo');
+    await saveItem('pacientes', patient);
+    renderPatientsList();
+    loadDashboardData();
+  }
 }
 
 async function renderPatientsList() {
@@ -853,26 +905,30 @@ async function renderPatientsList() {
 
   const filtered = patients.filter(p => {
     const matchesStatus = filter === 'todos' ? true : p.status === filter;
-    const matchesSearch = p.nome.toLowerCase().includes(searchQuery);
+    const pName = (p.nome || p.name || '').toLowerCase();
+    const matchesSearch = pName.includes(searchQuery);
     return matchesStatus && matchesSearch;
   });
 
   filtered.forEach(p => {
     const tr = document.createElement('tr');
+    const pName = p.nome || p.name || '';
+    const pType = p.tipo || p.type || '';
+    const pPhone = p.telefone || p.phone || '';
+    
     tr.innerHTML = `
-      <td><strong>${p.nome}</strong></td>
-      <td>${p.tipo}</td>
-      <td>${p.telefone}</td>
+      <td><strong>${pName}</strong></td>
+      <td>${pType}</td>
+      <td>${pPhone}</td>
       <td><span class="badge ${p.status === 'ativo' ? 'badge-active' : 'badge-inactive'}">${p.status.toUpperCase()}</span></td>
       <td>
         <button class="btn-primary" onclick="openProntuario(${p.id})">Prontuário</button>
         <button class="btn-secondary" onclick="openPatientModal(${p.id})">Editar</button>
         ${p.status === 'ativo' 
-          ? `<button class="btn-danger" onclick="togglePatientStatus(${p.id}, 'inativo')">Inativar</button>`
+          ? `<button class="btn-danger" onclick="togglePatientStatus(${p.id}, 'inativo')">Inativar</button>` 
           : `<button class="btn-secondary" onclick="togglePatientStatus(${p.id}, 'ativo')">Reativar</button>`
         }
-      </td>
-    `;
+      </td>`;
     tbody.appendChild(tr);
   });
 }
@@ -886,36 +942,51 @@ async function loadProntuarioData(patientId, monthFilter = null) {
   const patient = await getById('pacientes', patientId);
   if (!patient) return;
 
-  document.getElementById('pront-patient-name').innerText = `${patient.nome} (${patient.tipo})`;
-  let details = `Tel: ${patient.telefone}`;
-  if (patient.tipo === 'Infantil') {
-    details += ` | Resp: ${patient.responsavel} (${patient.parentesco}) - Tel Resp: ${patient.telefoneResponsavel}`;
+  const pName = patient.nome || patient.name || '';
+  const pType = patient.tipo || patient.type || '';
+  const pPhone = patient.telefone || patient.phone || '';
+
+  document.getElementById('pront-patient-name').innerText = `${pName} (${pType})`;
+  
+  let details = `Tel: ${pPhone}`;
+  if (pType === 'Infantil') {
+    const pResp = patient.responsavel || patient.guardian || '';
+    const pKin = patient.parentesco || patient.kinship || '';
+    const pRespTel = patient.telefoneResponsavel || patient.guardianPhone || '';
+    details += ` | Resp: ${pResp} (${pKin}) - Tel Resp: ${pRespTel}`;
   }
   document.getElementById('pront-patient-details').innerText = details;
 
   const allSessions = await getAll('sessoes');
   const allEvolutions = await getAll('evolucoes');
 
-  let patientSessions = allSessions.filter(s => s.pacienteld === Number(patientId));
-  if (monthFilter) patientSessions = patientSessions.filter(s => s.dataHora.startsWith(monthFilter));
+  let patientSessions = allSessions.filter(s => Number(s.pacienteId) === Number(patientId));
 
-  patientSessions.sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora));
+  if (monthFilter) {
+    patientSessions = patientSessions.filter(s => (s.dataHora || s.datetime || '').startsWith(monthFilter));
+  }
+
+  patientSessions.sort((a, b) => new Date(b.dataHora || b.datetime) - new Date(a.dataHora || a.datetime));
 
   const tbody = document.getElementById('prontuario-table-body');
   tbody.innerHTML = '';
 
   patientSessions.forEach(s => {
-    const evo = allEvolutions.find(e => e.sessaold === s.id);
-    const dt = new Date(s.dataHora).toLocaleString('pt-BR');
-    const val = parseFloat(s.valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    const evo = allEvolutions.find(e => Number(e.sessaoId) === Number(s.id));
+    const dtStr = s.dataHora || s.datetime;
+    const dt = new Date(dtStr).toLocaleString('pt-BR');
+    const valNum = parseFloat(s.valor || s.value || 0);
+    const val = valNum.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    const payStatus = s.pagamentoStatus || s.paymentStatus || 'pendente';
+    const mode = s.modalidade || s.mode || '';
 
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${dt}</td>
-      <td>${s.modalidade}</td>
+      <td>${mode}</td>
       <td>
         <strong>${val}</strong><br>
-        <span class="badge ${s.pagamentoStatus === 'pago' ? 'badge-paid' : 'badge-pending'}">${s.pagamentoStatus.toUpperCase()}</span>
+        <span class="badge ${payStatus === 'pago' ? 'badge-paid' : 'badge-pending'}">${payStatus.toUpperCase()}</span>
       </td>
       <td>
         <div class="action-btns">
@@ -927,7 +998,7 @@ async function loadProntuarioData(patientId, monthFilter = null) {
         </div>
       </td>
       <td>
-        ${s.recibo 
+        ${(s.recibo || s.receipt)
           ? `<button class="btn-secondary" onclick="openReceiptModal(${s.id})">Ver Comprovante</button>`
           : `<button class="btn-secondary" style="border-style:dashed;" onclick="openReceiptModal(${s.id})">+ Anexar</button>`
         }
@@ -937,8 +1008,7 @@ async function loadProntuarioData(patientId, monthFilter = null) {
           <button class="btn-secondary" onclick="openSessionModal(${s.id})">Editar Sessão</button>
           <button class="btn-danger" onclick="deleteSession(${s.id})">Excluir</button>
         </div>
-      </td>
-    `;
+      </td>`;
     tbody.appendChild(tr);
   });
 }
@@ -957,29 +1027,30 @@ function resetPatientHistory() {
 async function deleteSession(sessionId) {
   if (confirm("Tem certeza que deseja excluir esta sessão e todo seu registro de evolução?")) {
     const evolutions = await getAll('evolucoes');
-    const evo = evolutions.find(e => e.sessaold === Number(sessionId));
+    const evo = evolutions.find(e => Number(e.sessaoId) === Number(sessionId));
     if (evo) await deleteItem('evolucoes', evo.id);
     await deleteItem('sessoes', sessionId);
     loadProntuarioData(currentPatientId);
+    loadDashboardData();
   }
 }
 
-/* GERAÇÃO DE PDF VIA HTML2CANVAS (CÓDIGO 2 MAPPING PARA ALINHAMENTO E PARÁGRAFOS EXATOS) */
-async function generateSessionPDF(sessionId) {
+/* GERAÇÃO DE PDF DA SESSÃO VIA HTML2CANVAS E JSPDF COM TEXTO JUSTIFICADO */
+async function generatePDF(sessionId) {
   const session = await getById('sessoes', sessionId);
   if (!session) return;
-  const patient = await getById('pacientes', session.pacienteld);
+  const patient = await getById('pacientes', session.pacienteId);
   const evolutions = await getAll('evolucoes');
-  const evo = evolutions.find(e => e.sessaold === session.id);
+  const evo = evolutions.find(e => Number(e.sessaoId) === Number(sessionId));
 
   if (!evo) {
-    alert("Cadastre primeiro uma evolução clínica nesta sessão para gerar o PDF.");
+    alert('Evolução clínica não encontrada.');
     return;
   }
 
   const { jsPDF } = window.jspdf;
 
-  // Cria um container temporário estilizado no padrão Folha A4
+  // Container temporário formatado estilo A4
   const container = document.createElement('div');
   container.style.position = 'absolute';
   container.style.left = '-9999px';
@@ -991,66 +1062,83 @@ async function generateSessionPDF(sessionId) {
   container.style.fontFamily = "'Poppins', sans-serif";
   container.style.boxSizing = 'border-box';
 
+  const pName = patient.nome || patient.name || '';
+  const pType = patient.tipo || patient.type || '';
+  const pPhone = patient.telefone || patient.phone || '';
+  const pGuardian = patient.responsavel || patient.guardian || '';
+  const pKinship = patient.parentesco || patient.kinship || 'Resp.';
+  const pGuardianPhone = patient.telefoneResponsavel || patient.guardianPhone || 'N/A';
+
   let guardianHTML = '';
-  if (patient.tipo === 'Infantil' && (patient.responsavel || patient.guardian)) {
-    const guardianName = patient.responsavel || patient.guardian;
-    const kinship = patient.parentesco || patient.kinship || 'Resp.';
-    const phoneResp = patient.telefoneResponsavel || patient.guardianPhone || 'N/A';
-    guardianHTML = `<p style="margin: 4px 0; font-size: 0.9rem;"><strong>Responsável Legal:</strong> ${guardianName} (${kinship}) - <strong>Tel:</strong> ${phoneResp}</p>`;
+  if (pType === 'Infantil' && pGuardian) {
+    guardianHTML = `<p style="margin: 4px 0; font-size: 0.9rem; text-align: justify;"><strong>Responsável Legal:</strong> ${pGuardian} (${pKinship}) - <strong>Tel:</strong> ${pGuardianPhone}</p>`;
   }
 
-  const dateFormatted = new Date(session.dataHora || session.datetime).toLocaleString('pt-BR');
-  const queixaVal = evo.queixa || evo.complaint;
-  const demandaVal = evo.demanda || evo.demand;
-  const descricaoVal = evo.descricao || evo.description;
-  const analiseVal = evo.analise || evo.analysis;
+  const dtStr = session.dataHora || session.datetime;
+  const dateFormatted = new Date(dtStr).toLocaleString('pt-BR');
+  const mode = session.modalidade || session.mode || '';
+  const status = session.status || '';
+  const complaint = evo.queixa || evo.complaint || '';
+  const demand = evo.demanda || evo.demand || '';
+  const description = evo.descricao || evo.description || '';
+  const analysis = evo.analise || evo.analysis || '';
 
   container.innerHTML = `
+    <style>
+      p, div { text-align: justify; text-justify: inter-word; }
+    </style>
     <div style="text-align: center; border-bottom: 2px solid #d81b60; padding-bottom: 15px; margin-bottom: 25px;">
-      <h1 style="color: #880e4f; font-size: 1.4rem; margin-bottom: 4px;">Daniele Sousa Santos</h1>
-      <p style="color: #78909c; font-size: 0.9rem; margin: 0;">Psicóloga - CRP: 22/07398</p>
-      <h2 style="color: #d81b60; font-size: 1.1rem; margin-top: 15px; text-transform: uppercase; letter-spacing: 0.5px;">Relatório de Evolução Psicológica</h2>
+      <h1 style="color: #880e4f; font-size: 1.4rem; margin-bottom: 4px; text-align: center;">Daniele Sousa Santos</h1>
+      <p style="color: #78909c; font-size: 0.9rem; margin: 0; text-align: center;">Psicóloga - CRP: 22/07398</p>
+      <h2 style="color: #d81b60; font-size: 1.1rem; margin-top: 15px; text-transform: uppercase; letter-spacing: 0.5px; text-align: center;">Relatório de Evolução Psicológica</h2>
     </div>
 
     <div style="background: #fff5f8; padding: 15px; border-radius: 8px; border: 1px solid #f48fb1; margin-bottom: 20px;">
-      <h3 style="color: #880e4f; font-size: 0.95rem; text-transform: uppercase; margin-bottom: 8px; border-bottom: 1px solid #f8bbd0; padding-bottom: 4px;">Identificação do Paciente</h3>
-      <p style="margin: 4px 0; font-size: 0.9rem;"><strong>Nome:</strong> ${patient.nome || patient.name}</p>
-      <p style="margin: 4px 0; font-size: 0.9rem;"><strong>Contato:</strong> ${patient.telefone || patient.phone}</p>
-      <p style="margin: 4px 0; font-size: 0.9rem;"><strong>Tipo:</strong> ${patient.tipo || patient.type}</p>
+      <h3 style="color: #880e4f; font-size: 0.95rem; text-transform: uppercase; margin-bottom: 8px; border-bottom: 1px solid #f8bbd0; padding-bottom: 4px; text-align: left;">Identificação do Paciente</h3>
+      <p style="margin: 4px 0; font-size: 0.9rem; text-align: justify;"><strong>Nome:</strong> ${pName}</p>
+      <p style="margin: 4px 0; font-size: 0.9rem; text-align: justify;"><strong>Contato:</strong> ${pPhone}</p>
+      <p style="margin: 4px 0; font-size: 0.9rem; text-align: justify;"><strong>Tipo:</strong> ${pType}</p>
       ${guardianHTML}
     </div>
 
     <div style="background: #fff5f8; padding: 15px; border-radius: 8px; border: 1px solid #f48fb1; margin-bottom: 25px;">
-      <h3 style="color: #880e4f; font-size: 0.95rem; text-transform: uppercase; margin-bottom: 8px; border-bottom: 1px solid #f8bbd0; padding-bottom: 4px;">Dados da Sessão</h3>
-      <p style="margin: 4px 0; font-size: 0.9rem;"><strong>Data/Hora:</strong> ${dateFormatted}</p>
-      <p style="margin: 4px 0; font-size: 0.9rem;"><strong>Modalidade:</strong> ${session.modalidade || session.mode}</p>
-      <p style="margin: 4px 0; font-size: 0.9rem;"><strong>Status:</strong> ${session.status.toUpperCase()}</p>
+      <h3 style="color: #880e4f; font-size: 0.95rem; text-transform: uppercase; margin-bottom: 8px; border-bottom: 1px solid #f8bbd0; padding-bottom: 4px; text-align: left;">Dados da Sessão</h3>
+      <p style="margin: 4px 0; font-size: 0.9rem; text-align: justify;"><strong>Data/Hora:</strong> ${dateFormatted}</p>
+      <p style="margin: 4px 0; font-size: 0.9rem; text-align: justify;"><strong>Modalidade:</strong> ${mode}</p>
+      <p style="margin: 4px 0; font-size: 0.9rem; text-align: justify;"><strong>Status:</strong> ${status.toUpperCase()}</p>
     </div>
 
     <div style="margin-bottom: 25px;">
-      <h3 style="color: #880e4f; font-size: 1rem; border-bottom: 1px solid #d81b60; padding-bottom: 5px; margin-bottom: 15px;">REGISTRO CLÍNICO DA EVOLUÇÃO</h3>
-      ${queixaVal ? `<div style="margin-bottom: 15px;">
-        <h4 style="color: #d81b60; font-size: 0.9rem; margin-bottom: 4px;">1. Queixa Principal / Relato:</h4>
-        <p style="font-size: 0.88rem; line-height: 1.5; white-space: pre-wrap; margin: 0; text-align: justify;">${queixaVal}</p>
-      </div>` : ''}
-      ${demandaVal ? `<div style="margin-bottom: 15px;">
-        <h4 style="color: #d81b60; font-size: 0.9rem; margin-bottom: 4px;">2. Demanda Trabalhada:</h4>
-        <p style="font-size: 0.88rem; line-height: 1.5; white-space: pre-wrap; margin: 0; text-align: justify;">${demandaVal}</p>
-      </div>` : ''}
+      <h3 style="color: #880e4f; font-size: 1rem; border-bottom: 1px solid #d81b60; padding-bottom: 5px; margin-bottom: 15px; text-align: left;">REGISTRO CLÍNICO DA EVOLUÇÃO</h3>
+      
+      ${complaint ? `
       <div style="margin-bottom: 15px;">
-        <h4 style="color: #d81b60; font-size: 0.9rem; margin-bottom: 4px;">3. Descrição Detalhada da Sessão:</h4>
-        <p style="font-size: 0.88rem; line-height: 1.5; white-space: pre-wrap; margin: 0; text-align: justify;">${descricaoVal || 'Não informada'}</p>
+        <h4 style="color: #d81b60; font-size: 0.9rem; margin-bottom: 4px; text-align: left;">1. Queixa Principal / Relato:</h4>
+        <p style="font-size: 0.88rem; line-height: 1.6; white-space: pre-wrap; margin: 0; text-align: justify; word-break: break-word;">${complaint}</p>
+      </div>` : ''}
+
+      ${demand ? `
+      <div style="margin-bottom: 15px;">
+        <h4 style="color: #d81b60; font-size: 0.9rem; margin-bottom: 4px; text-align: left;">2. Demanda Trabalhada:</h4>
+        <p style="font-size: 0.88rem; line-height: 1.6; white-space: pre-wrap; margin: 0; text-align: justify; word-break: break-word;">${demand}</p>
+      </div>` : ''}
+
+      <div style="margin-bottom: 15px;">
+        <h4 style="color: #d81b60; font-size: 0.9rem; margin-bottom: 4px; text-align: left;">3. Descrição Detalhada da Sessão:</h4>
+        <p style="font-size: 0.88rem; line-height: 1.6; white-space: pre-wrap; margin: 0; text-align: justify; word-break: break-word;">${description}</p>
       </div>
-      ${analiseVal ? `<div style="margin-bottom: 15px;">
-        <h4 style="color: #d81b60; font-size: 0.9rem; margin-bottom: 4px;">4. Análise Técnica e Evolução:</h4>
-        <p style="font-size: 0.88rem; line-height: 1.5; white-space: pre-wrap; margin: 0; text-align: justify;">${analiseVal}</p>
+
+      ${analysis ? `
+      <div style="margin-bottom: 15px;">
+        <h4 style="color: #d81b60; font-size: 0.9rem; margin-bottom: 4px; text-align: left;">4. Análise Técnica e Evolução:</h4>
+        <p style="font-size: 0.88rem; line-height: 1.6; white-space: pre-wrap; margin: 0; text-align: justify; word-break: break-word;">${analysis}</p>
       </div>` : ''}
     </div>
 
     <div style="margin-top: 60px; text-align: center;">
-      <div style="display: inline-block; width: 280px; border-top: 1px solid #37474f; padding-top: 8px;">
-        <p style="margin: 0; font-weight: 600; font-size: 0.95rem; color: #37474f;">Daniele Sousa Santos</p>
-        <p style="margin: 2px 0 0 0; font-size: 0.85rem; color: #78909c;">Psicóloga - CRP: 22/07398</p>
+      <div style="display: inline-block; width: 280px; border-top: 1px solid #37474f; padding-top: 6px; text-align: center;">
+        <p style="margin: 0; font-size: 0.88rem; font-weight: 600; color: #37474f; text-align: center;">Daniele Sousa Santos</p>
+        <p style="margin: 0; font-size: 0.8rem; color: #78909c; text-align: center;">Psicóloga - CRP: 22/07398</p>
       </div>
     </div>
   `;
@@ -1058,23 +1146,38 @@ async function generateSessionPDF(sessionId) {
   document.body.appendChild(container);
 
   try {
-    const canvas = await html2canvas(container, { scale: 2 });
+    const canvas = await html2canvas(container, { scale: 2, useCORS: true });
     const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+    const doc = new jsPDF('p', 'mm', 'a4');
+    const imgWidth = 210;
+    const pageHeight = 297;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    let heightLeft = imgHeight;
+    let position = 0;
 
-    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+    doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
 
-    const dateStr = (session.dataHora || session.datetime).substring(0, 10);
-    const safeName = (patient.nome || patient.name).replace(/\s+/g, '_');
-    pdf.save(`Evolucao_${safeName}_${dateStr}.pdf`);
+    while (heightLeft >= 0) {
+      position = heightLeft - imgHeight;
+      doc.addPage();
+      doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+
+    const dateFileStr = (session.dataHora || session.datetime || '').substring(0, 10);
+    const fileName = `Evolucao_${pName.replace(/\s+/g, '_')}_${dateFileStr}.pdf`;
+    doc.save(fileName);
   } catch (err) {
-    console.error("Erro ao gerar PDF:", err);
+    console.error("Erro ao gerar o PDF:", err);
     alert("Ocorreu um erro ao gerar o PDF da evolução.");
   } finally {
     document.body.removeChild(container);
   }
+}
+
+function generateSessionPDF(sessionId) {
+  generatePDF(sessionId);
 }
 
 /* FINANCEIRO MENSAL */
@@ -1092,10 +1195,7 @@ async function renderFinancialReport() {
   const sessions = await getAll('sessoes');
   const patients = await getAll('pacientes');
 
-  const monthSessions = sessions.filter(s => {
-    const dt = s.dataHora || s.datetime;
-    return dt && dt.startsWith(selectedMonth);
-  });
+  const monthSessions = sessions.filter(s => (s.dataHora || s.datetime || '').startsWith(selectedMonth));
 
   let totalGross = 0;
   let totalReceived = 0;
@@ -1105,28 +1205,32 @@ async function renderFinancialReport() {
   tbody.innerHTML = '';
 
   monthSessions.forEach(s => {
-    const patient = patients.find(p => p.id === s.pacienteld);
+    const patient = patients.find(p => Number(p.id) === Number(s.pacienteId));
     const val = parseFloat(s.valor || s.value) || 0;
-    const payStatus = s.pagamentoStatus || s.paymentStatus;
-
     totalGross += val;
-    if (payStatus === 'pago') totalReceived += val;
+
+    const isPaid = (s.pagamentoStatus || s.paymentStatus) === 'pago';
+    if (isPaid) totalReceived += val;
     else totalPending += val;
 
-    const dt = new Date(s.dataHora || s.datetime).toLocaleString('pt-BR');
+    const dtStr = s.dataHora || s.datetime;
+    const dt = new Date(dtStr).toLocaleString('pt-BR');
+    const pName = patient ? (patient.nome || patient.name) : 'Paciente Não Encontrado';
+    const sStatus = s.status || '';
+    const pStatus = s.pagamentoStatus || s.paymentStatus || 'pendente';
+
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${dt}</td>
-      <td><strong>${patient ? (patient.nome || patient.name) : 'Paciente Não Encontrado'}</strong></td>
+      <td><strong>${pName}</strong></td>
       <td>${val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
-      <td>${s.status.toUpperCase()}</td>
-      <td><span class="badge ${payStatus === 'pago' ? 'badge-paid' : 'badge-pending'}">${payStatus.toUpperCase()}</span></td>
+      <td>${sStatus.toUpperCase()}</td>
+      <td><span class="badge ${pStatus === 'pago' ? 'badge-paid' : 'badge-pending'}">${pStatus.toUpperCase()}</span></td>
       <td>
         <button class="btn-secondary" onclick="togglePaymentStatusFromFinance(${s.id})">
-          Alternar para ${payStatus === 'pago' ? 'Pendente' : 'Pago'}
+          Alternar para ${pStatus === 'pago' ? 'Pendente' : 'Pago'}
         </button>
-      </td>
-    `;
+      </td>`;
     tbody.appendChild(tr);
   });
 
@@ -1140,11 +1244,13 @@ async function renderFinancialReport() {
 
 async function togglePaymentStatusFromFinance(sessionId) {
   const session = await getById('sessoes', sessionId);
-  const currentStatus = session.pagamentoStatus || session.paymentStatus;
-  const newStatus = currentStatus === 'pago' ? 'pendente' : 'pago';
+  if (!session) return;
 
-  if (session.pagamentoStatus !== undefined) session.pagamentoStatus = newStatus;
-  if (session.paymentStatus !== undefined) session.paymentStatus = newStatus;
+  const currentP = session.pagamentoStatus || session.paymentStatus;
+  const newP = currentP === 'pago' ? 'pendente' : 'pago';
+
+  session.pagamentoStatus = newP;
+  session.paymentStatus = newP;
 
   await saveItem('sessoes', session);
   renderFinancialReport();
@@ -1159,11 +1265,11 @@ function openSessionModal(sessionId = null) {
   if (sessionId) {
     getById('sessoes', sessionId).then(s => {
       document.getElementById('session-id').value = s.id;
-      document.getElementById('session-datetime').value = s.dataHora || s.datetime;
-      document.getElementById('session-mode').value = s.modalidade || s.mode;
-      document.getElementById('session-status').value = s.status;
-      document.getElementById('session-value').value = s.valor || s.value;
-      document.getElementById('session-payment-status').value = s.pagamentoStatus || s.paymentStatus;
+      document.getElementById('session-datetime').value = s.dataHora || s.datetime || '';
+      document.getElementById('session-mode').value = s.modalidade || s.mode || 'Online';
+      document.getElementById('session-status').value = s.status || 'realizada';
+      document.getElementById('session-value').value = s.valor || s.value || '';
+      document.getElementById('session-payment-status').value = s.pagamentoStatus || s.paymentStatus || 'pendente';
       openModal('modal-session');
     });
   } else {
@@ -1179,7 +1285,7 @@ async function handleSessionSubmit(e) {
   const id = document.getElementById('session-id').value;
 
   const sessionData = {
-    pacienteld: Number(currentPatientId),
+    pacienteId: Number(currentPatientId),
     dataHora: document.getElementById('session-datetime').value,
     modalidade: document.getElementById('session-mode').value,
     status: document.getElementById('session-status').value,
@@ -1190,9 +1296,8 @@ async function handleSessionSubmit(e) {
   if (id) {
     const existing = await getById('sessoes', id);
     sessionData.id = Number(id);
-    if (existing.recibo || existing.receipt) {
-      sessionData.recibo = existing.recibo || existing.receipt;
-    }
+    if (existing && existing.recibo) sessionData.recibo = existing.recibo;
+    if (existing && existing.receipt) sessionData.receipt = existing.receipt;
   }
 
   await saveItem('sessoes', sessionData);
@@ -1208,11 +1313,13 @@ function openEvolutionModal(sessionId, evolutionId = null) {
 
   if (evolutionId) {
     getById('evolucoes', evolutionId).then(e => {
-      document.getElementById('evolution-id').value = e.id;
-      document.getElementById('evo-complaint').value = e.queixa || e.complaint || '';
-      document.getElementById('evo-demand').value = e.demanda || e.demand || '';
-      document.getElementById('evo-description').value = e.descricao || e.description || '';
-      document.getElementById('evo-analysis').value = e.analise || e.analysis || '';
+      if (e) {
+        document.getElementById('evolution-id').value = e.id;
+        document.getElementById('evo-complaint').value = e.queixa || e.complaint || '';
+        document.getElementById('evo-demand').value = e.demanda || e.demand || '';
+        document.getElementById('evo-description').value = e.descricao || e.description || '';
+        document.getElementById('evo-analysis').value = e.analise || e.analysis || '';
+      }
       openModal('modal-evolution');
     });
   } else {
@@ -1226,8 +1333,8 @@ async function handleEvolutionSubmit(e) {
   const sessionId = document.getElementById('evolution-session-id').value;
 
   const evoData = {
-    sessaold: Number(sessionId),
-    pacienteld: Number(currentPatientId),
+    sessaoId: Number(sessionId),
+    pacienteId: Number(currentPatientId),
     queixa: document.getElementById('evo-complaint').value,
     demanda: document.getElementById('evo-demand').value,
     descricao: document.getElementById('evo-description').value,
@@ -1249,15 +1356,16 @@ async function openReceiptModal(sessionId) {
   const btnRemove = document.getElementById('btn-remove-receipt');
 
   const session = await getById('sessoes', sessionId);
-  const receipt = session ? (session.recibo || session.receipt) : null;
+  const rec = session ? (session.recibo || session.receipt) : null;
 
-  if (receipt) {
-    statusDiv.innerHTML = `<p style="color: var(--success-color);">Recibo Anexado: <strong>${receipt.nome || receipt.name}</strong></p>`;
+  if (rec) {
+    statusDiv.innerHTML = `<p style="color: var(--success-color);">Recibo Anexado: <strong>${rec.nome || rec.name}</strong></p>`;
     btnRemove.style.display = 'inline-block';
   } else {
     statusDiv.innerHTML = '<p style="color: var(--text-muted);">Nenhum recibo anexado.</p>';
     btnRemove.style.display = 'none';
   }
+
   openModal('modal-receipt');
 }
 
@@ -1277,6 +1385,7 @@ async function handleReceiptSubmit(e) {
       closeModal('modal-receipt');
       loadProntuarioData(currentPatientId);
     };
+
     reader.readAsDataURL(file);
   } else {
     closeModal('modal-receipt');
@@ -1286,6 +1395,7 @@ async function handleReceiptSubmit(e) {
 async function removeReceipt() {
   const sessionId = document.getElementById('receipt-session-id').value;
   const session = await getById('sessoes', sessionId);
+
   if (session) {
     delete session.recibo;
     delete session.receipt;
@@ -1306,10 +1416,7 @@ async function generateMonthlySummary() {
   if (!monthVal || !currentPatientId) return;
 
   const allSessions = await getAll('sessoes');
-  const patientSessions = allSessions.filter(s => {
-    const dt = s.dataHora || s.datetime;
-    return s.pacienteld === Number(currentPatientId) && dt && dt.startsWith(monthVal);
-  });
+  const patientSessions = allSessions.filter(s => Number(s.pacienteId) === Number(currentPatientId) && (s.dataHora || s.datetime || '').startsWith(monthVal));
 
   let totalSessions = patientSessions.length;
   let realizadas = 0, canceladas = 0, faltas = 0;
@@ -1322,9 +1429,7 @@ async function generateMonthlySummary() {
 
     const v = parseFloat(s.valor || s.value) || 0;
     valorTotal += v;
-
-    const payStatus = s.pagamentoStatus || s.paymentStatus;
-    if (payStatus === 'pago') valorPago += v;
+    if ((s.pagamentoStatus || s.paymentStatus) === 'pago') valorPago += v;
   });
 
   document.getElementById('summary-results').innerHTML = `
