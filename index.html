@@ -837,7 +837,6 @@
                     document.getElementById('patient-name').value = p.nome;
                     document.getElementById('patient-type').value = p.tipo;
                     document.getElementById('patient-phone').value = p.telefone;
-                    document.getElementById('patient-email').value = p.email;
                     toggleInfantFields();
                     if (p.tipo === 'Infantil') {
                         document.getElementById('patient-guardian').value = p.responsavel || '';
@@ -861,7 +860,6 @@
                 nome: document.getElementById('patient-name').value,
                 tipo: type,
                 telefone: document.getElementById('patient-phone').value,
-                email: document.getElementById('patient-email').value,
                 status: 'ativo'
             };
 
@@ -908,7 +906,7 @@
                 tr.innerHTML = `
                     <td><strong>${p.nome}</strong></td>
                     <td>${p.tipo}</td>
-                    <td>${p.telefone}<br><small style="color:var(--text-muted)">${p.email}</small></td>
+                    <td>${p.telefone}<br><small style="color:var(--text-muted)">${p.}</small></td>
                     <td><span class="badge ${p.status === 'ativo' ? 'badge-active' : 'badge-inactive'}">${p.status.toUpperCase()}</span></td>
                     <td>
                         <button class="btn-primary" onclick="openProntuario(${p.id})">Prontuário</button>
